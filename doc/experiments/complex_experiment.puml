@@ -1,0 +1,30 @@
+@startuml
+title "Complex" Experiment
+
+[*] -right-> start
+
+start -right-> setup : CONFIRMED
+setup : delay=10
+
+setup -down-> run_70 : COMPLETED
+run_70 : PoMA:
+run_70 : \t= intensity 70,70,70,70
+
+run_70 -left-> run_90 : FEEDBACK_YES
+run_70 -right-> run_30 : TIMEOUT
+note top of run_30
+  PoMA:
+  \t= intensity 30,30,30,30
+end note
+
+run_90 --> end : FEEDBACK_YES
+run_90 --> feedback : TIMEOUT
+
+run_30 --> end : FEEDBACK_YES
+run_30 --> feedback : TIMEOUT
+
+feedback --> run_70 : VALUE < 5
+feedback --> end : VALUE >= 5
+
+end --> [*] : EXITED
+@enduml

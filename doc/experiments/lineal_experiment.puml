@@ -1,0 +1,16 @@
+@startuml
+title "Lineal" Experiment
+
+[*] -right-> confirm
+
+confirm -right-> delay : CONFIRMED
+
+delay -right-> run : COMPLETED
+
+run --> feedback : TIMEOUT
+run --> end : FEEDBACK_YES
+
+feedback -left-> end : ANY_VALUE
+
+end -left-> [*] : EXITED
+@enduml
