@@ -22,7 +22,7 @@ abstract class ExperimentStage<T_Result> {
   void _pomaCallback(String eventKey) {
     if (pomaCommands.containsKey(eventKey)) {
       String pomaCommand = pomaCommands[eventKey]!;
-      if (pomaClient != null) {
+      if ((pomaClient != null) && pomaClient!.isConnected()) {
         pomaClient!.send(pomaCommand);
       } else {
         debugPrint("Sending PoMA command: '$pomaCommand'."); // TODO: quitar.

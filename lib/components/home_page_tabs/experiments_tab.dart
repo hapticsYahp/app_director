@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wifi_app/providers/data/data_provider.dart';
 import '../../core/experiment/experiment.dart';
+import '../../providers/config/config_notifier.dart';
+import '../../providers/poma/poma_client.dart';
+import '../../providers/poma/poma_exception.dart';
 
 class ExperimentsTab extends StatefulWidget {
   const ExperimentsTab({super.key});
@@ -14,10 +18,82 @@ class _ExperimentsTabState extends State<ExperimentsTab>
   late List<Experiment<String, String>> experiments;
   Experiment<String, String>? selectedExperiment;
 
+  bool connectionCommandInProgress = false;
+  late PomaClient pomaClient;
+
   @override
   void initState() {
     super.initState();
     experiments = DataProvider().getExperiments();
+    pomaClient = Provider.of<PomaClient>(context, listen: false);
+  }
+
+  void _onConnect() async {
+    if (!connectionCommandInProgress && !pomaClient.isConnected()) {
+      final ConfigNotifier configNotifier =
+          Provider.of<ConfigNotifier>(context, listen: false);
+      setState(() {
+        connectionCommandInProgress = true;
+      });
+      try {
+        await pomaClient.connect(
+          configNotifier.deviceHost,
+          configNotifier.devicePort,
+          timeout: Duration(seconds: configNotifier.deviceConnectionTimeout),
+        );
+      } on PomaException catch (e, stackTrace) {
+        debugPrint("PoMA Exception: $e");
+        debugPrintStack(stackTrace: stackTrace);
+        _showAlert("PoMA Exception", e.message);
+      } catch (e, stackTrace) {
+        debugPrint("Error: $e");
+        debugPrintStack(stackTrace: stackTrace);
+        _showAlert("Error", e.toString());
+      }
+      setState(() {
+        connectionCommandInProgress = false;
+      });
+    }
+  }
+
+  void _onDisconnect() async {
+    if (!connectionCommandInProgress && pomaClient.isConnected()) {
+      setState(() {
+        connectionCommandInProgress = true;
+      });
+      try {
+        await pomaClient.disconnect();
+      } on PomaException catch (e, stackTrace) {
+        debugPrint("PoMA Exception: $e");
+        debugPrintStack(stackTrace: stackTrace);
+        _showAlert("PoMA Exception", e.message);
+      } catch (e, stackTrace) {
+        debugPrint("Error: $e");
+        debugPrintStack(stackTrace: stackTrace);
+        _showAlert("Error", e.toString());
+      }
+      setState(() {
+        connectionCommandInProgress = false;
+      });
+    }
+  }
+
+  void _showAlert(String title, String value) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(value),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("Close"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _onStageResult(String result) {
@@ -47,9 +123,20 @@ class _ExperimentsTabState extends State<ExperimentsTab>
     super.build(context);
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: (selectedExperiment == null)
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        ElevatedButton.icon(
+          onPressed: pomaClient.isConnected() ? _onDisconnect : _onConnect,
+          icon: Icon(
+              pomaClient.isConnected() ? Icons.sensors_off : Icons.sensors),
+          label: connectionCommandInProgress
+              ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(pomaClient.isConnected() ? "Disconnect" : "Connect"),
+        ),
+        ...((selectedExperiment == null)
             // Experiments selection.
             ? [
                 DropdownButtonFormField<Experiment<String, String>>(
@@ -67,6 +154,9 @@ class _ExperimentsTabState extends State<ExperimentsTab>
                     );
                   }).toList(),
                   onChanged: (Experiment<String, String>? value) {
+                    if (value != null) {
+                      value.setPomaClient(pomaClient);
+                    }
                     setState(() {
                       selectedExperiment = value;
                     });
@@ -137,8 +227,8 @@ class _ExperimentsTabState extends State<ExperimentsTab>
                           child: Text("Close"),
                         ),
                 ),
-              ],
-      ),
+              ]),
+      ]),
     );
   }
 }

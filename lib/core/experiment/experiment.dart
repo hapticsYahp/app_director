@@ -1,4 +1,5 @@
 import 'package:wifi_app/core/experiment/experiment_stage.dart';
+import '../../providers/poma/poma_client.dart';
 import '../graph/conditional_directed_graph.dart';
 
 class Experiment<T_Stage_Id, T_Stage_Result> {
@@ -6,6 +7,8 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
 
   final String title;
   final String description;
+
+  PomaClient? pomaClient;
 
   final Map<T_Stage_Id, ExperimentStage<T_Stage_Result>> stages;
   final ConditionalDirectedGraph<T_Stage_Id, T_Stage_Result> transitions;
@@ -36,11 +39,18 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
     _currentStageId = _initialStageId;
   }
 
+  void setPomaClient(PomaClient pomaClient) {
+    this.pomaClient = pomaClient;
+  }
+
   void advanceToStage(T_Stage_Id stageId) {
     if (!stages.containsKey(stageId)) {
       throw Exception('Invalid Stage ID "$stageId".');
     }
     _currentStageId = stageId;
+    if (pomaClient != null) {
+      currentStage.setPomaClient(pomaClient!);
+    }
   }
 
   Future<void> advanceByResult(T_Stage_Result result) async {
