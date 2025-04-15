@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:wifi_app/core/experiment/experiment_stage.dart';
 import '../../providers/poma/poma_client.dart';
 import '../graph/conditional_directed_graph.dart';
@@ -33,6 +34,9 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
     if (stages.keys.isEmpty) {
       throw Exception('Experiment without Stages.');
     }
+    for (ExperimentStage<T_Stage_Result> stage in stages.values) {
+      stage.setExperiment(this);
+    }
     _initialStageId = initialStageId ?? stages.keys.first;
     _endStageId = lastStageId ?? stages.keys.last;
     _abortStageId = cancelStageId ?? _endStageId;
@@ -43,14 +47,19 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
     this.pomaClient = pomaClient;
   }
 
+  void sendPomaCommand(String pomaCommand) {
+    if (pomaClient?.isConnected() == true) {
+      pomaClient!.send(pomaCommand);
+    } else {
+      debugPrint("Cannot send PoMA command: '$pomaCommand'."); // TODO: quitar.
+    }
+  }
+
   void advanceToStage(T_Stage_Id stageId) {
     if (!stages.containsKey(stageId)) {
       throw Exception('Invalid Stage ID "$stageId".');
     }
     _currentStageId = stageId;
-    if (pomaClient != null) {
-      currentStage.setPomaClient(pomaClient!);
-    }
   }
 
   Future<void> advanceByResult(T_Stage_Result result) async {

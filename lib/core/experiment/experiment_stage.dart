@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../providers/poma/poma_client.dart';
+import 'experiment.dart';
 
 abstract class ExperimentStage<T_Result> {
   final String id;
   final String title;
   final String description;
   final Map<String, String> pomaCommands;
-  PomaClient? pomaClient;
+  Experiment<dynamic, T_Result>? experiment;
 
   ExperimentStage({
     required this.id,
@@ -15,18 +15,13 @@ abstract class ExperimentStage<T_Result> {
     this.pomaCommands = const {},
   });
 
-  void setPomaClient(PomaClient pomaClient) {
-    this.pomaClient = pomaClient;
+  void setExperiment(Experiment<dynamic, T_Result> experiment) {
+    this.experiment = experiment;
   }
 
   void _pomaCallback(String eventKey) {
     if (pomaCommands.containsKey(eventKey)) {
-      String pomaCommand = pomaCommands[eventKey]!;
-      if ((pomaClient != null) && pomaClient!.isConnected()) {
-        pomaClient!.send(pomaCommand);
-      } else {
-        debugPrint("Sending PoMA command: '$pomaCommand'."); // TODO: quitar.
-      }
+      experiment?.sendPomaCommand(pomaCommands[eventKey]!);
     }
   }
 
