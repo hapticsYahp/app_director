@@ -6,7 +6,8 @@ import '../../components/experiment_stages/experiment_stage_wait_widget.dart';
 class ExperimentStageWait<T_Result> extends ExperimentStage<T_Result> {
   final T_Result timeoutResult;
   final T_Result feedbackResult;
-  final int waitingSeconds;
+  final int waitingMs;
+  final int tickProgressMs;
   final String waitFeedback;
   final String buttonLabel;
   final IconData buttonIcon;
@@ -17,7 +18,8 @@ class ExperimentStageWait<T_Result> extends ExperimentStage<T_Result> {
     super.description = "Waiting...",
     required this.timeoutResult,
     required this.feedbackResult,
-    this.waitingSeconds = 10,
+    this.waitingMs = 10_000,
+    this.tickProgressMs = 100,
     this.waitFeedback = "Time:",
     this.buttonLabel = "Feedback",
     this.buttonIcon = Icons.thumb_up,

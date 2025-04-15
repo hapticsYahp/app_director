@@ -38,8 +38,8 @@ abstract class ExperimentStage<T_Result> {
     _pomaCallback("EXIT");
   }
 
-  void onTick(int seconds) {
-    _pomaCallback("TICK_$seconds");
+  void onTick(int milliseconds) {
+    _pomaCallback("TICK_${milliseconds.toString().padLeft(4, '0')}");
   }
 
   Widget buildWidget(

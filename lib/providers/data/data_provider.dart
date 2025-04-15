@@ -33,7 +33,8 @@ class DataProvider {
         id: "ABC123_SETUP",
         title: "Device Setup",
         description: "The device is being configured, please wait.",
-        delaySeconds: 10,
+        delayMs: 10_000,
+        tickProgressMs: 1_000,
         completionResult: "COMPLETED",
         pomaCommands: {
           "ENTER": "= intensity 1,1,1,1",
@@ -47,7 +48,8 @@ class DataProvider {
         title: "Device Running",
         description:
             "The device is working. Confirm if you feel the vibration.",
-        waitingSeconds: 15,
+        waitingMs: 15_000,
+        tickProgressMs: 500,
         timeoutResult: "TIMEOUT",
         feedbackResult: "FEEDBACK_YES",
         pomaCommands: {
@@ -116,7 +118,7 @@ class DataProvider {
         id: "QWE-456_SETUP",
         title: "Device Setup",
         description: "The device is being configured, please wait.",
-        delaySeconds: 10,
+        delayMs: 10_000,
         completionResult: "COMPLETED",
       ),
       "run_30": ExperimentStageWait(
@@ -124,7 +126,7 @@ class DataProvider {
         title: "Device Running (30%)",
         description:
             "The device is working. Confirm if you feel the vibration.",
-        waitingSeconds: 10,
+        waitingMs: 10_000,
         timeoutResult: "TIMEOUT",
         feedbackResult: "FEEDBACK_YES",
       ),
@@ -133,7 +135,7 @@ class DataProvider {
         title: "Device Running (70%)",
         description:
             "The device is working. Confirm if you feel the vibration.",
-        waitingSeconds: 10,
+        waitingMs: 10_000,
         timeoutResult: "TIMEOUT",
         feedbackResult: "FEEDBACK_YES",
       ),
@@ -142,7 +144,7 @@ class DataProvider {
         title: "Device Running (90%)",
         description:
             "The device is working. Confirm if you feel the vibration.",
-        waitingSeconds: 10,
+        waitingMs: 10_000,
         timeoutResult: "TIMEOUT",
         feedbackResult: "FEEDBACK_YES",
       ),

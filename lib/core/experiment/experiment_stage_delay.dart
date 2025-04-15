@@ -4,7 +4,8 @@ import '../../components/experiment_stages/experiment_stage_delay_widget.dart';
 
 class ExperimentStageDelay<T_Result> extends ExperimentStage<T_Result> {
   final T_Result completionResult;
-  final int delaySeconds;
+  final int delayMs;
+  final int tickProgressMs;
   final String delayFeedback;
 
   ExperimentStageDelay({
@@ -12,7 +13,8 @@ class ExperimentStageDelay<T_Result> extends ExperimentStage<T_Result> {
     super.title = "Delay",
     super.description = "Delaying...",
     required this.completionResult,
-    this.delaySeconds = 10,
+    this.delayMs = 10_000,
+    this.tickProgressMs = 100,
     this.delayFeedback = "Starting in...",
     super.pomaCommands = const {},
   });

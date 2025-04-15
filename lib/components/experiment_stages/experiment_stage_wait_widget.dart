@@ -21,7 +21,7 @@ class ExperimentStageWaitWidgetState<T_Result>
     extends State<ExperimentStageWaitWidget<T_Result>> {
   Timer? _timer;
   double _progress = 0;
-  int _remainingTime = 0;
+  int _remainingTimeMs = 0;
   bool _stageCompleted = false;
 
   @override
@@ -49,17 +49,18 @@ class ExperimentStageWaitWidgetState<T_Result>
 
   void _resetTimer() {
     _timer?.cancel();
-    _remainingTime = widget.stage.waitingSeconds;
+    _remainingTimeMs = widget.stage.waitingMs;
     _progress = 0;
 
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (_remainingTime > 0) {
+    _timer = Timer.periodic(Duration(milliseconds: widget.stage.tickProgressMs),
+        (timer) {
+      if (_remainingTimeMs > 0) {
         setState(() {
-          _remainingTime--;
-          _progress = (widget.stage.waitingSeconds - _remainingTime) /
-              widget.stage.waitingSeconds;
+          _remainingTimeMs = _remainingTimeMs - widget.stage.tickProgressMs;
+          _progress = (widget.stage.waitingMs - _remainingTimeMs) /
+              widget.stage.waitingMs;
         });
-        widget.stage.onTick(widget.stage.waitingSeconds - _remainingTime);
+        widget.stage.onTick(widget.stage.waitingMs - _remainingTimeMs);
       } else {
         _onTimeout();
       }
@@ -97,7 +98,7 @@ class ExperimentStageWaitWidgetState<T_Result>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          "${widget.stage.waitFeedback} ${_remainingTime}s",
+          "${widget.stage.waitFeedback} ${(_remainingTimeMs / 1000).ceil()}s",
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 18),
         ),

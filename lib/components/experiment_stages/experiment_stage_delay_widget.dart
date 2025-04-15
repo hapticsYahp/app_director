@@ -21,7 +21,7 @@ class ExperimentStageDelayWidgetState<T_Result>
     extends State<ExperimentStageDelayWidget<T_Result>> {
   Timer? _timer;
   double _progress = 0;
-  int _remainingTime = 0;
+  int _remainingTimeMs = 0;
 
   @override
   void initState() {
@@ -45,17 +45,18 @@ class ExperimentStageDelayWidgetState<T_Result>
 
   void _resetTimer() {
     _timer?.cancel();
-    _remainingTime = widget.stage.delaySeconds;
+    _remainingTimeMs = widget.stage.delayMs;
     _progress = 0;
 
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (_remainingTime > 0) {
+    _timer = Timer.periodic(Duration(milliseconds: widget.stage.tickProgressMs),
+        (timer) {
+      if (_remainingTimeMs > 0) {
         setState(() {
-          _remainingTime--;
-          _progress = (widget.stage.delaySeconds - _remainingTime) /
-              widget.stage.delaySeconds;
+          _remainingTimeMs = _remainingTimeMs - widget.stage.tickProgressMs;
+          _progress =
+              (widget.stage.delayMs - _remainingTimeMs) / widget.stage.delayMs;
         });
-        widget.stage.onTick(widget.stage.delaySeconds - _remainingTime);
+        widget.stage.onTick(widget.stage.delayMs - _remainingTimeMs);
       } else {
         _timer?.cancel();
         _onCompleteStage();
@@ -80,7 +81,8 @@ class ExperimentStageDelayWidgetState<T_Result>
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text("${widget.stage.delayFeedback} ${_remainingTime}s...",
+        Text(
+            "${widget.stage.delayFeedback} ${(_remainingTimeMs / 1000).ceil()}s...",
             style: TextStyle(fontSize: 18)),
         SizedBox(height: 20),
         LinearProgressIndicator(value: _progress, minHeight: 10),
