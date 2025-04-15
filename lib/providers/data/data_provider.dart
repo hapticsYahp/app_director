@@ -1,3 +1,7 @@
+import 'package:wifi_app/core/graph/trigger_always.dart';
+import 'package:wifi_app/core/graph/trigger_equals.dart';
+import 'package:wifi_app/core/graph/trigger_lesser_than.dart';
+
 import '../../core/experiment/experiment.dart';
 import '../../core/experiment/experiment_stage.dart';
 import '../../core/experiment/experiment_stage_confirm.dart';
@@ -11,13 +15,11 @@ class DataProvider {
   List<Experiment<String, String>> getExperiments() {
     ConditionalDirectedGraph<String, String> linealTransitions =
         ConditionalDirectedGraph();
-    linealTransitions.addRule("start", (input) => true, "setup");
-    linealTransitions.addRule("setup", (input) => true, "run");
-    linealTransitions.addRule(
-        "run", (input) => (input == "FEEDBACK_YES"), "end");
-    linealTransitions.addRule(
-        "run", (input) => (input == "TIMEOUT"), "feedback");
-    linealTransitions.addRule("feedback", (input) => true, "end");
+    linealTransitions.addRule("start", TriggerAlways(), "setup");
+    linealTransitions.addRule("setup", TriggerAlways(), "run");
+    linealTransitions.addRule("run", TriggerEquals("FEEDBACK_YES"), "end");
+    linealTransitions.addRule("run", TriggerEquals("TIMEOUT"), "feedback");
+    linealTransitions.addRule("feedback", TriggerAlways(), "end");
     Map<String, ExperimentStage<String>> linealStages = {
       "start": ExperimentStageConfirm(
         id: "ABC123_START",
@@ -90,22 +92,16 @@ class DataProvider {
 
     ConditionalDirectedGraph<String, String> complexTransitions =
         ConditionalDirectedGraph();
-    complexTransitions.addRule("start", (input) => true, "setup");
-    complexTransitions.addRule("setup", (input) => true, "run_70");
+    complexTransitions.addRule("start", TriggerAlways(), "setup");
+    complexTransitions.addRule("setup", TriggerAlways(), "run_70");
     complexTransitions.addRule(
-        "run_70", (input) => (input == "FEEDBACK_YES"), "run_90");
-    complexTransitions.addRule(
-        "run_70", (input) => (input == "TIMEOUT"), "run_30");
-    complexTransitions.addRule(
-        "run_90", (input) => (input == "FEEDBACK_YES"), "end");
-    complexTransitions.addRule(
-        "run_90", (input) => (input == "TIMEOUT"), "feedback");
-    complexTransitions.addRule(
-        "run_30", (input) => (input == "FEEDBACK_YES"), "end");
-    complexTransitions.addRule(
-        "run_30", (input) => (input == "TIMEOUT"), "feedback");
-    complexTransitions.addRule(
-        "feedback", (input) => int.tryParse(input)! < 5, "run_70");
+        "run_70", TriggerEquals("FEEDBACK_YES"), "run_90");
+    complexTransitions.addRule("run_70", TriggerEquals("TIMEOUT"), "run_30");
+    complexTransitions.addRule("run_90", TriggerEquals("FEEDBACK_YES"), "end");
+    complexTransitions.addRule("run_90", TriggerEquals("TIMEOUT"), "feedback");
+    complexTransitions.addRule("run_30", TriggerEquals("FEEDBACK_YES"), "end");
+    complexTransitions.addRule("run_30", TriggerEquals("TIMEOUT"), "feedback");
+    complexTransitions.addRule("feedback", TriggerLesserThan(5), "run_70");
     Map<String, ExperimentStage<String>> complexStages = {
       "start": ExperimentStageConfirm(
         id: "QWE-456_START",

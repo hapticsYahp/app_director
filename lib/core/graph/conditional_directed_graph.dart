@@ -12,7 +12,7 @@ class ConditionalDirectedGraph<T_Node, T_Trigger_Input> {
 
   T_Node? getDestination(T_Node origin, T_Trigger_Input triggerInput) {
     return getDestinations(origin)
-        .firstWhereOrNull((t) => t.trigger(triggerInput))
+        .firstWhereOrNull((t) => t.trigger.evaluate(triggerInput))
         ?.destination;
   }
 

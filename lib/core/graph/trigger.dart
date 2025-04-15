@@ -1,1 +1,3 @@
-typedef Trigger<T_Input> = bool Function(T_Input input);
+abstract class Trigger<T_Input> {
+  bool evaluate(T_Input input);
+}
