@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wifi_app/providers/poma/poma_exception.dart';
 
+import '../../providers/config/config_notifier.dart';
 import '../../providers/poma/poma_client.dart';
 import '../../providers/poma/poma_socket_impl.dart';
 
-const String defaultPomaHost = "172.24.149.223";
-const int defaultPomaPort = 3333;
 const String pomaTopicTest = "intensity";
 
 class SettingsTab extends StatefulWidget {
@@ -17,8 +17,7 @@ class SettingsTab extends StatefulWidget {
 
 class _SettingsTabState extends State<SettingsTab>
     with AutomaticKeepAliveClientMixin {
-  String pomaHost = defaultPomaHost;
-  int pomaPort = defaultPomaPort;
+  late final ConfigNotifier configNotifier;
 
   bool isTesting = false;
   String testResult = "";
@@ -36,16 +35,19 @@ class _SettingsTabState extends State<SettingsTab>
 
   @override
   void initState() {
-    _pomaHostController.text = pomaHost;
-    _pomaPortController.text = pomaPort.toString();
+    configNotifier = Provider.of<ConfigNotifier>(context, listen: false);
+    _pomaHostController.text = configNotifier.deviceHost;
+    _pomaPortController.text = configNotifier.devicePort.toString();
     super.initState();
   }
 
   void _onSave() {
     if (_isFormValid && !isTesting) {
+      configNotifier.updateSettings(
+        deviceHost: _pomaHostController.text,
+        devicePort: int.tryParse(_pomaPortController.text)!,
+      );
       setState(() {
-        pomaHost = _pomaHostController.text;
-        pomaPort = int.tryParse(_pomaPortController.text)!;
         testResult = "";
       });
     }
@@ -62,7 +64,8 @@ class _SettingsTabState extends State<SettingsTab>
     String result;
     try {
       PomaClient pomaClient = PomaClient(PomaSocketImpl());
-      await pomaClient.connect(pomaHost, pomaPort);
+      await pomaClient.connect(
+          configNotifier.deviceHost, configNotifier.devicePort);
       List<String> topics = await pomaClient.getTopics();
       result = topics.contains(pomaTopicTest)
           ? "Success."

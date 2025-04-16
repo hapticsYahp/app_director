@@ -14,8 +14,6 @@ class ConfigNotifier extends ChangeNotifier {
   void updateSettings({
     String? deviceHost,
     int? devicePort,
-    String? deviceAuthUser,
-    String? deviceAuthPass,
     int? deviceConnectionTimeout,
   }) {
     if (deviceHost != null) {
