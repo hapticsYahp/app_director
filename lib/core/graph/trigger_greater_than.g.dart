@@ -11,7 +11,7 @@ TriggerGreaterThan<T_Input> _$TriggerGreaterThanFromJson<T_Input>(
   T_Input Function(Object? json) fromJsonT_Input,
 ) =>
     TriggerGreaterThan<T_Input>(
-      (json['expected'] as num).toInt(),
+      (json['compareTo'] as num).toInt(),
     );
 
 Map<String, dynamic> _$TriggerGreaterThanToJson<T_Input>(
@@ -19,5 +19,5 @@ Map<String, dynamic> _$TriggerGreaterThanToJson<T_Input>(
   Object? Function(T_Input value) toJsonT_Input,
 ) =>
     <String, dynamic>{
-      'expected': instance.expected,
+      'compareTo': instance.compareTo,
     };

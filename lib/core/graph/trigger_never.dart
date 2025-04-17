@@ -5,6 +5,8 @@ part 'trigger_never.g.dart';
 
 @JsonSerializable(genericArgumentFactories: true)
 class TriggerNever<T_Input> extends Trigger<T_Input> {
+  static const String jsonType = 'never';
+
   const TriggerNever();
 
   factory TriggerNever.fromJson(
@@ -19,4 +21,9 @@ class TriggerNever<T_Input> extends Trigger<T_Input> {
 
   @override
   bool evaluate(T_Input input) => false;
+
+  @override
+  String getJsonType() {
+    return jsonType;
+  }
 }

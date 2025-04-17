@@ -5,11 +5,13 @@ part 'trigger_lesser_than.g.dart';
 
 @JsonSerializable(genericArgumentFactories: true)
 class TriggerLesserThan<T_Input> extends TriggerIntegerComparison<T_Input> {
-  const TriggerLesserThan(super.expected, {super.parser});
+  static const String jsonType = 'lesser_than';
+
+  const TriggerLesserThan(super.compareTo, {super.parser});
 
   @override
-  bool compare(int input, int expected) {
-    return input < expected;
+  bool compare(int input, int compareTo) {
+    return input < compareTo;
   }
 
   factory TriggerLesserThan.fromJson(
@@ -21,4 +23,9 @@ class TriggerLesserThan<T_Input> extends TriggerIntegerComparison<T_Input> {
   @override
   Map<String, dynamic> toJson(Object? Function(T_Input value) toJsonT_Input) =>
       _$TriggerLesserThanToJson(this, toJsonT_Input);
+
+  @override
+  String getJsonType() {
+    return jsonType;
+  }
 }

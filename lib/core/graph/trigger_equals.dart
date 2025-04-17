@@ -5,6 +5,8 @@ part 'trigger_equals.g.dart';
 
 @JsonSerializable(genericArgumentFactories: true)
 class TriggerEquals<T_Input> extends Trigger<T_Input> {
+  static const String jsonType = 'equals';
+
   final T_Input expected;
 
   const TriggerEquals(this.expected);
@@ -21,4 +23,9 @@ class TriggerEquals<T_Input> extends Trigger<T_Input> {
 
   @override
   bool evaluate(T_Input input) => (input == expected);
+
+  @override
+  String getJsonType() {
+    return jsonType;
+  }
 }

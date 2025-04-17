@@ -11,7 +11,7 @@ TriggerLesserThan<T_Input> _$TriggerLesserThanFromJson<T_Input>(
   T_Input Function(Object? json) fromJsonT_Input,
 ) =>
     TriggerLesserThan<T_Input>(
-      (json['expected'] as num).toInt(),
+      (json['compareTo'] as num).toInt(),
     );
 
 Map<String, dynamic> _$TriggerLesserThanToJson<T_Input>(
@@ -19,5 +19,5 @@ Map<String, dynamic> _$TriggerLesserThanToJson<T_Input>(
   Object? Function(T_Input value) toJsonT_Input,
 ) =>
     <String, dynamic>{
-      'expected': instance.expected,
+      'compareTo': instance.compareTo,
     };

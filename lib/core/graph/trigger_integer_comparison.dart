@@ -5,18 +5,18 @@ abstract class TriggerIntegerComparison<T_Input> extends Trigger<T_Input> {
   static int _defaultParser(dynamic input) =>
       int.tryParse(input.toString()) ?? 0;
 
-  final int expected;
+  final int compareTo;
 
-  @JsonKey(includeToJson: false, includeFromJson: false)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   final int Function(T_Input) _parser;
 
   const TriggerIntegerComparison(
-    this.expected, {
+    this.compareTo, {
     int Function(T_Input)? parser,
   }) : _parser = parser ?? _defaultParser;
 
-  bool compare(int input, int expected);
+  bool compare(int input, int compareTo);
 
   @override
-  bool evaluate(T_Input input) => compare(_parser(input), expected);
+  bool evaluate(T_Input input) => compare(_parser(input), compareTo);
 }
