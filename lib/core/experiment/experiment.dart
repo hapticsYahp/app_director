@@ -68,7 +68,7 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
   }
 
   bool get canAdvance {
-    return transitions.getDestinations(_currentStageId).isNotEmpty;
+    return transitions.getDestinationsFromOrigin(_currentStageId).isNotEmpty;
   }
 
   void reset() {

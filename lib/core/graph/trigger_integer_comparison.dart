@@ -2,8 +2,14 @@ import 'package:json_annotation/json_annotation.dart';
 import 'trigger.dart';
 
 abstract class TriggerIntegerComparison<T_Input> extends Trigger<T_Input> {
-  static int _defaultParser(dynamic input) =>
-      int.tryParse(input.toString()) ?? 0;
+  static int _defaultParser(dynamic input) {
+    if (input == null) return 0;
+    if (input is int) return input;
+    if (input is double) return input.toInt();
+    final str = input.toString().trim();
+    final parsed = int.tryParse(str);
+    return parsed ?? 0;
+  }
 
   final int compareTo;
 

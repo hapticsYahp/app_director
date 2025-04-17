@@ -11,12 +11,13 @@ class ConditionalDirectedGraph<T_Node, T_Trigger_Input> {
   }
 
   T_Node? getDestination(T_Node origin, T_Trigger_Input triggerInput) {
-    return getDestinations(origin)
+    return getDestinationsFromOrigin(origin)
         .firstWhereOrNull((rule) => rule.evaluate(triggerInput))
         ?.destination;
   }
 
-  List<ConditionRule<T_Node, T_Trigger_Input>> getDestinations(T_Node origin) {
+  List<ConditionRule<T_Node, T_Trigger_Input>> getDestinationsFromOrigin(
+      T_Node origin) {
     return _rules
         .where((t) => (t.origin == origin) || (t.origin == "*"))
         .toList();
