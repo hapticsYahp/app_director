@@ -1,12 +1,28 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../graph/conditional_directed_graph.dart';
+import 'package:wifi_app/core/serialization/serializable_condition_rule.dart';
 
 part 'serializable_conditional_directed_graph.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class SerializableConditionalDirectedGraph
     extends ConditionalDirectedGraph<String, String> {
-  SerializableConditionalDirectedGraph();
+  @JsonKey(name: 'rules')
+  List<SerializableConditionRule> get serializableRules {
+    return rules
+        .map((rule) => SerializableConditionRule(
+            rule.origin, rule.trigger, rule.destination))
+        .toList();
+  }
+
+  set serializableRules(List<SerializableConditionRule> rules) {
+    for (final rule in rules) {
+      addRule(rule.origin, rule.trigger, rule.destination);
+    }
+  }
+
+  SerializableConditionalDirectedGraph(
+      [List<SerializableConditionRule>? super.rules]);
 
   factory SerializableConditionalDirectedGraph.fromJson(
           Map<String, dynamic> json) =>

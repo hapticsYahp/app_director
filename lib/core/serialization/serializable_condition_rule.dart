@@ -7,11 +7,7 @@ part 'serializable_condition_rule.g.dart';
 @JsonSerializable()
 @SerializableTriggerConverter()
 class SerializableConditionRule extends ConditionRule<String, String> {
-  SerializableConditionRule(
-    super.origin,
-    super.trigger,
-    super.destination,
-  );
+  SerializableConditionRule(super.origin, super.trigger, super.destination);
 
   factory SerializableConditionRule.fromJson(Map<String, dynamic> json) =>
       _$SerializableConditionRuleFromJson(json);

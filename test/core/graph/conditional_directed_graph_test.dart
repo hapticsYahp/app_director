@@ -5,6 +5,7 @@ import 'package:wifi_app/core/graph/trigger_greater_than.dart';
 import 'package:wifi_app/core/graph/trigger_lesser_than.dart';
 import 'package:wifi_app/core/graph/trigger_never.dart';
 import 'package:wifi_app/core/graph/trigger_equals.dart';
+import 'package:wifi_app/core/graph/condition_rule.dart';
 
 void main() {
   group('ConditionalDirectedGraph', () {
@@ -17,10 +18,39 @@ void main() {
       graph = ConditionalDirectedGraph<String, String>();
     });
 
-    test('should be created with no rules', () {
+    test('should be created with no rules when no parameters are provided', () {
       final destinations = graph.getDestinationsFromOrigin(node1);
       expect(destinations, isEmpty);
       expect(graph.getDestination(node1, 'any_input'), isNull);
+    });
+
+    test('should be created with rules when provided in constructor', () {
+      final rule1 =
+          ConditionRule<String, String>(node1, TriggerAlways<String>(), node2);
+      final rule2 =
+          ConditionRule<String, String>(node2, TriggerNever<String>(), node3);
+      final rules = [rule1, rule2];
+      final graphWithRules = ConditionalDirectedGraph<String, String>(rules);
+      expect(graphWithRules.rules, hasLength(2));
+      expect(graphWithRules.rules.first.origin, equals(rule1.origin));
+      expect(graphWithRules.rules.first.trigger, equals(rule1.trigger));
+      expect(graphWithRules.rules.first.destination, equals(rule1.destination));
+      expect(graphWithRules.rules.last.origin, equals(rule2.origin));
+      expect(graphWithRules.rules.last.trigger, equals(rule2.trigger));
+      expect(graphWithRules.rules.last.destination, equals(rule2.destination));
+    });
+
+    test('should create a defensive copy of rules in constructor', () {
+      final rules = [
+        ConditionRule<String, String>(node1, TriggerAlways<String>(), node2),
+      ];
+      final graphWithRules = ConditionalDirectedGraph<String, String>(rules);
+      rules.add(
+          ConditionRule<String, String>(node2, TriggerAlways<String>(), node3));
+      expect(rules, hasLength(2));
+      expect(graphWithRules.rules, hasLength(1));
+      graphWithRules.addRule(node2, TriggerAlways<String>(), node3);
+      expect(graphWithRules.rules, hasLength(2));
     });
 
     test('should add rules correctly', () {
@@ -90,7 +120,7 @@ void main() {
       final int nodeInt2 = 2;
       final int nodeInt3 = 3;
       final numericGraph = ConditionalDirectedGraph<int, double>();
-      
+
       // Add rules in reverse order to match behavior in test
       // The issue was that rules are evaluated in the order they're added
       // When the input is exactly equal to compareTo (5.0), both conditions fail
@@ -98,7 +128,7 @@ void main() {
           nodeInt1, TriggerLesserThan<double>(compareTo), nodeInt3);
       numericGraph.addRule(
           nodeInt1, TriggerGreaterThan<double>(compareTo), nodeInt2);
-      
+
       // Use values that are clearly greater/lesser to avoid boundary issues
       expect(numericGraph.getDestination(nodeInt1, compareTo + 1.0),
           equals(nodeInt2));

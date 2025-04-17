@@ -1,9 +1,16 @@
 import 'package:collection/collection.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:wifi_app/core/graph/trigger.dart';
 import 'package:wifi_app/core/graph/condition_rule.dart';
 
 class ConditionalDirectedGraph<T_Node, T_Trigger_Input> {
-  final List<ConditionRule<T_Node, T_Trigger_Input>> _rules = [];
+  final List<ConditionRule<T_Node, T_Trigger_Input>> _rules;
+
+  ConditionalDirectedGraph(
+      [List<ConditionRule<T_Node, T_Trigger_Input>>? rules])
+      : _rules = (rules ?? [])
+            .map((r) => ConditionRule(r.origin, r.trigger, r.destination))
+            .toList();
 
   void addRule(
       T_Node origin, Trigger<T_Trigger_Input> trigger, T_Node destination) {
@@ -22,4 +29,8 @@ class ConditionalDirectedGraph<T_Node, T_Trigger_Input> {
         .where((t) => (t.origin == origin) || (t.origin == "*"))
         .toList();
   }
+
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  List<ConditionRule<T_Node, T_Trigger_Input>> get rules =>
+      List.unmodifiable(_rules);
 }
