@@ -13,12 +13,13 @@ class TriggerDistinct<T_Input> extends Trigger<T_Input> {
 
   factory TriggerDistinct.fromJson(
     Map<String, dynamic> json,
-    T_Input Function(Object? json) fromJsonT_Input,
+    T_Input Function(Object? json) fromJsonTInput,
   ) =>
-      _$TriggerDistinctFromJson(json, fromJsonT_Input);
+      _$TriggerDistinctFromJson(json, fromJsonTInput);
 
-  Map<String, dynamic> toJson(Object? Function(T_Input value) toJsonT_Input) =>
-      _$TriggerDistinctToJson(this, toJsonT_Input);
+  @override
+  Map<String, dynamic> toJson(Object? Function(T_Input value) toJsonTInput) =>
+      _$TriggerDistinctToJson(this, toJsonTInput);
 
   @override
   bool evaluate(T_Input input) => (input != notExpected);

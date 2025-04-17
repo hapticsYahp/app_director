@@ -11,13 +11,13 @@ class TriggerAlways<T_Input> extends Trigger<T_Input> {
 
   factory TriggerAlways.fromJson(
     Map<String, dynamic> json,
-    T_Input Function(Object? json) fromJsonT_Input,
+    T_Input Function(Object? json) fromJsonTInput,
   ) =>
-      _$TriggerAlwaysFromJson(json, fromJsonT_Input);
+      _$TriggerAlwaysFromJson(json, fromJsonTInput);
 
   @override
-  Map<String, dynamic> toJson(Object? Function(T_Input value) toJsonT_Input) =>
-      _$TriggerAlwaysToJson(this, toJsonT_Input);
+  Map<String, dynamic> toJson(Object? Function(T_Input value) toJsonTInput) =>
+      _$TriggerAlwaysToJson(this, toJsonTInput);
 
   @override
   bool evaluate(T_Input input) => true;

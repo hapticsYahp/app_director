@@ -3,7 +3,7 @@ abstract class Trigger<T_Input> {
 
   bool evaluate(T_Input input);
 
-  Map<String, dynamic> toJson(Object? Function(T_Input value) toJsonT_Input);
+  Map<String, dynamic> toJson(Object? Function(T_Input value) toJsonTInput);
 
   String getJsonType();
 }

@@ -16,13 +16,13 @@ class TriggerGreaterThan<T_Input> extends TriggerIntegerComparison<T_Input> {
 
   factory TriggerGreaterThan.fromJson(
     Map<String, dynamic> json,
-    T_Input Function(Object? json) fromJsonT_Input,
+    T_Input Function(Object? json) fromJsonTInput,
   ) =>
-      _$TriggerGreaterThanFromJson(json, fromJsonT_Input);
+      _$TriggerGreaterThanFromJson(json, fromJsonTInput);
 
   @override
-  Map<String, dynamic> toJson(Object? Function(T_Input value) toJsonT_Input) =>
-      _$TriggerGreaterThanToJson(this, toJsonT_Input);
+  Map<String, dynamic> toJson(Object? Function(T_Input value) toJsonTInput) =>
+      _$TriggerGreaterThanToJson(this, toJsonTInput);
 
   @override
   String getJsonType() {
