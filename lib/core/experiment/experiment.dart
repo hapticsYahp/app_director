@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:wifi_app/core/experiment/experiment_stage.dart';
 import '../../providers/poma/poma_client.dart';
 import '../graph/conditional_directed_graph.dart';
 
 class Experiment<T_Stage_Id, T_Stage_Result> {
   final String id;
-
   final String title;
   final String description;
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
   PomaClient? pomaClient;
 
   final Map<T_Stage_Id, ExperimentStage<T_Stage_Result>> stages;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
   final ConditionalDirectedGraph<T_Stage_Id, T_Stage_Result> transitions;
   late T_Stage_Id _initialStageId;
   late T_Stage_Id _endStageId;

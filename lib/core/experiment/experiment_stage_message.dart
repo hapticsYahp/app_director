@@ -39,11 +39,10 @@ class ExperimentStageMessage<T_Result> extends ExperimentStage<T_Result> {
   ) =>
       _$ExperimentStageMessageFromJson(json, fromJsonTResult);
 
+  @override
   Map<String, dynamic> toJson(Object? Function(T_Result value) toJsonTResult) =>
       _$ExperimentStageMessageToJson(this, toJsonTResult);
 
   @override
-  String getJsonType() {
-    return jsonType;
-  }
+  String getJsonType() => jsonType;
 }
