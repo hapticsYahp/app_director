@@ -1,40 +1,41 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wifi_app/core/experiment/experiment_stage.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:wifi_app/providers/poma/poma_client.dart';
+import 'experiment_stage_test.mocks.dart';
+import 'test_experiment.dart';
+import 'test_experiment_stage.dart';
 
-class MockExperimentStage extends ExperimentStage<String> {
-  MockExperimentStage({
-    required super.id,
-    required super.title,
-    required super.description,
-    super.pomaCommands = const {},
-  });
 
-  @override
-  Widget buildWidget(
-      BuildContext context, void Function(String result) onResult) {
-    return const SizedBox(); // Devuelve un widget mínimo para pruebas
-  }
-}
-
+@GenerateMocks([TestExperiment, PomaClient])
 void main() {
-  group('ExperimentStage', () {
+  group('ExperimentStage Base Class', () {
     final String id = 'mock_id';
     final String title = 'Mock Stage';
     final String description = 'Mock Description';
+    final String enterCommand = 'enter_command';
+    final String exitCommand = 'exit_command';
+    final String tickCommand = 'tick_command';
     final Map<String, String> pomaCommands = {
-      'ENTER': 'enter_command',
-      'EXIT': 'exit_command',
+      'ENTER': enterCommand,
+      'TICK_1000': tickCommand,
+      'EXIT': exitCommand,
     };
-    late MockExperimentStage stage;
+
+    late TestExperimentStage stage;
+    late MockTestExperiment mockExperiment;
+    late MockPomaClient mockPomaClient;
 
     setUp(() {
-      stage = MockExperimentStage(
+      stage = TestExperimentStage(
         id: id,
         title: title,
         description: description,
         pomaCommands: pomaCommands,
       );
+      mockExperiment = MockTestExperiment();
+      mockPomaClient = MockPomaClient();
+      when(mockExperiment.pomaClient).thenReturn(mockPomaClient);
     });
 
     test('should have correct initialization values', () {
@@ -42,6 +43,46 @@ void main() {
       expect(stage.title, equals(title));
       expect(stage.description, equals(description));
       expect(stage.pomaCommands, equals(pomaCommands));
+    });
+
+    test('setExperiment should associate the stage with an experiment', () {
+      stage.setExperiment(mockExperiment);
+      expect(stage.experiment, equals(mockExperiment));
+    });
+
+    test('onEnter should send PoMA command via experiment', () {
+      stage.setExperiment(mockExperiment);
+      when(mockPomaClient.isConnected()).thenReturn(true);
+      stage.onEnter();
+      verify(mockExperiment.sendPomaCommand(enterCommand)).called(1);
+    });
+
+    test('onExit should send PoMA command via experiment', () {
+      stage.setExperiment(mockExperiment);
+      when(mockPomaClient.isConnected()).thenReturn(true);
+      stage.onExit();
+      verify(mockExperiment.sendPomaCommand(exitCommand)).called(1);
+    });
+
+    test('onTick should send PoMA command via experiment when tick matches',
+        () {
+      stage.setExperiment(mockExperiment);
+      when(mockPomaClient.isConnected()).thenReturn(true);
+      stage.onTick(1_000);
+      verify(mockExperiment.sendPomaCommand(tickCommand)).called(1);
+    });
+
+    test('onTick should not send PoMA command when tick does not match', () {
+      stage.setExperiment(mockExperiment);
+      when(mockPomaClient.isConnected()).thenReturn(true);
+      stage.onTick(5_000);
+      verifyNever(mockExperiment.sendPomaCommand(any));
+    });
+
+    test('should handle missing experiment gracefully', () {
+      expect(() => stage.onEnter(), returnsNormally);
+      expect(() => stage.onExit(), returnsNormally);
+      expect(() => stage.onTick(10), returnsNormally);
     });
   });
 }

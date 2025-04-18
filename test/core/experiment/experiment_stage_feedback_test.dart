@@ -1,11 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:wifi_app/core/experiment/experiment_stage_feedback.dart';
+import 'package:wifi_app/providers/poma/poma_client.dart';
+import 'experiment_stage_feedback_test.mocks.dart';
+import 'test_experiment.dart';
 
+@GenerateMocks([TestExperiment, PomaClient])
 void main() {
   group('ExperimentStageFeedback', () {
     final String id = 'feedback_id';
+    final String enterCommand = 'enter_command';
+    final String exitCommand = 'exit_command';
+    final Map<String, String> pomaCommands = {
+      'ENTER': enterCommand,
+      'EXIT': exitCommand,
+    };
+
     getResult(value) => 'FEEDBACK_$value';
+
+    late MockTestExperiment mockExperiment;
+    late MockPomaClient mockPomaClient;
+    late ExperimentStageFeedback<String> stage;
+
+    setUp(() {
+      mockExperiment = MockTestExperiment();
+      mockPomaClient = MockPomaClient();
+      when(mockExperiment.pomaClient).thenReturn(mockPomaClient);
+      stage = ExperimentStageFeedback<String>(
+        id: id,
+        getResult: getResult,
+        pomaCommands: pomaCommands,
+      );
+    });
 
     test('should have correct default values', () {
       final stage = ExperimentStageFeedback<String>(
@@ -86,6 +114,28 @@ void main() {
       expect(stage.getResult(0), equals(getResult(0)));
       expect(stage.getResult(5), equals(getResult(5)));
       expect(stage.getResult(10), equals(getResult(10)));
+    });
+
+    test('should send ENTER command when stage is entered', () {
+      stage.setExperiment(mockExperiment);
+      when(mockPomaClient.isConnected()).thenReturn(true);
+      stage.onEnter();
+      verify(mockExperiment.sendPomaCommand(enterCommand)).called(1);
+    });
+
+    test('should send EXIT command when stage is exited', () {
+      stage.setExperiment(mockExperiment);
+      when(mockPomaClient.isConnected()).thenReturn(true);
+      stage.onExit();
+      verify(mockExperiment.sendPomaCommand(exitCommand)).called(1);
+    });
+
+    test('should not send commands when PomaClient is not connected', () {
+      stage.setExperiment(mockExperiment);
+      when(mockPomaClient.isConnected()).thenReturn(false);
+      stage.onEnter();
+      stage.onExit();
+      verifyNever(mockPomaClient.send(any));
     });
   });
 }
