@@ -11,7 +11,7 @@ import 'package:wifi_app/core/experiment/experiment_stage.dart' as _i3;
 import 'package:wifi_app/core/graph/conditional_directed_graph.dart' as _i2;
 import 'package:wifi_app/providers/poma/poma_client.dart' as _i6;
 
-import 'experiment_stage_message_test.dart' as _i4;
+import 'test_experiment.dart' as _i4;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -40,11 +40,11 @@ class _FakeExperimentStage_1<T_Result> extends _i1.SmartFake
     : super(parent, parentInvocation);
 }
 
-/// A class which mocks [StringExperiment].
+/// A class which mocks [TestExperiment].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockStringExperiment extends _i1.Mock implements _i4.StringExperiment {
-  MockStringExperiment() {
+class MockTestExperiment extends _i1.Mock implements _i4.TestExperiment {
+  MockTestExperiment() {
     _i1.throwOnMissingStub(this);
   }
 

@@ -70,10 +70,6 @@ void main() {
       final IconData positiveIcon = Icons.add;
       final IconData negativeIcon = Icons.remove;
       final IconData confirmIcon = Icons.send;
-      final Map<String, String> pomaCommands = {
-        'ENTER': 'enter_command',
-        'EXIT': 'exit_command',
-      };
       final stage = ExperimentStageFeedback<String>(
         id: id,
         title: title,
