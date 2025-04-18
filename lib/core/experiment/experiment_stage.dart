@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'experiment.dart';
 
 abstract class ExperimentStage<T_Result> {
@@ -6,6 +7,8 @@ abstract class ExperimentStage<T_Result> {
   final String title;
   final String description;
   final Map<String, String> pomaCommands;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
   Experiment<dynamic, T_Result>? experiment;
 
   ExperimentStage({
@@ -41,4 +44,8 @@ abstract class ExperimentStage<T_Result> {
     BuildContext context,
     void Function(T_Result result) onResult,
   );
+
+  Map<String, dynamic> toJson(Object? Function(T_Result value) toJsonTResult);
+
+  String getJsonType();
 }

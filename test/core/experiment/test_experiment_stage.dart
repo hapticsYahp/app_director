@@ -14,4 +14,14 @@ class TestExperimentStage extends ExperimentStage<String> {
       BuildContext context, void Function(String result) onResult) {
     return const SizedBox();
   }
+
+  @override
+  String getJsonType() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Map<String, dynamic> toJson(Object? Function(String value) toJsonTResult) {
+    throw UnimplementedError();
+  }
 }

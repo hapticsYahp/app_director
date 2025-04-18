@@ -1,7 +1,6 @@
 import 'package:wifi_app/core/graph/trigger_always.dart';
 import 'package:wifi_app/core/graph/trigger_equals.dart';
 import 'package:wifi_app/core/graph/trigger_lesser_than.dart';
-
 import '../../core/experiment/experiment.dart';
 import '../../core/experiment/experiment_stage.dart';
 import '../../core/experiment/experiment_stage_confirm.dart';
@@ -9,6 +8,7 @@ import '../../core/experiment/experiment_stage_delay.dart';
 import '../../core/experiment/experiment_stage_feedback.dart';
 import '../../core/experiment/experiment_stage_message.dart';
 import '../../core/experiment/experiment_stage_wait.dart';
+import '../../core/experiment/result_generator_to_string.dart';
 import '../../core/graph/conditional_directed_graph.dart';
 
 class DataProvider {
@@ -28,7 +28,7 @@ class DataProvider {
             "Stage description. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam hendrerit dui at sagittis aliquam.",
         confirmationResult: "CONFIRMED",
         pomaCommands: {
-          "ENTER": "= intensity 0,0,0,0",
+          "ENTER": "= intensity 0,0",
         },
       ),
       "setup": ExperimentStageDelay(
@@ -39,10 +39,15 @@ class DataProvider {
         tickProgressMs: 1_000,
         completionResult: "COMPLETED",
         pomaCommands: {
-          "ENTER": "= intensity 1,1,1,1",
-          "TICK_1": "= intensity 0,0,0,0",
-          "TICK_9": "= intensity 1,1,1,1",
-          "TICK_10": "= intensity 0,0,0,0",
+          "TICK_1000": "= intensity 0,0",
+          "TICK_2000": "= intensity 50,50",
+          "TICK_3000": "= intensity 0,0",
+          "TICK_4000": "= intensity 50,50",
+          "TICK_5000": "= intensity 0,0",
+          "TICK_6000": "= intensity 50,50",
+          "TICK_7000": "= intensity 0,0",
+          "TICK_8000": "= intensity 50,50",
+          "TICK_9000": "= intensity 0,0",
         },
       ),
       "run": ExperimentStageWait(
@@ -55,19 +60,20 @@ class DataProvider {
         timeoutResult: "TIMEOUT",
         feedbackResult: "FEEDBACK_YES",
         pomaCommands: {
-          "TICK_1": "= intensity 10,10,10,10",
-          "TICK_3": "= intensity 30,30,30,30",
-          "TICK_5": "= intensity 50,50,50,50",
-          "TICK_7": "= intensity 70,70,70,70",
-          "TICK_9": "= intensity 90,90,90,90",
-          "EXIT": "= intensity 0,0,0,0",
+          "TICK_1000": "= intensity 10,10",
+          "TICK_3000": "= intensity 30,30",
+          "TICK_5500": "= intensity 50,50",
+          "TICK_7000": "= intensity 70,70",
+          "TICK_9500": "= intensity 90,90",
+          "EXIT": "= intensity 0,0",
         },
       ),
-      "feedback": ExperimentStageFeedback(
+      "feedback": ExperimentStageFeedback<String>(
         id: "ABC123_FEEDBACK",
         title: "Feedback Stage",
         description: "Please indicate if you felt the vibration.",
-        getResult: (scaleValue) => scaleValue.toString(),
+        resultGenerator: ResultGeneratorToString(),
+        defaultResult: "NO_RESULT",
       ),
       "end": ExperimentStageMessage(
         id: "ABC123_END",
@@ -76,8 +82,8 @@ class DataProvider {
         exitedResult: "EXITED",
         message: "Thank you.",
         pomaCommands: {
-          "ENTER": "= intensity 0,0,0,0",
-          "EXIT": "= intensity 0,0,0,0",
+          "ENTER": "= intensity 0,0",
+          "EXIT": "= intensity 0,0",
         },
       ),
     };
@@ -144,11 +150,12 @@ class DataProvider {
         timeoutResult: "TIMEOUT",
         feedbackResult: "FEEDBACK_YES",
       ),
-      "feedback": ExperimentStageFeedback(
+      "feedback": ExperimentStageFeedback<String>(
         id: "QWE-456_FEEDBACK",
         title: "Feedback Stage",
         description: "Please indicate if you felt the vibration.",
-        getResult: (scaleValue) => scaleValue.toString(),
+        resultGenerator: ResultGeneratorToString(),
+        defaultResult: "NO_RESULT",
       ),
       "end": ExperimentStageMessage(
         id: "QWE-456_END",

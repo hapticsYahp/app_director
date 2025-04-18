@@ -127,6 +127,25 @@ class MockExperimentStage<T_Result> extends _i1.Mock
             ),
           )
           as _i2.Widget);
+
+  @override
+  Map<String, dynamic> toJson(Object? Function(T_Result)? toJsonTResult) =>
+      (super.noSuchMethod(
+            Invocation.method(#toJson, [toJsonTResult]),
+            returnValue: <String, dynamic>{},
+          )
+          as Map<String, dynamic>);
+
+  @override
+  String getJsonType() =>
+      (super.noSuchMethod(
+            Invocation.method(#getJsonType, []),
+            returnValue: _i4.dummyValue<String>(
+              this,
+              Invocation.method(#getJsonType, []),
+            ),
+          )
+          as String);
 }
 
 /// A class which mocks [PomaClient].

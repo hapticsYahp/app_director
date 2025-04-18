@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:wifi_app/core/experiment/experiment_stage_feedback.dart';
+import 'package:wifi_app/core/experiment/result_generator_to_string.dart';
 import 'package:wifi_app/providers/poma/poma_client.dart';
 import 'experiment_stage_feedback_test.mocks.dart';
 import 'test_experiment.dart';
@@ -17,20 +18,21 @@ void main() {
       'ENTER': enterCommand,
       'EXIT': exitCommand,
     };
-
-    getResult(value) => 'FEEDBACK_$value';
+    final String defaultResult = "NO_RESULT";
 
     late MockTestExperiment mockExperiment;
     late MockPomaClient mockPomaClient;
     late ExperimentStageFeedback<String> stage;
+    late ResultGeneratorToString resultGenerator;
 
     setUp(() {
       mockExperiment = MockTestExperiment();
       mockPomaClient = MockPomaClient();
       when(mockExperiment.pomaClient).thenReturn(mockPomaClient);
+      resultGenerator = ResultGeneratorToString();
       stage = ExperimentStageFeedback<String>(
         id: id,
-        getResult: getResult,
+        defaultResult: defaultResult,
         pomaCommands: pomaCommands,
       );
     });
@@ -38,10 +40,10 @@ void main() {
     test('should have correct default values', () {
       final stage = ExperimentStageFeedback<String>(
         id: id,
-        getResult: getResult,
+        defaultResult: defaultResult,
       );
       expect(stage.id, equals(id));
-      expect(stage.getResult, equals(getResult));
+      expect(stage.defaultResult, equals(defaultResult));
       expect(stage.title, isNotNull);
       expect(stage.description, isNotNull);
       expect(stage.minScaleValue, isNotNull);
@@ -81,7 +83,8 @@ void main() {
         negativeLabel: negativeLabel,
         feedbackLabel: feedbackLabel,
         confirmLabel: confirmLabel,
-        getResult: getResult,
+        resultGenerator: resultGenerator,
+        defaultResult: defaultResult,
         positiveIcon: positiveIcon,
         negativeIcon: negativeIcon,
         confirmIcon: confirmIcon,
@@ -96,20 +99,22 @@ void main() {
       expect(stage.negativeLabel, equals(negativeLabel));
       expect(stage.feedbackLabel, equals(feedbackLabel));
       expect(stage.confirmLabel, equals(confirmLabel));
+      expect(stage.resultGenerator, equals(resultGenerator));
       expect(stage.positiveIcon, equals(positiveIcon));
       expect(stage.negativeIcon, equals(negativeIcon));
       expect(stage.confirmIcon, equals(confirmIcon));
       expect(stage.pomaCommands, equals(pomaCommands));
     });
 
-    test('should properly transform scale values with getResult function', () {
+    test('should properly transform scale values with ResultGenerator', () {
       final stage = ExperimentStageFeedback<String>(
         id: id,
-        getResult: getResult,
+        resultGenerator: resultGenerator,
+        defaultResult: defaultResult,
       );
-      expect(stage.getResult(0), equals(getResult(0)));
-      expect(stage.getResult(5), equals(getResult(5)));
-      expect(stage.getResult(10), equals(getResult(10)));
+      expect(stage.getResult(0), equals(resultGenerator.getResult(0)));
+      expect(stage.getResult(5), equals(resultGenerator.getResult(5)));
+      expect(stage.getResult(10), equals(resultGenerator.getResult(10)));
     });
 
     test('should send ENTER command when stage is entered', () {
