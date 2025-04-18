@@ -16,9 +16,10 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   final ConditionalDirectedGraph<T_Stage_Id, T_Stage_Result> transitions;
-  late T_Stage_Id _initialStageId;
-  late T_Stage_Id _endStageId;
-  late T_Stage_Id _abortStageId;
+
+  late final T_Stage_Id startingStageId;
+  late final T_Stage_Id finalStageId;
+  late final T_Stage_Id abortStageId;
 
   late T_Stage_Id _currentStageId;
 
@@ -40,10 +41,10 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
     for (ExperimentStage<T_Stage_Result> stage in stages.values) {
       stage.setExperiment(this);
     }
-    _initialStageId = initialStageId ?? stages.keys.first;
-    _endStageId = lastStageId ?? stages.keys.last;
-    _abortStageId = cancelStageId ?? _endStageId;
-    _currentStageId = _initialStageId;
+    startingStageId = initialStageId ?? stages.keys.first;
+    finalStageId = lastStageId ?? stages.keys.last;
+    abortStageId = cancelStageId ?? finalStageId;
+    _currentStageId = startingStageId;
   }
 
   void setPomaClient(PomaClient pomaClient) {
@@ -67,7 +68,7 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
 
   Future<void> advanceByResult(T_Stage_Result result) async {
     advanceToStage(
-        transitions.getDestination(_currentStageId, result) ?? _abortStageId);
+        transitions.getDestination(_currentStageId, result) ?? abortStageId);
   }
 
   bool get canAdvance {
@@ -76,16 +77,16 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
 
   void reset() {
     currentStage.onExit();
-    advanceToStage(_initialStageId);
+    advanceToStage(startingStageId);
   }
 
   void finish() {
     currentStage.onExit();
-    advanceToStage(_endStageId);
+    advanceToStage(finalStageId);
   }
 
   void abort() {
     currentStage.onExit();
-    advanceToStage(_abortStageId);
+    advanceToStage(abortStageId);
   }
 }

@@ -104,6 +104,57 @@ class MockTestExperiment extends _i1.Mock implements _i4.TestExperiment {
           as _i2.ConditionalDirectedGraph<String, String>);
 
   @override
+  String get startingStageId =>
+      (super.noSuchMethod(
+            Invocation.getter(#startingStageId),
+            returnValue: _i5.dummyValue<String>(
+              this,
+              Invocation.getter(#startingStageId),
+            ),
+          )
+          as String);
+
+  @override
+  set startingStageId(String? _startingStageId) => super.noSuchMethod(
+    Invocation.setter(#startingStageId, _startingStageId),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  String get finalStageId =>
+      (super.noSuchMethod(
+            Invocation.getter(#finalStageId),
+            returnValue: _i5.dummyValue<String>(
+              this,
+              Invocation.getter(#finalStageId),
+            ),
+          )
+          as String);
+
+  @override
+  set finalStageId(String? _finalStageId) => super.noSuchMethod(
+    Invocation.setter(#finalStageId, _finalStageId),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  String get abortStageId =>
+      (super.noSuchMethod(
+            Invocation.getter(#abortStageId),
+            returnValue: _i5.dummyValue<String>(
+              this,
+              Invocation.getter(#abortStageId),
+            ),
+          )
+          as String);
+
+  @override
+  set abortStageId(String? _abortStageId) => super.noSuchMethod(
+    Invocation.setter(#abortStageId, _abortStageId),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   _i3.ExperimentStage<String> get currentStage =>
       (super.noSuchMethod(
             Invocation.getter(#currentStage),
