@@ -43,6 +43,7 @@ class ExperimentStageConfirm<T_Result> extends ExperimentStage<T_Result> {
   ) =>
       _$ExperimentStageConfirmFromJson(json, fromJsonTResult);
 
+  @override
   Map<String, dynamic> toJson(Object? Function(T_Result value) toJsonTResult) =>
       _$ExperimentStageConfirmToJson(this, toJsonTResult);
 

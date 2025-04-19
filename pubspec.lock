@@ -388,7 +388,7 @@ packages:
     source: hosted
     version: "2.0.0"
   mockito:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: mockito
       sha256: f99d8d072e249f719a5531735d146d8cf04c580d93920b04de75bef6dfb2daf6
@@ -576,14 +576,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  tcp_socket_connection:
-    dependency: "direct main"
-    description:
-      name: tcp_socket_connection
-      sha256: "9b11a30791464a6ed5263d9879c267f672cc4b0c3f716d953be2a1703325c7d7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.1"
   term_glyph:
     dependency: transitive
     description:
@@ -593,7 +585,7 @@ packages:
     source: hosted
     version: "1.2.2"
   test:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: test
       sha256: "301b213cd241ca982e9ba50266bd3f5bd1ea33f1455554c5abb85d1be0e2d87e"
@@ -673,7 +665,7 @@ packages:
     source: hosted
     version: "0.1.6"
   web_socket_channel:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: web_socket_channel
       sha256: "0b8e2457400d8a859b7b2030786835a28a8e80836ef64402abef392ff4f1d0e5"
@@ -688,14 +680,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
-  wifi_scan:
-    dependency: "direct main"
-    description:
-      name: wifi_scan
-      sha256: "78896ea3db8838769053accd47cab02a62ead6480557e235295320603f84c9c7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.1+2"
   yaml:
     dependency: transitive
     description:

@@ -51,6 +51,7 @@ class ExperimentStageWait<T_Result> extends ExperimentStage<T_Result> {
   ) =>
       _$ExperimentStageWaitFromJson(json, fromJsonTResult);
 
+  @override
   Map<String, dynamic> toJson(Object? Function(T_Result value) toJsonTResult) =>
       _$ExperimentStageWaitToJson(this, toJsonTResult);
 
