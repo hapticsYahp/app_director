@@ -1,45 +1,49 @@
 @startuml
-'Header Comments are ignored:
+'Header Comments (only visible in the pUML graph, not part of this experiment definition):'
 center header
 19/04/2025
-end header
+endheader
 
-'Title ignored:
+'Title Comments (ídem Header Comments):'
 title
 Lineal Experiment
 end title
 
-'-----------
-'Experiment:
-'-----------
+'----------------------'
+'Experiment Definition:'
+'----------------------'
 legend top
-'Experiment title:
+'Experiment Title (format: "===<title>"):'
 ===Lineal Experiment
 ----
-'Experiment Description:
+'Experiment Description (multiline):'
 Experiment description. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 Nullam hendrerit dui at sagittis aliquam. Fusce faucibus nec lorem quis scelerisque.
 ....
-'Experiment Details:
+'Experiment Details (multiline; format: "<key>: <value>"):'
 ID: ABC123
 abortStageId: end
 end legend
-'---------------
-'Experiment End.
-'---------------
+'--------------------------'
+'Experiment Definition End.'
+'--------------------------'
 
-'------------------
-'Experiment Stages:
-'------------------
+'------------------'
+'Stages Definition:'
+'------------------'
+'Stage Definition Format: state "===[<type>] <title>" as <ref>'
 state "===[confirm] Confirmation" as Start
+'Stage Description (multiline; format: "<ref>: <description_line>"):'
 Start: Stage description. Lorem ipsum dolor sit amet,
 Start: consectetur adipiscing elit. Nullam hendrerit
 Start: dui at sagittis aliquam.
 Start: ....
+'Stage Details (multiline; format: "<ref>: <key>: <value>"):'
 Start: ID: ABC123_START
 Start: confirmationResult: CONFIRMED
 Start: buttonLabel: Start
 Start: buttonIcon: 58571
+'Stage PoMA Commands (multiline; format: "<ref>: *<event>: <command>"):'
 Start: ..pomaCommands..
 Start: *ENTER: =intensity 0,0
 
@@ -111,30 +115,30 @@ End: message: Thank you.
 End: ..pomaCommands..
 End: *ENTER: =intensity 0,0
 End: *EXIT: =intensity 0,0
-'----------------------
-'Experiment Stages End.
-'----------------------
+'----------------------'
+'Stages Definition End.'
+'----------------------'
 
-'------------
-'Transitions:
-'------------
-'Starting Stage:
+'------------'
+'Transitions:'
+'------------'
+'Starting Stage (only one is allowed):'
 [*] -down-> Start
 
-'Final Stage:
+'Final Stage (only one is allowed):'
 End -down-> [*]
 
-'Transitions:
+'Transitions (format: "<origin_ref> --> <destination_ref> : [<trigger_type>] <trigger_value>"; the arrow direction is ignored):'
 Start -right-> Setup : [always]
 Setup -right-> Run : [always]
 Run --> End : [equals] FEEDBACK_YES
 Run --> Feedback : [equals] TIMEOUT
 Feedback -right-> End : [always]
-'----------------
-'Transitions End.
-'----------------
+'----------------'
+'Transitions End.'
+'----------------'
 
-'Footer Comments are ignored:
+'Footer Comments (ídem Header Comments):'
 footer
 Copyright: 2025
 end footer
