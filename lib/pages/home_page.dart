@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wifi_app/providers/data/data_provider.dart';
 import '../components/home_page_tabs/user_tab.dart';
 import '../components/home_page_tabs/experiments_tab.dart';
 import '../components/home_page_tabs/settings_tab.dart';
@@ -14,8 +15,12 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => ConfigNotifier()),
+        ChangeNotifierProvider<ConfigNotifier>(
+            create: (context) => ConfigNotifier()),
         Provider<PomaClient>(create: (context) => PomaClient(PomaSocketImpl())),
+        ProxyProvider<ConfigNotifier, DataProvider>(
+          update: (_, configNotifier, __) => DataProvider(configNotifier),
+        ),
       ],
       child: DefaultTabController(
         length: 3,

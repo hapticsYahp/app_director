@@ -21,7 +21,7 @@ class ExperimentStageFeedback<T_Result> extends ExperimentStage<T_Result> {
   final String confirmLabel;
 
   @JsonKey(
-    toJson: _resultGeneratorToJson,
+    includeToJson: false,
     includeFromJson: false,
   )
   ResultGenerator<T_Result>? resultGenerator;
@@ -78,22 +78,25 @@ class ExperimentStageFeedback<T_Result> extends ExperimentStage<T_Result> {
   ) {
     final result =
         _$ExperimentStageFeedbackFromJson<T_Result>(json, fromJsonTResult);
-    final resultGeneratorJson = json['resultGenerator'] as Map<String, dynamic>;
-    result.resultGenerator =
-        ResultGeneratorConverter<T_Result>().fromJson(resultGeneratorJson);
+    final resultGeneratorJson =
+        json['resultGenerator'] as Map<String, dynamic>?;
+    if (resultGeneratorJson != null) {
+      result.resultGenerator =
+          ResultGeneratorConverter<T_Result>().fromJson(resultGeneratorJson);
+    }
     return result;
   }
 
   @override
   Map<String, dynamic> toJson(Object? Function(T_Result value) toJsonTResult) {
-    return _$ExperimentStageFeedbackToJson(this, toJsonTResult);
+    final base = _$ExperimentStageFeedbackToJson(this, toJsonTResult);
+    if (resultGenerator != null) {
+      base['resultGenerator'] =
+          ResultGeneratorConverter<T_Result>().toJson(resultGenerator!);
+    }
+    return base;
   }
 
   @override
   String getJsonType() => jsonType;
-
-  static Map<String, dynamic> _resultGeneratorToJson(
-      ResultGenerator generator) {
-    return ResultGeneratorConverter().toJson(generator);
-  }
 }

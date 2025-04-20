@@ -5,7 +5,7 @@ part 'result_generator_to_string.g.dart';
 
 @JsonSerializable()
 class ResultGeneratorToString extends ResultGenerator<String> {
-  static const String jsonType = 'toString';
+  static const String jsonType = 'to_string';
 
   ResultGeneratorToString();
 

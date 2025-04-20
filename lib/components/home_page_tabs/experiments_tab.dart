@@ -15,7 +15,10 @@ class ExperimentsTab extends StatefulWidget {
 
 class _ExperimentsTabState extends State<ExperimentsTab>
     with AutomaticKeepAliveClientMixin {
-  late List<Experiment<String, String>> experiments;
+  late final DataProvider dataProvider;
+
+  bool loadingExperiments = false;
+  List<Experiment<String, String>> experiments = [];
   Experiment<String, String>? selectedExperiment;
 
   bool connectionCommandInProgress = false;
@@ -24,8 +27,31 @@ class _ExperimentsTabState extends State<ExperimentsTab>
   @override
   void initState() {
     super.initState();
-    experiments = DataProvider().getExperiments();
+    dataProvider = Provider.of<DataProvider>(context, listen: false);
     pomaClient = Provider.of<PomaClient>(context, listen: false);
+    _getExperiments();
+  }
+
+  Future<void> _getExperiments() async {
+    if (!loadingExperiments) {
+      setState(() {
+        loadingExperiments = true;
+      });
+      try {
+        final result = await dataProvider.getExperiments();
+        setState(() {
+          experiments = result;
+        });
+      } catch (e, stackTrace) {
+        debugPrint("Error: $e");
+        debugPrintStack(stackTrace: stackTrace);
+        _showAlert("Error", e.toString());
+      } finally {
+        setState(() {
+          loadingExperiments = false;
+        });
+      }
+    }
   }
 
   void _onConnect() async {
@@ -124,17 +150,35 @@ class _ExperimentsTabState extends State<ExperimentsTab>
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        ElevatedButton.icon(
-          onPressed: pomaClient.isConnected() ? _onDisconnect : _onConnect,
-          icon: Icon(
-              pomaClient.isConnected() ? Icons.sensors_off : Icons.sensors),
-          label: connectionCommandInProgress
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(pomaClient.isConnected() ? "Disconnect" : "Connect"),
+        Row(
+          children: [
+            ElevatedButton.icon(
+              onPressed: pomaClient.isConnected() ? _onDisconnect : _onConnect,
+              icon: Icon(
+                  pomaClient.isConnected() ? Icons.sensors_off : Icons.sensors),
+              label: connectionCommandInProgress
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(pomaClient.isConnected() ? "Disconnect" : "Connect"),
+            ),
+            SizedBox(
+              width: 16,
+            ),
+            ElevatedButton.icon(
+              onPressed: _getExperiments,
+              icon: Icon(Icons.refresh),
+              label: loadingExperiments
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text("Experiments"),
+            ),
+          ],
         ),
         ...((selectedExperiment == null)
             // Experiments selection.

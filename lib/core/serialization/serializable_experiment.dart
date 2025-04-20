@@ -28,9 +28,11 @@ class SerializableExperiment extends Experiment<String, String> {
         SerializableConditionalDirectedGraph.fromJson(
             json['transitions'] as Map<String, dynamic>);
     final Map<String, ExperimentStage<String>> stages =
-        (json['stages'] as Map<String, Map<String, dynamic>>).map(
-            (String key, Map<String, dynamic> jsonStage) =>
-                MapEntry(key, ExperimentStageConverter().fromJson(jsonStage)));
+        (json['stages'] as Map<String, dynamic>).map(
+            (String key, dynamic jsonStage) => MapEntry(
+                key,
+                ExperimentStageConverter()
+                    .fromJson(jsonStage as Map<String, dynamic>)));
     return SerializableExperiment(
       id: json['id'] as String,
       title: json['title'] as String,
