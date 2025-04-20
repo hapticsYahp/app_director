@@ -1,16 +1,141 @@
 @startuml
-title "Lineal" Experiment
+'Header Comments are ignored:
+center header
+19/04/2025
+end header
 
-[*] -right-> confirm
+'Title ignored:
+title
+Lineal Experiment
+end title
 
-confirm -right-> delay : CONFIRMED
+'-----------
+'Experiment:
+'-----------
+legend top
+'Experiment title:
+===Lineal Experiment
+----
+'Experiment Description:
+Experiment description. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Nullam hendrerit dui at sagittis aliquam. Fusce faucibus nec lorem quis scelerisque.
+....
+'Experiment Details:
+ID: ABC123
+abortStageId: end
+end legend
+'---------------
+'Experiment End.
+'---------------
 
-delay -right-> run : COMPLETED
+'------------------
+'Experiment Stages:
+'------------------
+state "===[confirm] Confirmation" as Start
+Start: Stage description. Lorem ipsum dolor sit amet,
+Start: consectetur adipiscing elit. Nullam hendrerit
+Start: dui at sagittis aliquam.
+Start: ....
+Start: ID: ABC123_START
+Start: confirmationResult: CONFIRMED
+Start: buttonLabel: Start
+Start: buttonIcon: 58571
+Start: ..pomaCommands..
+Start: *ENTER: =intensity 0,0
 
-run --> feedback : TIMEOUT
-run --> end : FEEDBACK_YES
+state "===[delay] Device Setup" as Setup
+Setup: The device is being configured, please wait.
+Setup: ....
+Setup: ID: ABC123_SETUP
+Setup: completionResult: COMPLETED
+Setup: delayMs: 10000
+Setup: tickProgressMs: 1000
+Setup: delayFeedback: Starting in...
+Setup: ..pomaCommands..
+Setup: *TICK_1000: =intensity 0,0
+Setup: *TICK_2000: =intensity 50,50
+Setup: *TICK_3000: =intensity 0,0
+Setup: *TICK_4000: =intensity 50,50
+Setup: *TICK_5000: =intensity 0,0
+Setup: *TICK_6000: =intensity 50,50
+Setup: *TICK_7000: =intensity 0,0
+Setup: *TICK_8000: =intensity 50,50
+Setup: *TICK_9000: =intensity 0,0
 
-feedback -left-> end : ANY_VALUE
+state "===[wait] Device Running" as Run
+Run: The device is working. Confirm if you feel
+Run: the vibration.
+Run: ....
+Run: ID: ABC123_WAIT
+Run: timeoutResult: TIMEOUT
+Run: feedbackResult: FEEDBACK_YES
+Run: waitingMs: 15000
+Run: tickProgressMs: 500
+Run: waitFeedback: Time:
+Run: buttonLabel: Feedback
+Run: buttonIcon: 58971
+Run: ..pomaCommands..
+Run: *TICK_1000: =intensity 10,10
+Run: *TICK_3000: =intensity 30,30
+Run: *TICK_5500: =intensity 50,50
+Run: *TICK_7000: =intensity 70,70
+Run: *TICK_9500: =intensity 90,90
+Run: *EXIT: =intensity 0,0
 
-end -left-> [*] : EXITED
+state "===[feedback] Feedback" as Feedback
+Feedback: Please indicate if you felt the vibration.
+Feedback: ....
+Feedback: ID: ABC123_FEEDBACK
+Feedback: timeoutResult: TIMEOUT
+Feedback: feedbackResult: FEEDBACK_YES
+Feedback: minScaleValue: 0
+Feedback: maxScaleValue: 10
+Feedback: initialSelectedValue: 5
+Feedback: positiveLabel: Yes
+Feedback: negativeLabel: No
+Feedback: feedbackLabel: Indicate the perceived intensity:
+Feedback: confirmLabel: Confirm
+Feedback: defaultResult: NO_RESULT
+Feedback: positiveIcon: 58971
+Feedback: negativeIcon: 58968
+Feedback: confirmIcon: 57686
+Feedback: resultGenerator.$_class: to_string
+Feedback: ..pomaCommands..
+
+state "===[message] End" as End
+End: The experiment has concluded.
+End: ....
+End: ID: ABC123_END
+End: exitedResult: EXITED
+End: message: Thank you.
+End: ..pomaCommands..
+End: *ENTER: =intensity 0,0
+End: *EXIT: =intensity 0,0
+'----------------------
+'Experiment Stages End.
+'----------------------
+
+'------------
+'Transitions:
+'------------
+'Starting Stage:
+[*] -down-> Start
+
+'Final Stage:
+End -down-> [*]
+
+'Transitions:
+Start -right-> Setup : [always]
+Setup -right-> Run : [always]
+Run --> End : [equals] FEEDBACK_YES
+Run --> Feedback : [equals] TIMEOUT
+Feedback -right-> End : [always]
+'----------------
+'Transitions End.
+'----------------
+
+'Footer Comments are ignored:
+footer
+Copyright: 2025
+end footer
 @enduml
