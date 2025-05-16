@@ -22,7 +22,7 @@ Nullam hendrerit dui at sagittis aliquam. Fusce faucibus nec lorem quis sceleris
 ....
 'Experiment Details (multiline; format: "<key>: <value>"):'
 ID: ABC123
-abortStageId: end
+abortStageId: End
 end legend
 '--------------------------'
 'Experiment Definition End.'
@@ -122,13 +122,16 @@ End: *EXIT: =intensity 0,0
 '------------'
 'Transitions:'
 '------------'
+'Format: <origin_ref> <arrow> <destination_ref> : [<trigger_type>] <trigger_value>)'
+'Arrow format (either): -->, -up->, -down->, -left->, -right->'
+
 'Starting Stage (only one is allowed):'
 [*] -down-> Start
 
 'Final Stage (only one is allowed):'
 End -down-> [*]
 
-'Transitions (format: "<origin_ref> --> <destination_ref> : [<trigger_type>] <trigger_value>"; the arrow direction is ignored):'
+'Transitions:'
 Start -right-> Setup : [always]
 Setup -right-> Run : [always]
 Run --> End : [equals] FEEDBACK_YES

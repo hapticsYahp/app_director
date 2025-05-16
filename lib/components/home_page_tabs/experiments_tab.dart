@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wifi_app/providers/data/data_provider.dart';
 import '../../core/experiment/experiment.dart';
+import '../../core/trial/experiment_trial.dart';
 import '../../providers/config/config_notifier.dart';
 import '../../providers/poma/poma_client.dart';
 import '../../providers/poma/poma_exception.dart';
@@ -134,10 +135,28 @@ class _ExperimentsTabState extends State<ExperimentsTab>
     });
   }
 
-  void _onClose() {
+  Future<void> _onClose() async {
+    ExperimentTrial? trial = selectedExperiment?.end();
+    if (trial != null) {
+      await dataProvider.saveTrialEvents(trial);
+    }
     setState(() {
-      selectedExperiment?.reset();
       selectedExperiment = null;
+    });
+  }
+
+  Future<void> _onSelectExperiment(
+      Experiment<String, String>? experiment) async {
+    if (experiment != null) {
+      experiment.setPomaClient(pomaClient);
+      experiment.start(await dataProvider.createTrial(
+        experiment,
+        await dataProvider.createSubjectTrial(),
+        (await dataProvider.getDevices()).first,
+      ));
+    }
+    setState(() {
+      selectedExperiment = experiment;
     });
   }
 
@@ -197,13 +216,8 @@ class _ExperimentsTabState extends State<ExperimentsTab>
                       child: Text(value.title),
                     );
                   }).toList(),
-                  onChanged: (Experiment<String, String>? value) {
-                    if (value != null) {
-                      value.setPomaClient(pomaClient);
-                    }
-                    setState(() {
-                      selectedExperiment = value;
-                    });
+                  onChanged: (Experiment<String, String>? experiment) async {
+                    await _onSelectExperiment(experiment);
                   },
                   validator: (Experiment? value) {
                     if (value == null) {

@@ -3,6 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:wifi_app/core/experiment/experiment_stage.dart';
 import '../../providers/poma/poma_client.dart';
 import '../graph/conditional_directed_graph.dart';
+import '../trial/experiment_trial.dart';
 
 class Experiment<T_Stage_Id, T_Stage_Result> {
   final String id;
@@ -11,6 +12,9 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   PomaClient? pomaClient;
+
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  ExperimentTrial? trial;
 
   final Map<T_Stage_Id, ExperimentStage<T_Stage_Result>> stages;
 
@@ -47,11 +51,20 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
     _currentStageId = startingStageId;
   }
 
+  void saveTrialEvent(String name,
+      {Map<String, dynamic> extraData = const {}}) {
+    this.trial?.saveTrialEvent(name, extraData: extraData);
+  }
+
   void setPomaClient(PomaClient pomaClient) {
     this.pomaClient = pomaClient;
   }
 
   void sendPomaCommand(String pomaCommand) {
+    this.saveTrialEvent("POMA_COMMAND", extraData: {
+      'command': pomaCommand,
+      'stageId': _currentStageId,
+    });
     if (pomaClient?.isConnected() == true) {
       pomaClient!.send(pomaCommand);
     } else {
@@ -63,10 +76,20 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
     if (!stages.containsKey(stageId)) {
       throw Exception('Invalid Stage ID "$stageId".');
     }
-    _currentStageId = stageId;
+    if (_currentStageId != stageId) {
+      this.saveTrialEvent("EXPERIMENT_ADVANCE", extraData: {
+        'toStageId': stageId.toString(),
+        'fromStageId': _currentStageId,
+      });
+      _currentStageId = stageId;
+    }
   }
 
   Future<void> advanceByResult(T_Stage_Result result) async {
+    this.saveTrialEvent("STAGE_RESULT", extraData: {
+      'result': result.toString(),
+      'stageId': _currentStageId,
+    });
     advanceToStage(
         transitions.getDestination(_currentStageId, result) ?? abortStageId);
   }
@@ -75,17 +98,32 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
     return transitions.getDestinationsFromOrigin(_currentStageId).isNotEmpty;
   }
 
+  Future<void> start(ExperimentTrial trial) async {
+    this.trial = trial;
+    this.saveTrialEvent("EXPERIMENT_START");
+    advanceToStage(startingStageId);
+  }
+
+  ExperimentTrial? end() {
+    this.saveTrialEvent("EXPERIMENT_END");
+    currentStage.onExit();
+    return trial;
+  }
+
   void reset() {
+    this.saveTrialEvent("EXPERIMENT_RESET");
     currentStage.onExit();
     advanceToStage(startingStageId);
   }
 
   void finish() {
+    this.saveTrialEvent("EXPERIMENT_FINISH");
     currentStage.onExit();
     advanceToStage(finalStageId);
   }
 
   void abort() {
+    this.saveTrialEvent("EXPERIMENT_ABORT");
     currentStage.onExit();
     advanceToStage(abortStageId);
   }

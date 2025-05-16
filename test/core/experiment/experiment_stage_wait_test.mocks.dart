@@ -3,12 +3,13 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i7;
+import 'dart:async' as _i8;
 
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i5;
 import 'package:wifi_app/core/experiment/experiment_stage.dart' as _i3;
 import 'package:wifi_app/core/graph/conditional_directed_graph.dart' as _i2;
+import 'package:wifi_app/core/trial/experiment_trial.dart' as _i7;
 import 'package:wifi_app/providers/poma/poma_client.dart' as _i6;
 
 import 'test_experiment.dart' as _i4;
@@ -81,6 +82,12 @@ class MockTestExperiment extends _i1.Mock implements _i4.TestExperiment {
   @override
   set pomaClient(_i6.PomaClient? _pomaClient) => super.noSuchMethod(
     Invocation.setter(#pomaClient, _pomaClient),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  set trial(_i7.ExperimentTrial? _trial) => super.noSuchMethod(
+    Invocation.setter(#trial, _trial),
     returnValueForMissingStub: null,
   );
 
@@ -183,19 +190,37 @@ class MockTestExperiment extends _i1.Mock implements _i4.TestExperiment {
   );
 
   @override
+  void saveTrialEvent(
+    String? name, {
+    Map<String, dynamic>? extraData = const {},
+  }) => super.noSuchMethod(
+    Invocation.method(#saveTrialEvent, [name], {#extraData: extraData}),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   void advanceToStage(String? stageId) => super.noSuchMethod(
     Invocation.method(#advanceToStage, [stageId]),
     returnValueForMissingStub: null,
   );
 
   @override
-  _i7.Future<void> advanceByResult(String? result) =>
+  _i8.Future<void> advanceByResult(String? result) =>
       (super.noSuchMethod(
             Invocation.method(#advanceByResult, [result]),
-            returnValue: _i7.Future<void>.value(),
-            returnValueForMissingStub: _i7.Future<void>.value(),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
           )
-          as _i7.Future<void>);
+          as _i8.Future<void>);
+
+  @override
+  _i8.Future<void> start(_i7.ExperimentTrial? trial) =>
+      (super.noSuchMethod(
+            Invocation.method(#start, [trial]),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
+          )
+          as _i8.Future<void>);
 
   @override
   void reset() => super.noSuchMethod(
@@ -225,12 +250,12 @@ class MockPomaClient extends _i1.Mock implements _i6.PomaClient {
   }
 
   @override
-  _i7.Stream<String> get onDebug =>
+  _i8.Stream<String> get onDebug =>
       (super.noSuchMethod(
             Invocation.getter(#onDebug),
-            returnValue: _i7.Stream<String>.empty(),
+            returnValue: _i8.Stream<String>.empty(),
           )
-          as _i7.Stream<String>);
+          as _i8.Stream<String>);
 
   @override
   bool isConnected() =>
@@ -257,7 +282,7 @@ class MockPomaClient extends _i1.Mock implements _i6.PomaClient {
           as bool);
 
   @override
-  _i7.Future<void> connect(
+  _i8.Future<void> connect(
     String? serverHost,
     int? serverPort, {
     Duration? timeout = const Duration(seconds: 3),
@@ -269,58 +294,58 @@ class MockPomaClient extends _i1.Mock implements _i6.PomaClient {
               [serverHost, serverPort],
               {#timeout: timeout, #cancelOnError: cancelOnError},
             ),
-            returnValue: _i7.Future<void>.value(),
-            returnValueForMissingStub: _i7.Future<void>.value(),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
           )
-          as _i7.Future<void>);
+          as _i8.Future<void>);
 
   @override
-  _i7.Future<void> disconnect() =>
+  _i8.Future<void> disconnect() =>
       (super.noSuchMethod(
             Invocation.method(#disconnect, []),
-            returnValue: _i7.Future<void>.value(),
-            returnValueForMissingStub: _i7.Future<void>.value(),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
           )
-          as _i7.Future<void>);
+          as _i8.Future<void>);
 
   @override
-  _i7.Future<void> send(String? message) =>
+  _i8.Future<void> send(String? message) =>
       (super.noSuchMethod(
             Invocation.method(#send, [message]),
-            returnValue: _i7.Future<void>.value(),
-            returnValueForMissingStub: _i7.Future<void>.value(),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
           )
-          as _i7.Future<void>);
+          as _i8.Future<void>);
 
   @override
-  _i7.Future<String?> sendAndWait(String? message) =>
+  _i8.Future<String?> sendAndWait(String? message) =>
       (super.noSuchMethod(
             Invocation.method(#sendAndWait, [message]),
-            returnValue: _i7.Future<String?>.value(),
+            returnValue: _i8.Future<String?>.value(),
           )
-          as _i7.Future<String?>);
+          as _i8.Future<String?>);
 
   @override
-  _i7.Future<List<String>> getTopics() =>
+  _i8.Future<List<String>> getTopics() =>
       (super.noSuchMethod(
             Invocation.method(#getTopics, []),
-            returnValue: _i7.Future<List<String>>.value(<String>[]),
+            returnValue: _i8.Future<List<String>>.value(<String>[]),
           )
-          as _i7.Future<List<String>>);
+          as _i8.Future<List<String>>);
 
   @override
-  _i7.Future<String?> getTopicValue(String? topic) =>
+  _i8.Future<String?> getTopicValue(String? topic) =>
       (super.noSuchMethod(
             Invocation.method(#getTopicValue, [topic]),
-            returnValue: _i7.Future<String?>.value(),
+            returnValue: _i8.Future<String?>.value(),
           )
-          as _i7.Future<String?>);
+          as _i8.Future<String?>);
 
   @override
-  _i7.Future<bool> setTopicValue(String? topic, String? value) =>
+  _i8.Future<bool> setTopicValue(String? topic, String? value) =>
       (super.noSuchMethod(
             Invocation.method(#setTopicValue, [topic, value]),
-            returnValue: _i7.Future<bool>.value(false),
+            returnValue: _i8.Future<bool>.value(false),
           )
-          as _i7.Future<bool>);
+          as _i8.Future<bool>);
 }
