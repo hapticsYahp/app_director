@@ -4,12 +4,11 @@ part 'device_trial.g.dart';
 
 @JsonSerializable()
 class DeviceTrial {
-  @JsonKey(name: "_id")
   final String id;
 
-  final String nombre;
+  String name;
 
-  DeviceTrial(this.id, this.nombre);
+  DeviceTrial(this.id, this.name);
 
   factory DeviceTrial.fromJson(Map<String, dynamic> json) =>
       _$DeviceTrialFromJson(json);

@@ -13,6 +13,12 @@ class DataProvider {
 
   DataProvider(this.config);
 
+  /*
+  -----------------------------------
+  Experiments.
+  -----------------------------------
+   */
+
   Future<List<SerializableExperiment>> getExperiments() async {
     final Db db = Db(config.dbUri);
     await db.open();
@@ -26,6 +32,12 @@ class DataProvider {
     return experiments;
   }
 
+  /*
+  -----------------------------------
+  Devices.
+  -----------------------------------
+   */
+
   Future<List<DeviceTrial>> getDevices() async {
     final Db db = Db(config.dbUri);
     await db.open();
@@ -37,6 +49,54 @@ class DataProvider {
     await db.close();
     return devices;
   }
+
+  Future<List<DeviceTrial>> searchDevicesByName(String name) async {
+    final Db db = Db(config.dbUri);
+    await db.open();
+    final DbCollection devicesCollection = db.collection('devices');
+    final query = {
+      'name': {'\$regex': name, '\$options': 'i'}
+    };
+    final List<Map<String, dynamic>> devicesJson =
+        await devicesCollection.find(query).toList();
+    final List<DeviceTrial> devices =
+        devicesJson.map((json) => DeviceTrial.fromJson(json)).toList();
+    await db.close();
+    return devices;
+  }
+
+  Future<DeviceTrial> createDeviceTrial(String name) async {
+    final Db db = Db(config.dbUri);
+    await db.open();
+    final DbCollection devicesCollection = db.collection('devices');
+    Map<String, dynamic> deviceJson = {
+      'id': Uuid().v4(),
+      'name': name,
+    };
+    final deviceJsonResult = await devicesCollection.insertOne(deviceJson);
+    if (deviceJsonResult.isFailure) {
+      throw deviceJsonResult.errmsg!;
+    }
+    await db.close();
+    return DeviceTrial.fromJson(deviceJson);
+  }
+
+  Future<void> saveDevice(DeviceTrial device) async {
+    final Db db = Db(config.dbUri);
+    await db.open();
+    final DbCollection devicesCollection = db.collection('devices');
+    await devicesCollection.updateOne(
+      where.eq('id', device.id),
+      modify.set('name', device.name),
+    );
+    await db.close();
+  }
+
+  /*
+  -----------------------------------
+  Subjects.
+  -----------------------------------
+   */
 
   Future<List<SubjectTrial>> getSubjects() async {
     final Db db = Db(config.dbUri);
@@ -65,20 +125,11 @@ class DataProvider {
     return SubjectTrial.fromJson(subjectJson);
   }
 
-  Future<DeviceTrial> createDeviceTrial() async {
-    final Db db = Db(config.dbUri);
-    await db.open();
-    final DbCollection devicesCollection = db.collection('devices');
-    Map<String, dynamic> deviceJson = {
-      '_id': Uuid().v4(),
-    };
-    final deviceJsonResult = await devicesCollection.insertOne(deviceJson);
-    if (deviceJsonResult.isFailure) {
-      throw deviceJsonResult.errmsg!;
-    }
-    await db.close();
-    return DeviceTrial.fromJson(deviceJson);
-  }
+  /*
+  -----------------------------------
+  Trials.
+  -----------------------------------
+   */
 
   Future<ExperimentTrial> createTrial(
     Experiment experiment,
@@ -102,6 +153,12 @@ class DataProvider {
     await db.close();
     return ExperimentTrial(id.oid, experiment, subject, device);
   }
+
+  /*
+  -----------------------------------
+  Trial Events.
+  -----------------------------------
+   */
 
   Future<void> saveTrialEvents(ExperimentTrial trial) async {
     final List<Map<String, dynamic>> events = trial.getBufferedEvents();

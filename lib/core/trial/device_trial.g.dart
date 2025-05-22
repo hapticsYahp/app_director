@@ -7,12 +7,12 @@ part of 'device_trial.dart';
 // **************************************************************************
 
 DeviceTrial _$DeviceTrialFromJson(Map<String, dynamic> json) => DeviceTrial(
-      json['_id'] as String,
-      json['nombre'] as String,
+      json['id'] as String,
+      json['name'] as String,
     );
 
 Map<String, dynamic> _$DeviceTrialToJson(DeviceTrial instance) =>
     <String, dynamic>{
-      '_id': instance.id,
-      'nombre': instance.nombre,
+      'id': instance.id,
+      'name': instance.name,
     };

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wifi_app/providers/config/device_trial_notifier.dart';
 import 'package:wifi_app/providers/data/data_provider.dart';
-import '../components/home_page_tabs/user_tab.dart';
+import '../components/home_page_tabs/user_device_tab.dart';
 import '../components/home_page_tabs/experiments_tab.dart';
 import '../components/home_page_tabs/settings_tab.dart';
 import '../providers/config/config_notifier.dart';
@@ -17,6 +18,8 @@ class HomePage extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<ConfigNotifier>(
             create: (context) => ConfigNotifier()),
+        ChangeNotifierProvider<DeviceTrialNotifier>(
+            create: (_) => DeviceTrialNotifier()),
         Provider<PomaClient>(create: (context) => PomaClient(PomaSocketImpl())),
         ProxyProvider<ConfigNotifier, DataProvider>(
           update: (_, configNotifier, __) => DataProvider(configNotifier),
@@ -34,7 +37,7 @@ class HomePage extends StatelessWidget {
                 ),
                 Tab(
                   icon: Icon(Icons.assignment_ind),
-                  text: "User Data",
+                  text: "Subject/Device",
                 ),
                 Tab(
                   icon: Icon(Icons.tune),
@@ -47,7 +50,7 @@ class HomePage extends StatelessWidget {
           body: const TabBarView(
             children: [
               ExperimentsTab(),
-              UserTab(),
+              UserDeviceTab(),
               SettingsTab(),
             ],
           ),
