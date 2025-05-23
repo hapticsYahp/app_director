@@ -21,6 +21,12 @@ class _DeviceFormState extends State<DeviceForm> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
 
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
   bool get _isFormValid {
     return _formKey.currentState?.validate() ?? false;
   }
@@ -47,34 +53,31 @@ class _DeviceFormState extends State<DeviceForm> {
   Future<void> _getDevice() async {
     final dataProvider = Provider.of<DataProvider>(context, listen: false);
     final name = await _promptDeviceName(context);
-    if (name == null || name.isEmpty) return;
+    if (name == null || name.trim().isEmpty) return;
     final results = await dataProvider.searchDevicesByName(name);
     if (!mounted) return;
     if (results.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No devices found with that name.')),
+        const SnackBar(content: Text('No devices found.')),
       );
       return;
     }
     final deviceNotifier =
         Provider.of<DeviceTrialNotifier>(context, listen: false);
-    DeviceTrial? selected;
-    if (results.length == 1) {
-      selected = results.first;
-    } else {
-      selected = await _selectDeviceFromList(context, results);
-    }
+    final DeviceTrial? selected = (results.length == 1)
+        ? results.first
+        : await _selectDeviceFromList(context, results);
     if (selected != null) {
-      deviceNotifier.selectDevice(selected);
       setState(() {
         _device = selected;
-        _nameController.text = selected!.name;
+        _nameController.text = selected.name;
       });
+      deviceNotifier.selectDevice(selected);
     }
   }
 
   Future<void> _saveDevice() async {
-    if (!_isFormValid) return;
+    if (!_canSave) return;
 
     setState(() => _isSaving = true);
     final dataProvider = Provider.of<DataProvider>(context, listen: false);
@@ -165,16 +168,7 @@ class _DeviceFormState extends State<DeviceForm> {
     return showDialog<String>(
       context: context,
       builder: (context) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          controller.selection = TextSelection(
-            baseOffset: 0,
-            extentOffset: controller.text.length,
-          );
-        });
-        void submit() {
-          Navigator.of(context).pop(controller.text);
-        }
-
+        void submit() => Navigator.of(context).pop(controller.text);
         return AlertDialog(
           title: const Text('Find Device by name'),
           content: TextField(

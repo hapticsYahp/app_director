@@ -8,7 +8,7 @@ class DeviceTrial {
 
   String name;
 
-  DeviceTrial(this.id, this.name);
+  DeviceTrial({required this.id, required this.name});
 
   factory DeviceTrial.fromJson(Map<String, dynamic> json) =>
       _$DeviceTrialFromJson(json);
