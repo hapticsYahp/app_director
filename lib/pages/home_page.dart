@@ -6,6 +6,7 @@ import '../components/home_page_tabs/user_device_tab.dart';
 import '../components/home_page_tabs/experiments_tab.dart';
 import '../components/home_page_tabs/settings_tab.dart';
 import '../providers/config/config_notifier.dart';
+import '../providers/config/subject_trial_notifier.dart';
 import '../providers/poma/poma_client.dart';
 import '../providers/poma/poma_socket_impl.dart';
 
@@ -20,6 +21,8 @@ class HomePage extends StatelessWidget {
             create: (context) => ConfigNotifier()),
         ChangeNotifierProvider<DeviceTrialNotifier>(
             create: (_) => DeviceTrialNotifier()),
+        ChangeNotifierProvider<SubjectTrialNotifier>(
+            create: (_) => SubjectTrialNotifier()),
         Provider<PomaClient>(create: (context) => PomaClient(PomaSocketImpl())),
         ProxyProvider<ConfigNotifier, DataProvider>(
           update: (_, configNotifier, __) => DataProvider(configNotifier),

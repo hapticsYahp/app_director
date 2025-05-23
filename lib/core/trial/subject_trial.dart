@@ -4,10 +4,26 @@ part 'subject_trial.g.dart';
 
 @JsonSerializable()
 class SubjectTrial {
-  @JsonKey(name: "_id")
   final String id;
 
-  SubjectTrial(this.id);
+  String name;
+  int? age;
+  String? gender;
+  String? dominantHand;
+  int? heightCm;
+  double? weightKg;
+  double? wristCircumferenceCm;
+
+  SubjectTrial({
+    required this.id,
+    required this.name,
+    this.age,
+    this.gender,
+    this.dominantHand,
+    this.heightCm,
+    this.weightKg,
+    this.wristCircumferenceCm,
+  });
 
   factory SubjectTrial.fromJson(Map<String, dynamic> json) =>
       _$SubjectTrialFromJson(json);

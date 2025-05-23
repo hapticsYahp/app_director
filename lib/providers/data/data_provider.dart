@@ -110,12 +110,32 @@ class DataProvider {
     return subjects;
   }
 
-  Future<SubjectTrial> createSubjectTrial() async {
+  Future<SubjectTrial> createSubjectTrial({
+    String? name,
+    int? age,
+    String? gender,
+    String? dominantHand,
+    int? heightCm,
+    double? weightKg,
+    double? wristCircumferenceCm,
+  }) async {
     final Db db = Db(config.dbUri);
     await db.open();
     final DbCollection subjectsCollection = db.collection('subjects');
+
+    if (name != null) {
+      name = 'Subject #';
+    }
+
     Map<String, dynamic> subjectJson = {
-      '_id': Uuid().v4(),
+      'id': Uuid().v4(),
+      'name': name,
+      'age': age,
+      'gender': gender,
+      'dominantHand': dominantHand,
+      'heightCm': heightCm,
+      'weightKg': weightKg,
+      'wristCircumferenceCm': wristCircumferenceCm,
     };
     final subjectJsonResult = await subjectsCollection.insertOne(subjectJson);
     if (subjectJsonResult.isFailure) {
@@ -123,6 +143,39 @@ class DataProvider {
     }
     await db.close();
     return SubjectTrial.fromJson(subjectJson);
+  }
+
+  Future<List<SubjectTrial>> searchSubjectsByName(String name) async {
+    final Db db = Db(config.dbUri);
+    await db.open();
+    final DbCollection subjectsCollection = db.collection('subjects');
+    final query = {
+      'name': {'\$regex': name, '\$options': 'i'}
+    };
+    final List<Map<String, dynamic>> subjectsJson =
+        await subjectsCollection.find(query).toList();
+    final List<SubjectTrial> subjects =
+        subjectsJson.map((json) => SubjectTrial.fromJson(json)).toList();
+    await db.close();
+    return subjects;
+  }
+
+  Future<void> saveSubject(SubjectTrial subject) async {
+    final Db db = Db(config.dbUri);
+    await db.open();
+    final DbCollection subjectsCollection = db.collection('subjects');
+    await subjectsCollection.updateOne(
+      where.eq('id', subject.id),
+      modify
+          .set('name', subject.name)
+          .set('age', subject.age)
+          .set('gender', subject.gender)
+          .set('dominantHand', subject.dominantHand)
+          .set('heightCm', subject.heightCm)
+          .set('weightKg', subject.weightKg)
+          .set('wristCircumferenceCm', subject.wristCircumferenceCm),
+    );
+    await db.close();
   }
 
   /*
