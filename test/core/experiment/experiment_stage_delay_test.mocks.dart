@@ -178,6 +178,15 @@ class MockTestExperiment extends _i1.Mock implements _i4.TestExperiment {
           as bool);
 
   @override
+  void saveTrialEvent(
+    String? name, {
+    Map<String, dynamic>? extraData = const {},
+  }) => super.noSuchMethod(
+    Invocation.method(#saveTrialEvent, [name], {#extraData: extraData}),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   void setPomaClient(_i6.PomaClient? pomaClient) => super.noSuchMethod(
     Invocation.method(#setPomaClient, [pomaClient]),
     returnValueForMissingStub: null,
@@ -186,15 +195,6 @@ class MockTestExperiment extends _i1.Mock implements _i4.TestExperiment {
   @override
   void sendPomaCommand(String? pomaCommand) => super.noSuchMethod(
     Invocation.method(#sendPomaCommand, [pomaCommand]),
-    returnValueForMissingStub: null,
-  );
-
-  @override
-  void saveTrialEvent(
-    String? name, {
-    Map<String, dynamic>? extraData = const {},
-  }) => super.noSuchMethod(
-    Invocation.method(#saveTrialEvent, [name], {#extraData: extraData}),
     returnValueForMissingStub: null,
   );
 
