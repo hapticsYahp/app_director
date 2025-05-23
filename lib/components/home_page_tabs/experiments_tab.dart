@@ -4,6 +4,8 @@ import 'package:wifi_app/providers/data/data_provider.dart';
 import '../../core/experiment/experiment.dart';
 import '../../core/trial/experiment_trial.dart';
 import '../../providers/config/config_notifier.dart';
+import '../../providers/config/device_trial_notifier.dart';
+import '../../providers/config/subject_trial_notifier.dart';
 import '../../providers/poma/poma_client.dart';
 import '../../providers/poma/poma_exception.dart';
 
@@ -148,12 +150,22 @@ class _ExperimentsTabState extends State<ExperimentsTab>
   Future<void> _onSelectExperiment(
       Experiment<String, String>? experiment) async {
     if (experiment != null) {
-      experiment.setPomaClient(pomaClient);
-      experiment.start(await dataProvider.createTrial(
-        experiment,
-        await dataProvider.createSubjectTrial(),
-        (await dataProvider.getDevices()).first,
-      ));
+      final selectedSubject =
+          Provider.of<SubjectTrialNotifier>(context, listen: false)
+              .selectedSubject;
+      final selectedDevice =
+          Provider.of<DeviceTrialNotifier>(context, listen: false)
+              .selectedDevice;
+      if ((selectedSubject == null) || (selectedDevice == null)) {
+        experiment = null;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Select Device/Subject first.')),
+        );
+      } else {
+        experiment.setPomaClient(pomaClient);
+        experiment.start(await dataProvider.createTrial(
+            experiment, selectedSubject, selectedDevice));
+      }
     }
     setState(() {
       selectedExperiment = experiment;
@@ -166,42 +178,57 @@ class _ExperimentsTabState extends State<ExperimentsTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final selectedSubject =
+        context.watch<SubjectTrialNotifier>().selectedSubject;
+    final selectedDevice = context.watch<DeviceTrialNotifier>().selectedDevice;
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(
-          children: [
-            ElevatedButton.icon(
-              onPressed: pomaClient.isConnected() ? _onDisconnect : _onConnect,
-              icon: Icon(
-                  pomaClient.isConnected() ? Icons.sensors_off : Icons.sensors),
-              label: connectionCommandInProgress
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(pomaClient.isConnected() ? "Disconnect" : "Connect"),
-            ),
-            SizedBox(
-              width: 16,
-            ),
-            ElevatedButton.icon(
-              onPressed: _getExperiments,
-              icon: Icon(Icons.refresh),
-              label: loadingExperiments
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text("Experiments"),
-            ),
-          ],
+        Row(children: [
+          Text("Subject: ", style: TextStyle(fontWeight: FontWeight.bold)),
+          Expanded(
+              child:
+                  Text(selectedSubject?.name ?? '<None. Please select one.>'))
+        ]),
+        Divider(color: Colors.grey, thickness: 1, indent: 0, endIndent: 0),
+        Row(children: [
+          Text("Device: ", style: TextStyle(fontWeight: FontWeight.bold)),
+          Expanded(
+              child: Text(selectedDevice?.name ?? '<None. Please select one.>'))
+        ]),
+        SizedBox(height: 4),
+        Center(
+          // FIXME: disconnect PoMA on device change. Disable connection if selectedDevice is null.
+          child: ElevatedButton.icon(
+            onPressed: pomaClient.isConnected() ? _onDisconnect : _onConnect,
+            icon: Icon(
+                pomaClient.isConnected() ? Icons.sensors_off : Icons.sensors),
+            label: connectionCommandInProgress
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(pomaClient.isConnected() ? "Disconnect" : "Connect"),
+          ),
+        ),
+        Divider(color: Colors.grey, thickness: 1, indent: 0, endIndent: 0),
+        Center(
+          child: ElevatedButton.icon(
+            onPressed: _getExperiments,
+            icon: Icon(Icons.refresh),
+            label: loadingExperiments
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text("Reload Experiments"),
+          ),
         ),
         ...((selectedExperiment == null)
-            // Experiments selection.
             ? [
+                // Experiments selection.
                 DropdownButtonFormField<Experiment<String, String>>(
                   decoration: InputDecoration(
                     labelText: "Experiment",

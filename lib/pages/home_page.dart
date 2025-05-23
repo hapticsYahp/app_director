@@ -35,12 +35,12 @@ class HomePage extends StatelessWidget {
             bottom: const TabBar(
               tabs: [
                 Tab(
-                  icon: Icon(Icons.sensors),
-                  text: 'Experiments',
-                ),
-                Tab(
                   icon: Icon(Icons.assignment_ind),
                   text: "Subject/Device",
+                ),
+                Tab(
+                  icon: Icon(Icons.sensors),
+                  text: 'Experiments',
                 ),
                 Tab(
                   icon: Icon(Icons.tune),
@@ -52,8 +52,8 @@ class HomePage extends StatelessWidget {
           ),
           body: const TabBarView(
             children: [
-              ExperimentsTab(),
               UserDeviceTab(),
+              ExperimentsTab(),
               SettingsTab(),
             ],
           ),

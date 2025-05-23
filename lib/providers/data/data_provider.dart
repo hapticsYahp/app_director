@@ -122,11 +122,10 @@ class DataProvider {
     final Db db = Db(config.dbUri);
     await db.open();
     final DbCollection subjectsCollection = db.collection('subjects');
-
     if (name != null) {
-      name = 'Subject #';
+      final count = await subjectsCollection.count();
+      name = 'Subject #${count + 1}';
     }
-
     Map<String, dynamic> subjectJson = {
       'id': Uuid().v4(),
       'name': name,

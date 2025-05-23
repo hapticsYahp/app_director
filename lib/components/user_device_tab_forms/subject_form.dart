@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/data/data_provider.dart';
 import '../../core/trial/subject_trial.dart';
-import '../../providers/config/device_trial_notifier.dart';
 import '../../providers/config/subject_trial_notifier.dart';
 
 class SubjectForm extends StatefulWidget {
@@ -289,8 +288,9 @@ class _SubjectFormState extends State<SubjectForm> {
                     const SizedBox(width: 12),
                     TextButton(
                       onPressed: () {
-                        Provider.of<DeviceTrialNotifier>(context, listen: false)
-                            .clearDevice();
+                        Provider.of<SubjectTrialNotifier>(context,
+                                listen: false)
+                            .clearSubject();
                         setState(() {
                           _subject = null;
                           _nameController.clear();
