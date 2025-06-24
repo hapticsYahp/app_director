@@ -15,7 +15,8 @@ ExperimentStageDelay<T_Result> _$ExperimentStageDelayFromJson<T_Result>(
       title: json['title'] as String? ?? "Delay",
       description: json['description'] as String? ?? "Delaying...",
       completionResult: fromJsonT_Result(json['completionResult']),
-      delayMs: (json['delayMs'] as num?)?.toInt() ?? 10_000,
+      minDelayMs: (json['minDelayMs'] as num?)?.toInt() ?? 5_000,
+      maxDelayMs: (json['maxDelayMs'] as num?)?.toInt() ?? 10_000,
       tickProgressMs: (json['tickProgressMs'] as num?)?.toInt() ?? 100,
       delayFeedback: json['delayFeedback'] as String? ?? "Starting in...",
       pomaCommands: (json['pomaCommands'] as Map<String, dynamic>?)?.map(
@@ -34,7 +35,8 @@ Map<String, dynamic> _$ExperimentStageDelayToJson<T_Result>(
       'description': instance.description,
       'pomaCommands': instance.pomaCommands,
       'completionResult': toJsonT_Result(instance.completionResult),
-      'delayMs': instance.delayMs,
+      'minDelayMs': instance.minDelayMs,
+      'maxDelayMs': instance.maxDelayMs,
       'tickProgressMs': instance.tickProgressMs,
       'delayFeedback': instance.delayFeedback,
     };

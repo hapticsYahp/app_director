@@ -24,6 +24,8 @@ void main() {
       'TICK_5000': tickCommand5,
       'EXIT': exitCommand,
     };
+    final int minDelayMs = 5000;
+    final int maxDelayMs = 10000;
 
     late MockTestExperiment mockExperiment;
     late MockPomaClient mockPomaClient;
@@ -49,7 +51,8 @@ void main() {
       expect(stage.completionResult, equals(completionResult));
       expect(stage.title, isNotNull);
       expect(stage.description, isNotNull);
-      expect(stage.delayMs, isNotNull);
+      expect(stage.minDelayMs, isNotNull);
+      expect(stage.maxDelayMs, isNotNull);
       expect(stage.tickProgressMs, isNotNull);
       expect(stage.delayFeedback, isNotNull);
       expect(stage.pomaCommands, isNotNull);
@@ -58,7 +61,6 @@ void main() {
     test('should allow custom values', () {
       final String title = 'Delay Title';
       final String description = 'Delay Description';
-      final int delayMs = 5000;
       final int tickProgressMs = 200;
       final String delayFeedback = "Delay feedback";
       final stage = ExperimentStageDelay<String>(
@@ -66,14 +68,16 @@ void main() {
         title: title,
         description: description,
         completionResult: completionResult,
-        delayMs: delayMs,
+        minDelayMs: minDelayMs,
+        maxDelayMs: maxDelayMs,
         tickProgressMs: tickProgressMs,
         delayFeedback: delayFeedback,
         pomaCommands: pomaCommands,
       );
       expect(stage.title, equals(title));
       expect(stage.description, equals(description));
-      expect(stage.delayMs, equals(delayMs));
+      expect(stage.minDelayMs, equals(minDelayMs));
+      expect(stage.maxDelayMs, equals(maxDelayMs));
       expect(stage.tickProgressMs, equals(tickProgressMs));
       expect(stage.delayFeedback, equals(delayFeedback));
       expect(stage.pomaCommands, equals(pomaCommands));
@@ -84,6 +88,14 @@ void main() {
       when(mockPomaClient.isConnected()).thenReturn(true);
       stage.onEnter();
       verify(mockExperiment.sendPomaCommand(enterCommand)).called(1);
+    });
+
+    test('should randomize delay when stage is entered', () {
+      stage.setExperiment(mockExperiment as Experiment<dynamic, String>);
+      when(mockPomaClient.isConnected()).thenReturn(true);
+      stage.onEnter();
+      expect(stage.delayMs, greaterThanOrEqualTo(minDelayMs));
+      expect(stage.delayMs, lessThanOrEqualTo(maxDelayMs));
     });
 
     test('should send EXIT command when stage is exited', () {

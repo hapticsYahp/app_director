@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:wifi_app/core/experiment/experiment_stage.dart';
@@ -10,20 +11,40 @@ class ExperimentStageDelay<T_Result> extends ExperimentStage<T_Result> {
   static const String jsonType = 'delay';
 
   final T_Result completionResult;
-  final int delayMs;
+  final int minDelayMs;
+  final int maxDelayMs;
   final int tickProgressMs;
   final String delayFeedback;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  late int delayMs;
 
   ExperimentStageDelay({
     required super.id,
     super.title = "Delay",
     super.description = "Delaying...",
     required this.completionResult,
-    this.delayMs = 10_000,
+    this.minDelayMs = 5_000,
+    this.maxDelayMs = 10_000,
     this.tickProgressMs = 100,
     this.delayFeedback = "Starting in...",
     super.pomaCommands = const {},
   });
+
+  void _randomizeDelay() {
+    final random = Random();
+    this.delayMs =
+        this.minDelayMs + random.nextInt(this.maxDelayMs - this.minDelayMs);
+    experiment?.saveTrialEvent("TRIAL_ENV", extraData: {
+      'delayMs': this.delayMs,
+    });
+  }
+
+  @override
+  void onEnter() {
+    super.onEnter();
+    _randomizeDelay();
+  }
 
   @override
   Widget buildWidget(
