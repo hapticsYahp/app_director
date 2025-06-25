@@ -139,7 +139,7 @@ class _SettingsTabState extends State<SettingsTab>
     });
     String result;
     try {
-      mongo_dart.Db db = mongo_dart.Db(configNotifier.dbUri);
+      mongo_dart.Db db = await mongo_dart.Db.create(configNotifier.dbUri);
       await db.open().timeout(
         const Duration(seconds: 5),
         onTimeout: () {

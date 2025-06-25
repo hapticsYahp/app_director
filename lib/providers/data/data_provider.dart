@@ -20,7 +20,7 @@ class DataProvider {
    */
 
   Future<List<SerializableExperiment>> getExperiments() async {
-    final Db db = Db(config.dbUri);
+    final Db db = await Db.create(config.dbUri);
     await db.open();
     final DbCollection experimentsCollection = db.collection('experiments');
     List<Map<String, dynamic>> experimentsJson =
@@ -39,7 +39,7 @@ class DataProvider {
    */
 
   Future<List<DeviceTrial>> getDevices() async {
-    final Db db = Db(config.dbUri);
+    final Db db = await Db.create(config.dbUri);
     await db.open();
     final DbCollection devicesCollection = db.collection('devices');
     List<Map<String, dynamic>> devicesJson =
@@ -51,7 +51,7 @@ class DataProvider {
   }
 
   Future<List<DeviceTrial>> searchDevicesByName(String name) async {
-    final Db db = Db(config.dbUri);
+    final Db db = await Db.create(config.dbUri);
     await db.open();
     final DbCollection devicesCollection = db.collection('devices');
     final query = {
@@ -66,7 +66,7 @@ class DataProvider {
   }
 
   Future<DeviceTrial> createDeviceTrial(String name) async {
-    final Db db = Db(config.dbUri);
+    final Db db = await Db.create(config.dbUri);
     await db.open();
     final DbCollection devicesCollection = db.collection('devices');
     Map<String, dynamic> deviceJson = {
@@ -82,7 +82,7 @@ class DataProvider {
   }
 
   Future<void> saveDevice(DeviceTrial device) async {
-    final Db db = Db(config.dbUri);
+    final Db db = await Db.create(config.dbUri);
     await db.open();
     final DbCollection devicesCollection = db.collection('devices');
     await devicesCollection.updateOne(
@@ -99,7 +99,7 @@ class DataProvider {
    */
 
   Future<List<SubjectTrial>> getSubjects() async {
-    final Db db = Db(config.dbUri);
+    final Db db = await Db.create(config.dbUri);
     await db.open();
     final DbCollection subjectsCollection = db.collection('subjects');
     List<Map<String, dynamic>> subjectsJson =
@@ -119,7 +119,7 @@ class DataProvider {
     double? weightKg,
     double? wristCircumferenceCm,
   }) async {
-    final Db db = Db(config.dbUri);
+    final Db db = await Db.create(config.dbUri);
     await db.open();
     final DbCollection subjectsCollection = db.collection('subjects');
     if (name != null) {
@@ -145,7 +145,7 @@ class DataProvider {
   }
 
   Future<List<SubjectTrial>> searchSubjectsByName(String name) async {
-    final Db db = Db(config.dbUri);
+    final Db db = await Db.create(config.dbUri);
     await db.open();
     final DbCollection subjectsCollection = db.collection('subjects');
     final query = {
@@ -160,7 +160,7 @@ class DataProvider {
   }
 
   Future<void> saveSubject(SubjectTrial subject) async {
-    final Db db = Db(config.dbUri);
+    final Db db = await Db.create(config.dbUri);
     await db.open();
     final DbCollection subjectsCollection = db.collection('subjects');
     await subjectsCollection.updateOne(
@@ -188,7 +188,7 @@ class DataProvider {
     SubjectTrial subject,
     DeviceTrial device,
   ) async {
-    final Db db = Db(config.dbUri);
+    final Db db = await Db.create(config.dbUri);
     await db.open();
     final DbCollection trialsCollection = db.collection('trials');
     final ObjectId id = ObjectId();
@@ -215,7 +215,7 @@ class DataProvider {
   Future<void> saveTrialEvents(ExperimentTrial trial) async {
     final List<Map<String, dynamic>> events = trial.getBufferedEvents();
     if (events.isNotEmpty) {
-      final Db db = Db(config.dbUri);
+      final Db db = await Db.create(config.dbUri);
       await db.open();
       final DbCollection trialsCollection = db.collection('trials');
       try {

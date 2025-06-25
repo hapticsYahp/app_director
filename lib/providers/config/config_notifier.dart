@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ConfigNotifier extends ChangeNotifier {
   String _deviceHost = "192.168.20.27";
   int _devicePort = 3333;
   int _deviceConnectionTimeout = 10;
-  String _dbUri = "mongodb://10.0.2.2:27017/haptic_trials";
+  String _dbUri = dotenv.get('MONGODB_CONN_STR', fallback: '');
 
   String get deviceHost => _deviceHost;
 
