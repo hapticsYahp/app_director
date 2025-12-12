@@ -15,6 +15,7 @@ class ExperimentStageDelay<T_Result> extends ExperimentStage<T_Result> {
   final int maxDelayMs;
   final int tickProgressMs;
   final String delayFeedback;
+  final bool showProgressBar;
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   late int delayMs;
@@ -28,6 +29,7 @@ class ExperimentStageDelay<T_Result> extends ExperimentStage<T_Result> {
     this.maxDelayMs = 10_000,
     this.tickProgressMs = 100,
     this.delayFeedback = "Starting in...",
+    this.showProgressBar = true,
     super.pomaCommands = const {},
   });
 

@@ -81,11 +81,13 @@ class ExperimentStageDelayWidgetState<T_Result>
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-            "${widget.stage.delayFeedback} ${(_remainingTimeMs / 1000).ceil()}s...",
-            style: TextStyle(fontSize: 18)),
-        SizedBox(height: 20),
-        LinearProgressIndicator(value: _progress, minHeight: 10),
+        if (widget.stage.showProgressBar) ...[
+          Text(
+              "${widget.stage.delayFeedback} ${(_remainingTimeMs / 1000).ceil()}s...",
+              style: TextStyle(fontSize: 18)),
+          SizedBox(height: 20),
+          LinearProgressIndicator(value: _progress, minHeight: 10),
+        ],
       ],
     );
   }

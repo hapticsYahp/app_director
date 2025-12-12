@@ -18,6 +18,7 @@ class ExperimentStageWait<T_Result> extends ExperimentStage<T_Result> {
   final String waitFeedback;
   final String buttonLabel;
   final IconData buttonIcon;
+  final bool showProgressBar;
 
   ExperimentStageWait({
     required super.id,
@@ -30,6 +31,7 @@ class ExperimentStageWait<T_Result> extends ExperimentStage<T_Result> {
     this.waitFeedback = "Time:",
     this.buttonLabel = "Feedback",
     this.buttonIcon = Icons.thumb_up,
+    this.showProgressBar = true,
     super.pomaCommands = const {},
   });
 

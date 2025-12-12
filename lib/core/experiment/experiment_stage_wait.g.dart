@@ -24,6 +24,7 @@ ExperimentStageWait<T_Result> _$ExperimentStageWaitFromJson<T_Result>(
           ? Icons.thumb_up
           : const IconDataJsonConverter()
               .fromJson((json['buttonIcon'] as num).toInt()),
+      showProgressBar: json['showProgressBar'] as bool? ?? true,
       pomaCommands: (json['pomaCommands'] as Map<String, dynamic>?)?.map(
             (k, e) => MapEntry(k, e as String),
           ) ??
@@ -46,4 +47,5 @@ Map<String, dynamic> _$ExperimentStageWaitToJson<T_Result>(
       'waitFeedback': instance.waitFeedback,
       'buttonLabel': instance.buttonLabel,
       'buttonIcon': const IconDataJsonConverter().toJson(instance.buttonIcon),
+      'showProgressBar': instance.showProgressBar,
     };

@@ -97,14 +97,16 @@ class ExperimentStageWaitWidgetState<T_Result>
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          "${widget.stage.waitFeedback} ${(_remainingTimeMs / 1000).ceil()}s",
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18),
-        ),
-        SizedBox(height: 20),
-        LinearProgressIndicator(value: _progress, minHeight: 10),
-        SizedBox(height: 20),
+        if (widget.stage.showProgressBar) ...[
+          Text(
+            "${widget.stage.waitFeedback} ${(_remainingTimeMs / 1000).ceil()}s",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18),
+          ),
+          SizedBox(height: 20),
+          LinearProgressIndicator(value: _progress, minHeight: 10),
+          SizedBox(height: 20),
+        ],
         Expanded(
           child: ElevatedButton.icon(
             onPressed: _stageCompleted ? null : _onFeedback,
