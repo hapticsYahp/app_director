@@ -188,7 +188,7 @@ class _SubjectFormState extends State<SubjectForm> {
                     labelText: "Gender",
                     hintText: "Select",
                   ),
-                  value: _subjectGender,
+                  initialValue: _subjectGender,
                   items: genderOptions
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
@@ -208,7 +208,7 @@ class _SubjectFormState extends State<SubjectForm> {
                     labelText: "Dominant Hand",
                     hintText: "Select",
                   ),
-                  value: _subjectDominantHand,
+                  initialValue: _subjectDominantHand,
                   items: dominantHandOptions
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(

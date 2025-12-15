@@ -4,12 +4,12 @@ import 'package:yahp_director/pages/home_page.dart';
 class App extends StatelessWidget {
   const App({super.key});
 
-  get theme => ThemeData(
+  ThemeData get theme => ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       );
 
-  get home => HomePage();
+  HomePage get home => HomePage();
 
   @override
   Widget build(BuildContext context) {

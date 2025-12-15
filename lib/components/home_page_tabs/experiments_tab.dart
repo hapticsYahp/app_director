@@ -234,7 +234,7 @@ class _ExperimentsTabState extends State<ExperimentsTab>
                     labelText: "Experiment",
                     hintText: "Select experiment to run",
                   ),
-                  value: selectedExperiment,
+                  initialValue: selectedExperiment,
                   items: experiments
                       .map<DropdownMenuItem<Experiment<String, String>>>(
                           (Experiment<String, String> value) {

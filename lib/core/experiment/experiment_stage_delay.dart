@@ -35,10 +35,10 @@ class ExperimentStageDelay<T_Result> extends ExperimentStage<T_Result> {
 
   void _randomizeDelay() {
     final random = Random();
-    this.delayMs =
-        this.minDelayMs + random.nextInt(this.maxDelayMs - this.minDelayMs);
+    delayMs =
+        minDelayMs + random.nextInt(maxDelayMs - minDelayMs);
     experiment?.saveTrialEvent("TRIAL_ENV", extraData: {
-      'delayMs': this.delayMs,
+      'delayMs': delayMs,
     });
   }
 
