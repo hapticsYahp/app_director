@@ -7,18 +7,20 @@ part of 'serializable_experiment.dart';
 // **************************************************************************
 
 Map<String, dynamic> _$SerializableExperimentToJson(
-        SerializableExperiment instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'title': instance.title,
-      'description': instance.description,
-      'stages': instance.stages.map(
-          (k, e) => MapEntry(k, const ExperimentStageConverter().toJson(e))),
-      'startingStageId': instance.startingStageId,
-      'finalStageId': instance.finalStageId,
-      'abortStageId': instance.abortStageId,
-      'currentStage':
-          const ExperimentStageConverter().toJson(instance.currentStage),
-      'canAdvance': instance.canAdvance,
-      'transitions': instance.serializableTransitions.toJson(),
-    };
+  SerializableExperiment instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'title': instance.title,
+  'description': instance.description,
+  'stages': instance.stages.map(
+    (k, e) => MapEntry(k, const ExperimentStageConverter().toJson(e)),
+  ),
+  'startingStageId': instance.startingStageId,
+  'finalStageId': instance.finalStageId,
+  'abortStageId': instance.abortStageId,
+  'currentStage': const ExperimentStageConverter().toJson(
+    instance.currentStage,
+  ),
+  'canAdvance': instance.canAdvance,
+  'transitions': instance.serializableTransitions.toJson(),
+};

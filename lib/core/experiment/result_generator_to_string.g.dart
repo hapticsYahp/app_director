@@ -7,9 +7,9 @@ part of 'result_generator_to_string.dart';
 // **************************************************************************
 
 ResultGeneratorToString _$ResultGeneratorToStringFromJson(
-        Map<String, dynamic> json) =>
-    ResultGeneratorToString();
+  Map<String, dynamic> json,
+) => ResultGeneratorToString();
 
 Map<String, dynamic> _$ResultGeneratorToStringToJson(
-        ResultGeneratorToString instance) =>
-    <String, dynamic>{};
+  ResultGeneratorToString instance,
+) => <String, dynamic>{};

@@ -19,7 +19,7 @@ class SelectOption {
   Map<String, dynamic> toJson() => _$SelectOptionToJson(this);
 }
 
-@JsonSerializable(genericArgumentFactories: true)
+@JsonSerializable(genericArgumentFactories: true, explicitToJson: true)
 @IconDataJsonConverter()
 class ExperimentStageSelect<T_Result> extends ExperimentStage<T_Result> {
   static const String jsonType = 'select';

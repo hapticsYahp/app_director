@@ -28,13 +28,8 @@ import 'package:wifi_app/providers/poma/poma_client.dart' as _i6;
 // ignore_for_file: invalid_use_of_internal_member
 
 class _FakeWidget_0 extends _i1.SmartFake implements _i2.Widget {
-  _FakeWidget_0(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakeWidget_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
 
   @override
   String toString({_i2.DiagnosticLevel? minLevel = _i2.DiagnosticLevel.info}) =>
@@ -51,84 +46,74 @@ class MockExperimentStage<T_Result> extends _i1.Mock
   }
 
   @override
-  String get id => (super.noSuchMethod(
-        Invocation.getter(#id),
-        returnValue: _i4.dummyValue<String>(
-          this,
-          Invocation.getter(#id),
-        ),
-      ) as String);
+  String get id =>
+      (super.noSuchMethod(
+            Invocation.getter(#id),
+            returnValue: _i4.dummyValue<String>(this, Invocation.getter(#id)),
+          )
+          as String);
 
   @override
-  String get title => (super.noSuchMethod(
-        Invocation.getter(#title),
-        returnValue: _i4.dummyValue<String>(
-          this,
-          Invocation.getter(#title),
-        ),
-      ) as String);
+  String get title =>
+      (super.noSuchMethod(
+            Invocation.getter(#title),
+            returnValue: _i4.dummyValue<String>(
+              this,
+              Invocation.getter(#title),
+            ),
+          )
+          as String);
 
   @override
-  String get description => (super.noSuchMethod(
-        Invocation.getter(#description),
-        returnValue: _i4.dummyValue<String>(
-          this,
-          Invocation.getter(#description),
-        ),
-      ) as String);
+  String get description =>
+      (super.noSuchMethod(
+            Invocation.getter(#description),
+            returnValue: _i4.dummyValue<String>(
+              this,
+              Invocation.getter(#description),
+            ),
+          )
+          as String);
 
   @override
-  Map<String, String> get pomaCommands => (super.noSuchMethod(
-        Invocation.getter(#pomaCommands),
-        returnValue: <String, String>{},
-      ) as Map<String, String>);
+  Map<String, String> get pomaCommands =>
+      (super.noSuchMethod(
+            Invocation.getter(#pomaCommands),
+            returnValue: <String, String>{},
+          )
+          as Map<String, String>);
 
   @override
   set experiment(_i5.Experiment<dynamic, T_Result>? value) =>
       super.noSuchMethod(
-        Invocation.setter(
-          #experiment,
-          value,
-        ),
+        Invocation.setter(#experiment, value),
         returnValueForMissingStub: null,
       );
 
   @override
   void setExperiment(_i5.Experiment<dynamic, T_Result>? experiment) =>
       super.noSuchMethod(
-        Invocation.method(
-          #setExperiment,
-          [experiment],
-        ),
+        Invocation.method(#setExperiment, [experiment]),
         returnValueForMissingStub: null,
       );
 
   @override
   void onEnter() => super.noSuchMethod(
-        Invocation.method(
-          #onEnter,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#onEnter, []),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void onExit() => super.noSuchMethod(
-        Invocation.method(
-          #onExit,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#onExit, []),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void onTick(int? milliseconds) => super.noSuchMethod(
-        Invocation.method(
-          #onTick,
-          [milliseconds],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#onTick, [milliseconds]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   _i2.Widget buildWidget(
@@ -136,49 +121,32 @@ class MockExperimentStage<T_Result> extends _i1.Mock
     void Function(T_Result)? onResult,
   ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #buildWidget,
-          [
-            context,
-            onResult,
-          ],
-        ),
-        returnValue: _FakeWidget_0(
-          this,
-          Invocation.method(
-            #buildWidget,
-            [
-              context,
-              onResult,
-            ],
-          ),
-        ),
-      ) as _i2.Widget);
+            Invocation.method(#buildWidget, [context, onResult]),
+            returnValue: _FakeWidget_0(
+              this,
+              Invocation.method(#buildWidget, [context, onResult]),
+            ),
+          )
+          as _i2.Widget);
 
   @override
   Map<String, dynamic> toJson(Object? Function(T_Result)? toJsonTResult) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #toJson,
-          [toJsonTResult],
-        ),
-        returnValue: <String, dynamic>{},
-      ) as Map<String, dynamic>);
+            Invocation.method(#toJson, [toJsonTResult]),
+            returnValue: <String, dynamic>{},
+          )
+          as Map<String, dynamic>);
 
   @override
-  String getJsonType() => (super.noSuchMethod(
-        Invocation.method(
-          #getJsonType,
-          [],
-        ),
-        returnValue: _i4.dummyValue<String>(
-          this,
-          Invocation.method(
-            #getJsonType,
-            [],
-          ),
-        ),
-      ) as String);
+  String getJsonType() =>
+      (super.noSuchMethod(
+            Invocation.method(#getJsonType, []),
+            returnValue: _i4.dummyValue<String>(
+              this,
+              Invocation.method(#getJsonType, []),
+            ),
+          )
+          as String);
 }
 
 /// A class which mocks [PomaClient].
@@ -190,37 +158,36 @@ class MockPomaClient extends _i1.Mock implements _i6.PomaClient {
   }
 
   @override
-  _i7.Stream<String> get onDebug => (super.noSuchMethod(
-        Invocation.getter(#onDebug),
-        returnValue: _i7.Stream<String>.empty(),
-      ) as _i7.Stream<String>);
+  _i7.Stream<String> get onDebug =>
+      (super.noSuchMethod(
+            Invocation.getter(#onDebug),
+            returnValue: _i7.Stream<String>.empty(),
+          )
+          as _i7.Stream<String>);
 
   @override
-  bool isConnected() => (super.noSuchMethod(
-        Invocation.method(
-          #isConnected,
-          [],
-        ),
-        returnValue: false,
-      ) as bool);
+  bool isConnected() =>
+      (super.noSuchMethod(
+            Invocation.method(#isConnected, []),
+            returnValue: false,
+          )
+          as bool);
 
   @override
-  bool isValidHost(String? host) => (super.noSuchMethod(
-        Invocation.method(
-          #isValidHost,
-          [host],
-        ),
-        returnValue: false,
-      ) as bool);
+  bool isValidHost(String? host) =>
+      (super.noSuchMethod(
+            Invocation.method(#isValidHost, [host]),
+            returnValue: false,
+          )
+          as bool);
 
   @override
-  bool isValidPort(int? port) => (super.noSuchMethod(
-        Invocation.method(
-          #isValidPort,
-          [port],
-        ),
-        returnValue: false,
-      ) as bool);
+  bool isValidPort(int? port) =>
+      (super.noSuchMethod(
+            Invocation.method(#isValidPort, [port]),
+            returnValue: false,
+          )
+          as bool);
 
   @override
   _i7.Future<void> connect(
@@ -230,81 +197,63 @@ class MockPomaClient extends _i1.Mock implements _i6.PomaClient {
     bool? cancelOnError,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #connect,
-          [
-            serverHost,
-            serverPort,
-          ],
-          {
-            #timeout: timeout,
-            #cancelOnError: cancelOnError,
-          },
-        ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+            Invocation.method(
+              #connect,
+              [serverHost, serverPort],
+              {#timeout: timeout, #cancelOnError: cancelOnError},
+            ),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
+          )
+          as _i7.Future<void>);
 
   @override
-  _i7.Future<void> disconnect() => (super.noSuchMethod(
-        Invocation.method(
-          #disconnect,
-          [],
-        ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
-
-  @override
-  _i7.Future<void> send(String? message) => (super.noSuchMethod(
-        Invocation.method(
-          #send,
-          [message],
-        ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
-
-  @override
-  _i7.Future<String?> sendAndWait(String? message) => (super.noSuchMethod(
-        Invocation.method(
-          #sendAndWait,
-          [message],
-        ),
-        returnValue: _i7.Future<String?>.value(),
-      ) as _i7.Future<String?>);
-
-  @override
-  _i7.Future<List<String>> getTopics() => (super.noSuchMethod(
-        Invocation.method(
-          #getTopics,
-          [],
-        ),
-        returnValue: _i7.Future<List<String>>.value(<String>[]),
-      ) as _i7.Future<List<String>>);
-
-  @override
-  _i7.Future<String?> getTopicValue(String? topic) => (super.noSuchMethod(
-        Invocation.method(
-          #getTopicValue,
-          [topic],
-        ),
-        returnValue: _i7.Future<String?>.value(),
-      ) as _i7.Future<String?>);
-
-  @override
-  _i7.Future<bool> setTopicValue(
-    String? topic,
-    String? value,
-  ) =>
+  _i7.Future<void> disconnect() =>
       (super.noSuchMethod(
-        Invocation.method(
-          #setTopicValue,
-          [
-            topic,
-            value,
-          ],
-        ),
-        returnValue: _i7.Future<bool>.value(false),
-      ) as _i7.Future<bool>);
+            Invocation.method(#disconnect, []),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
+          )
+          as _i7.Future<void>);
+
+  @override
+  _i7.Future<void> send(String? message) =>
+      (super.noSuchMethod(
+            Invocation.method(#send, [message]),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
+          )
+          as _i7.Future<void>);
+
+  @override
+  _i7.Future<String?> sendAndWait(String? message) =>
+      (super.noSuchMethod(
+            Invocation.method(#sendAndWait, [message]),
+            returnValue: _i7.Future<String?>.value(),
+          )
+          as _i7.Future<String?>);
+
+  @override
+  _i7.Future<List<String>> getTopics() =>
+      (super.noSuchMethod(
+            Invocation.method(#getTopics, []),
+            returnValue: _i7.Future<List<String>>.value(<String>[]),
+          )
+          as _i7.Future<List<String>>);
+
+  @override
+  _i7.Future<String?> getTopicValue(String? topic) =>
+      (super.noSuchMethod(
+            Invocation.method(#getTopicValue, [topic]),
+            returnValue: _i7.Future<String?>.value(),
+          )
+          as _i7.Future<String?>);
+
+  @override
+  _i7.Future<bool> setTopicValue(String? topic, String? value) =>
+      (super.noSuchMethod(
+            Invocation.method(#setTopicValue, [topic, value]),
+            returnValue: _i7.Future<bool>.value(false),
+          )
+          as _i7.Future<bool>);
 }
