@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:wifi_app/core/experiment/experiment_stage.dart';
+import 'package:yahp_director/core/experiment/experiment_stage.dart';
 
 class TestExperimentStage extends ExperimentStage<String> {
   TestExperimentStage({

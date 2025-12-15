@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:wifi_app/providers/poma/poma_client.dart';
+import 'package:yahp_director/providers/poma/poma_client.dart';
 import 'experiment_stage_test.mocks.dart';
 import 'test_experiment.dart';
 import 'test_experiment_stage.dart';

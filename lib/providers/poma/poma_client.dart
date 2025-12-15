@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:string_validator/string_validator.dart';
-import 'package:wifi_app/providers/poma/poma_exception.dart';
-import 'package:wifi_app/providers/poma/poma_socket.dart';
+import 'package:yahp_director/providers/poma/poma_exception.dart';
+import 'package:yahp_director/providers/poma/poma_socket.dart';
 
 class PomaClient {
   static final String _listTopicsCommandChar = "*";

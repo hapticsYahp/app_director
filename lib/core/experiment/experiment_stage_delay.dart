@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:wifi_app/core/experiment/experiment_stage.dart';
+import 'package:yahp_director/core/experiment/experiment_stage.dart';
 import '../../components/experiment_stages/experiment_stage_delay_widget.dart';
 
 part 'experiment_stage_delay.g.dart';

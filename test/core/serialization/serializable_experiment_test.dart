@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wifi_app/core/experiment/experiment_stage.dart';
-import 'package:wifi_app/core/experiment/experiment_stage_confirm.dart';
-import 'package:wifi_app/core/experiment/experiment_stage_message.dart';
-import 'package:wifi_app/core/graph/trigger_always.dart';
-import 'package:wifi_app/core/graph/trigger_equals.dart';
-import 'package:wifi_app/core/serialization/serializable_conditional_directed_graph.dart';
-import 'package:wifi_app/core/serialization/serializable_experiment.dart';
+import 'package:yahp_director/core/experiment/experiment_stage.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_confirm.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_message.dart';
+import 'package:yahp_director/core/graph/trigger_always.dart';
+import 'package:yahp_director/core/graph/trigger_equals.dart';
+import 'package:yahp_director/core/serialization/serializable_conditional_directed_graph.dart';
+import 'package:yahp_director/core/serialization/serializable_experiment.dart';
 
 void main() {
   group('SerializableExperiment', () {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wifi_app/providers/data/data_provider.dart';
+import 'package:yahp_director/providers/data/data_provider.dart';
 import '../../core/experiment/experiment.dart';
 import '../../core/trial/experiment_trial.dart';
 import '../../providers/config/config_notifier.dart';

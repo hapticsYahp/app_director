@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wifi_app/core/graph/trigger_always.dart';
-import 'package:wifi_app/core/graph/trigger_never.dart';
-import 'package:wifi_app/core/graph/trigger_equals.dart';
-import 'package:wifi_app/core/graph/trigger_distinct.dart';
-import 'package:wifi_app/core/graph/trigger_greater_than.dart';
-import 'package:wifi_app/core/graph/trigger_lesser_than.dart';
-import 'package:wifi_app/core/serialization/serializable_trigger_converter.dart';
+import 'package:yahp_director/core/graph/trigger_always.dart';
+import 'package:yahp_director/core/graph/trigger_never.dart';
+import 'package:yahp_director/core/graph/trigger_equals.dart';
+import 'package:yahp_director/core/graph/trigger_distinct.dart';
+import 'package:yahp_director/core/graph/trigger_greater_than.dart';
+import 'package:yahp_director/core/graph/trigger_lesser_than.dart';
+import 'package:yahp_director/core/serialization/serializable_trigger_converter.dart';
 
 void main() {
   late SerializableTriggerConverter converter;

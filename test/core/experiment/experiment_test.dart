@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:wifi_app/core/experiment/experiment.dart';
-import 'package:wifi_app/core/experiment/experiment_stage.dart';
-import 'package:wifi_app/core/graph/conditional_directed_graph.dart';
-import 'package:wifi_app/core/graph/trigger_always.dart';
-import 'package:wifi_app/providers/poma/poma_client.dart';
+import 'package:yahp_director/core/experiment/experiment.dart';
+import 'package:yahp_director/core/experiment/experiment_stage.dart';
+import 'package:yahp_director/core/graph/conditional_directed_graph.dart';
+import 'package:yahp_director/core/graph/trigger_always.dart';
+import 'package:yahp_director/providers/poma/poma_client.dart';
 
 import 'experiment_test.mocks.dart';
 

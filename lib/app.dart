@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wifi_app/pages/home_page.dart';
+import 'package:yahp_director/pages/home_page.dart';
 
 class App extends StatelessWidget {
   const App({super.key});

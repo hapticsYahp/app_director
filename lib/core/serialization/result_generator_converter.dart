@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:wifi_app/core/serialization/base_converter.dart';
+import 'package:yahp_director/core/serialization/base_converter.dart';
 import '../experiment/result_generator.dart';
 import '../experiment/result_generator_to_string.dart';
 

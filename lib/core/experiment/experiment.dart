@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:wifi_app/core/experiment/experiment_stage.dart';
+import 'package:yahp_director/core/experiment/experiment_stage.dart';
 import '../../providers/poma/poma_client.dart';
 import '../graph/conditional_directed_graph.dart';
 import '../trial/experiment_trial.dart';

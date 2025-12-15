@@ -1,4 +1,4 @@
-import 'package:wifi_app/core/experiment/experiment.dart';
+import 'package:yahp_director/core/experiment/experiment.dart';
 
 class TestExperiment extends Experiment<String, String> {
   TestExperiment({

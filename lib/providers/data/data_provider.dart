@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:uuid/uuid.dart';
-import 'package:wifi_app/core/serialization/serializable_experiment.dart';
-import 'package:wifi_app/core/trial/device_trial.dart';
-import 'package:wifi_app/core/trial/experiment_trial.dart';
-import 'package:wifi_app/core/trial/subject_trial.dart';
-import 'package:wifi_app/providers/config/config_notifier.dart';
+import 'package:yahp_director/core/serialization/serializable_experiment.dart';
+import 'package:yahp_director/core/trial/device_trial.dart';
+import 'package:yahp_director/core/trial/experiment_trial.dart';
+import 'package:yahp_director/core/trial/subject_trial.dart';
+import 'package:yahp_director/providers/config/config_notifier.dart';
 import '../../core/experiment/experiment.dart';
 
 class DataProvider {

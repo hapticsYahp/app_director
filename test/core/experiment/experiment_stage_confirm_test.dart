@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:wifi_app/core/experiment/experiment_stage_confirm.dart';
-import 'package:wifi_app/providers/poma/poma_client.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_confirm.dart';
+import 'package:yahp_director/providers/poma/poma_client.dart';
 import 'experiment_stage_confirm_test.mocks.dart';
 import 'test_experiment.dart';
 

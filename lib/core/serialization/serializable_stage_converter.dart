@@ -1,11 +1,11 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:wifi_app/core/experiment/experiment_stage.dart';
-import 'package:wifi_app/core/experiment/experiment_stage_confirm.dart';
-import 'package:wifi_app/core/experiment/experiment_stage_delay.dart';
-import 'package:wifi_app/core/experiment/experiment_stage_feedback.dart';
-import 'package:wifi_app/core/experiment/experiment_stage_message.dart';
-import 'package:wifi_app/core/experiment/experiment_stage_wait.dart';
-import 'package:wifi_app/core/experiment/experiment_stage_select.dart';
+import 'package:yahp_director/core/experiment/experiment_stage.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_confirm.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_delay.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_feedback.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_message.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_wait.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_select.dart';
 import 'base_converter.dart';
 
 class ExperimentStageConverter extends BaseConverter

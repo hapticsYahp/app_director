@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:wifi_app/providers/poma/poma_socket.dart';
+import 'package:yahp_director/providers/poma/poma_socket.dart';
 
 class PomaSocketImpl implements PomaSocket {
   Socket? _socket;

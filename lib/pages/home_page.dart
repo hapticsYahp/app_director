@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wifi_app/providers/config/device_trial_notifier.dart';
-import 'package:wifi_app/providers/data/data_provider.dart';
+import 'package:yahp_director/providers/config/device_trial_notifier.dart';
+import 'package:yahp_director/providers/data/data_provider.dart';
 import '../components/home_page_tabs/user_device_tab.dart';
 import '../components/home_page_tabs/experiments_tab.dart';
 import '../components/home_page_tabs/settings_tab.dart';

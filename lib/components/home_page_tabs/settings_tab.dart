@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo_dart;
 import 'package:provider/provider.dart';
-import 'package:wifi_app/providers/poma/poma_exception.dart';
+import 'package:yahp_director/providers/poma/poma_exception.dart';
 import '../../providers/config/config_notifier.dart';
 import '../../providers/poma/poma_client.dart';
 import '../../providers/poma/poma_socket_impl.dart';

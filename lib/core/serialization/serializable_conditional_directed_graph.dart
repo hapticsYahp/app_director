@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../graph/conditional_directed_graph.dart';
-import 'package:wifi_app/core/serialization/serializable_condition_rule.dart';
+import 'package:yahp_director/core/serialization/serializable_condition_rule.dart';
 
 part 'serializable_conditional_directed_graph.g.dart';
 

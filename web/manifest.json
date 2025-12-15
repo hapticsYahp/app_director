@@ -1,6 +1,6 @@
 {
-    "name": "wifi_app",
-    "short_name": "wifi_app",
+    "name": "yahp_director",
+    "short_name": "yahp_director",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

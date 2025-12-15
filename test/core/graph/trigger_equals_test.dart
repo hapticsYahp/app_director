@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wifi_app/core/graph/trigger_equals.dart';
+import 'package:yahp_director/core/graph/trigger_equals.dart';
 
 void main() {
   group('TriggerEquals', () {
