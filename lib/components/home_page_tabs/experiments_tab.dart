@@ -184,19 +184,6 @@ class _ExperimentsTabState extends State<ExperimentsTab>
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Text("Subject: ", style: TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(
-              child:
-                  Text(selectedSubject?.name ?? '<None. Please select one.>'))
-        ]),
-        Divider(color: Colors.grey, thickness: 1, indent: 0, endIndent: 0),
-        Row(children: [
-          Text("Device: ", style: TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(
-              child: Text(selectedDevice?.name ?? '<None. Please select one.>'))
-        ]),
-        SizedBox(height: 4),
         Center(
           // FIXME: disconnect PoMA on device change. Disable connection if selectedDevice is null.
           child: ElevatedButton.icon(

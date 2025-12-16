@@ -71,6 +71,17 @@ class _ExperimentStageSelectWidgetState<T_Result>
       ? _multiSelected.isNotEmpty
       : _singleSelected != null;
 
+  Widget _buildOptionTitle(SelectOption option) {
+    final img = option.image;
+    if (option.isNetworkImage) {
+      return Image.network(img!, fit: BoxFit.contain);
+    }
+    if (option.isAssetImage) {
+      return Image.asset(img!, fit: BoxFit.contain);
+    }
+    return Center(child: Text(option.label, textAlign: TextAlign.center));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -86,37 +97,47 @@ class _ExperimentStageSelectWidgetState<T_Result>
             ),
           ),
         Expanded(
-          child: ListView.builder(
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 1.5,
+            ),
             itemCount: _options.length,
             itemBuilder: (context, index) {
               final option = _options[index];
-              if (widget.stage.multipleSelection) {
-                final checked = _multiSelected.contains(option.value);
-                return CheckboxListTile(
-                  title: Text(option.label),
-                  value: checked,
-                  onChanged: (v) {
-                    setState(() {
-                      if (v == true) {
-                        _multiSelected.add(option.value);
-                      } else {
+              final selected = widget.stage.multipleSelection
+                  ? _multiSelected.contains(option.value)
+                  : _singleSelected == option.value;
+              Widget optionTitle = _buildOptionTitle(option);
+              return InkWell(
+                onTap: () {
+                  setState(() {
+                    if (widget.stage.multipleSelection) {
+                      if (selected) {
                         _multiSelected.remove(option.value);
+                      } else {
+                        _multiSelected.add(option.value);
                       }
-                    });
-                  },
-                );
-              } else {
-                return RadioListTile<String>(
-                  title: Text(option.label),
-                  value: option.value,
-                  groupValue: _singleSelected,
-                  onChanged: (v) {
-                    setState(() {
-                      _singleSelected = v;
-                    });
-                  },
-                );
-              }
+                    } else {
+                      _singleSelected = option.value;
+                    }
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(microseconds: 150),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: selected ? Colors.blue : Colors.grey.shade300,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: Center(child: optionTitle),
+                ),
+              );
             },
           ),
         ),

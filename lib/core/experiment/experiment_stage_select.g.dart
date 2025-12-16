@@ -9,10 +9,15 @@ part of 'experiment_stage_select.dart';
 SelectOption _$SelectOptionFromJson(Map<String, dynamic> json) => SelectOption(
   label: json['label'] as String,
   value: json['value'] as String,
+  image: json['image'] as String?,
 );
 
 Map<String, dynamic> _$SelectOptionToJson(SelectOption instance) =>
-    <String, dynamic>{'label': instance.label, 'value': instance.value};
+    <String, dynamic>{
+      'label': instance.label,
+      'value': instance.value,
+      'image': instance.image,
+    };
 
 ExperimentStageSelect<T_Result> _$ExperimentStageSelectFromJson<T_Result>(
   Map<String, dynamic> json,

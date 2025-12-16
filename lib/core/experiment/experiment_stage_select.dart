@@ -10,8 +10,13 @@ part 'experiment_stage_select.g.dart';
 class SelectOption {
   final String label;
   final String value;
+  final String? image; // 'assets/...'or 'https://...'.
 
-  SelectOption({required this.label, required this.value});
+  SelectOption({required this.label, required this.value, this.image});
+
+  bool get isNetworkImage => image != null && image!.startsWith('https://');
+
+  bool get isAssetImage => image != null && image!.startsWith('assets/');
 
   factory SelectOption.fromJson(Map<String, dynamic> json) =>
       _$SelectOptionFromJson(json);
@@ -65,8 +70,7 @@ class ExperimentStageSelect<T_Result> extends ExperimentStage<T_Result> {
   factory ExperimentStageSelect.fromJson(
     Map<String, dynamic> json,
     T_Result Function(Object? json) fromJsonTResult,
-  ) =>
-      _$ExperimentStageSelectFromJson(json, fromJsonTResult);
+  ) => _$ExperimentStageSelectFromJson(json, fromJsonTResult);
 
   @override
   Map<String, dynamic> toJson(Object? Function(T_Result value) toJsonTResult) =>
