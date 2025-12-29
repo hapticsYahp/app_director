@@ -25,7 +25,7 @@ class HomePage extends StatelessWidget {
             create: (_) => SubjectTrialNotifier()),
         Provider<PomaClient>(create: (context) => PomaClient(PomaSocketImpl())),
         ProxyProvider<ConfigNotifier, DataProvider>(
-          update: (_, configNotifier, __) => DataProvider(configNotifier),
+          update: (_, configNotifier, _) => DataProvider(configNotifier),
         ),
       ],
       child: DefaultTabController(

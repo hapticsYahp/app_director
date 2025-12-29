@@ -171,6 +171,7 @@ Las propiedades adicionales de Etapas Demorar son:
 * **Tick**: la cantidad de tiempo (en milisegundos) que debe transcurrir antes de actualizar la barra de progreso. Por
   defecto, `100`.
 * **Feedback**: el texto que acompaña a la barra de progreso. Por defecto, `Starting in...`.
+* **Mostrar Barra de Progreso**: un booleano que indica si se debe visualizar la barra de progreso. Por defecto, `true`.
 
 ##### Representación JSON
 
@@ -180,7 +181,8 @@ Las propiedades adicionales de Etapas Demorar son:
   "completionResult": "COMPLETED",
   "delayMs": 10000,
   "tickProgressMs": 100,
-  "delayFeedback": "Starting in..."
+  "delayFeedback": "Starting in...",
+  "showProgressBar": true
 }
 ```
 
@@ -200,6 +202,7 @@ Las propiedades adicionales de Etapas Esperar son:
 * **Feedback**: el texto que acompaña a la barra de progreso. Por defecto, `Time:`.
 * **Etiqueta**: el texto del botón. Por defecto, `Feedback`.
 * **Ícono**: el ícono que acompaña el botón. Por defecto, ícono de "pulgar arriba".
+* **Mostrar Barra de Progreso**: un booleano que indica si se debe visualizar la barra de progreso. Por defecto, `true`.
 
 ##### Representación JSON
 
@@ -212,7 +215,8 @@ Las propiedades adicionales de Etapas Esperar son:
   "tickProgressMs": 500,
   "waitFeedback": "Time:",
   "buttonLabel": "Feedback",
-  "buttonIcon": 58971
+  "buttonIcon": 58971,
+  "showProgressBar": true
 }
 ```
 
@@ -261,6 +265,61 @@ Las propiedades adicionales de Etapas Feedback son:
   "resultGenerator": {
     "$_class": "__TIPO_DE_GENERADOR__"
   }
+}
+```
+
+#### Selección (Select)
+
+El comportamiento de esta Etapa es presentar al usuario una lista de opciones para seleccionar. Permite tanto selección
+única como múltiple, y las opciones pueden ser visualizadas como texto o imágenes.
+Al confirmar la selección, la Etapa lanza como resultado el valor de la opción seleccionada (o los valores concatenados
+por `;` en caso de selección múltiple).
+
+Las propiedades adicionales de Etapas Selección son:
+
+* **Pregunta**: el texto de la pregunta o instrucción que se visualiza al usuario. Por defecto, `Select an option:`.
+* **Selección Múltiple**: un booleano que indica si se permite seleccionar más de una opción. Por defecto, `false`.
+* **Barajar Opciones**: un booleano que indica si las opciones deben presentarse en orden aleatorio. Por defecto,
+  `false`.
+* **Opciones**: una lista de objetos que definen las opciones disponibles
+  (ver [Opciones de Selección](#opciones-de-selección)).
+* **Etiqueta Confirmar**: el texto del botón de confirmación. Por defecto, `Confirm`.
+* **Ícono Confirmar**: el ícono que acompaña al botón de confirmación. Por defecto, ícono de "tilde".
+* **Etiqueta Limpiar**: el texto del botón para limpiar la selección. Por defecto, `Clear`.
+* **Ícono Limpiar**: el ícono que acompaña al botón de limpiar. Por defecto, ícono de "X".
+
+##### Opciones de Selección
+
+Cada objeto dentro de la lista de **Opciones** consta de las siguientes propiedades:
+
+* **Etiqueta**: el texto descriptivo de la opción.
+* **Valor**: el valor que será lanzado como resultado si se selecciona esta opción.
+* **Imagen**: opcional. Una ruta a un recurso de imagen (puede ser un asset local como `assets/...` o una URL
+  remota `https://...`). Si se provee una imagen, esta se visualizará en lugar de la etiqueta de texto.
+
+##### Representación JSON
+
+```json
+{
+  "$_class": "select",
+  "question": "Which one do you prefer?",
+  "multipleSelection": false,
+  "shuffleOptions": true,
+  "options": [
+    {
+      "label": "Option A",
+      "value": "RESULT_A"
+    },
+    {
+      "label": "Option B",
+      "value": "RESULT_B",
+      "image": "assets/images/option_b.png"
+    }
+  ],
+  "confirmButtonLabel": "Confirm",
+  "confirmButtonIcon": 57686,
+  "clearButtonLabel": "Clear",
+  "clearButtonIcon": 57671
 }
 ```
 
