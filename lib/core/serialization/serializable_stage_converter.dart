@@ -6,6 +6,7 @@ import 'package:yahp_director/core/experiment/experiment_stage_feedback.dart';
 import 'package:yahp_director/core/experiment/experiment_stage_message.dart';
 import 'package:yahp_director/core/experiment/experiment_stage_wait.dart';
 import 'package:yahp_director/core/experiment/experiment_stage_select.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_shuffle.dart';
 import 'base_converter.dart';
 
 class ExperimentStageConverter extends BaseConverter
@@ -29,6 +30,8 @@ class ExperimentStageConverter extends BaseConverter
         return ExperimentStageWait.fromJson(json, fromJsonString);
       case ExperimentStageSelect.jsonType:
         return ExperimentStageSelect.fromJson(json, fromJsonString);
+      case ExperimentStageShuffle.jsonType:
+        return ExperimentStageShuffle.fromJson(json, fromJsonString);
       default:
         throw ArgumentError('Unknown ExperimentStage Json Type: $type');
     }

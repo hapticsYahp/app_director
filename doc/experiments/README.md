@@ -194,7 +194,7 @@ Las propiedades adicionales de Etapas Esperar son:
 
 * **Resultado Timeout**: el valor del Resultado que se lanza al completarse el tiempo.
 * **Resultado Feedback**: el valor del Resultado que se lanza al presionar el botón.
-* **Espera**: la cantidad de tiempo (en milisegundos) que se debe esperar. Por defecti, `10.000`.
+* **Espera**: la cantidad de tiempo (en milisegundos) que se debe esperar. Por defecto, `10.000`.
 * **Tick**: la cantidad de tiempo (en milisegundos) que debe transcurrir antes de actualizar la barra de progreso. Por
   defecto, `100`.
 * **Feedback**: el texto que acompaña a la barra de progreso. Por defecto, `Time:`.
@@ -282,6 +282,34 @@ Las propiedades adicionales de Etapas Mensaje son:
   "$_class": "message",
   "exitedResult": "EXITED",
   "message": "Thank you."
+}
+```
+
+#### Randomización (Shuffle)
+
+Esta Etapa especial permite ejecutar un conjunto (pool) de etapas en orden aleatorio. El comportamiento es redirigir
+automáticamente a la siguiente etapa del pool que no haya sido visitada aún.
+
+Para que el ciclo funcione, las etapas contenidas en el pool deben tener reglas de transición que las devuelvan a la
+etapa de randomización al finalizar. Una vez que todas las etapas del pool han sido visitadas, la etapa de randomización
+lanza un resultado final para continuar con el flujo normal.
+
+Las propiedades adicionales de Etapas Randomización son:
+
+* **Etapas**: una lista de identificadores (referencias) de las etapas que deben ser ejecutadas en orden aleatorio.
+* **Resultado**: el valor del Resultado que se lanza una vez que se han completado todas las etapas del pool.
+
+##### Representación JSON
+
+```json
+{
+  "$_class": "shuffle",
+  "stages": [
+    "etapa_a",
+    "etapa_b",
+    "etapa_c"
+  ],
+  "completionResult": "POOL_COMPLETED"
 }
 ```
 
