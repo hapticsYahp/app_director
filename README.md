@@ -86,6 +86,11 @@ sistema requiere la definición de tres elementos:
 Durante el ensayo, el sistema registra de forma persistente todos los eventos (cambios de etapa, comandos enviados,
 respuestas del usuario) para su posterior análisis.
 
+### Documentación Adicional
+
+Para detalles exhaustivos sobre la modelización de experimentos y ejemplos con gráficos pUML,
+consultar [Definición de Experimentos](doc/experiments/README.md).
+
 ## Implementación y Uso
 
 ### Requisitos de Ejecución
@@ -98,8 +103,6 @@ Para el funcionamiento del motor, es necesario contar con:
 - **Conectividad PoMA**: un dispositivo háptico habilitado y accesible vía red (TCP/IP) para la orquestación de
   comandos.
 - **Ambiente de Ejecución**: Flutter SDK (canal stable) configurado para el desarrollo móvil.
-- **Documentación Adicional**: para detalles exhaustivos sobre la modelización de experimentos y ejemplos de grafos
-  pUML, consulte [Definición de Experimentos](doc/experiments/README.md).
 
 ### Configuración del Ambiente de Desarrollo
 
