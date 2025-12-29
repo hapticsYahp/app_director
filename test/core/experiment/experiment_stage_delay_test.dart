@@ -98,6 +98,18 @@ void main() {
       expect(stage.delayMs, lessThanOrEqualTo(maxDelayMs));
     });
 
+    test('should NOT throw exception when minDelayMs == maxDelayMs', () {
+      final stage = ExperimentStageDelay<String>(
+        id: id,
+        completionResult: completionResult,
+        minDelayMs: minDelayMs,
+        maxDelayMs: minDelayMs,
+      );
+      stage.setExperiment(mockExperiment as Experiment<dynamic, String>);
+      expect(() => stage.onEnter(), returnsNormally);
+      expect(stage.delayMs, equals(minDelayMs));
+    });
+
     test('should send EXIT command when stage is exited', () {
       stage.setExperiment(mockExperiment as Experiment<dynamic, String>);
       when(mockPomaClient.isConnected()).thenReturn(true);

@@ -34,12 +34,12 @@ class ExperimentStageDelay<T_Result> extends ExperimentStage<T_Result> {
   });
 
   void _randomizeDelay() {
-    final random = Random();
-    delayMs =
-        minDelayMs + random.nextInt(maxDelayMs - minDelayMs);
-    experiment?.saveTrialEvent("TRIAL_ENV", extraData: {
-      'delayMs': delayMs,
-    });
+    delayMs = minDelayMs;
+    final range = maxDelayMs - minDelayMs;
+    if (range > 0) {
+      delayMs = delayMs + Random().nextInt(range);
+    }
+    experiment?.saveTrialEvent("TRIAL_ENV", extraData: {'delayMs': delayMs});
   }
 
   @override
@@ -63,8 +63,7 @@ class ExperimentStageDelay<T_Result> extends ExperimentStage<T_Result> {
   factory ExperimentStageDelay.fromJson(
     Map<String, dynamic> json,
     T_Result Function(Object? json) fromJsonTResult,
-  ) =>
-      _$ExperimentStageDelayFromJson(json, fromJsonTResult);
+  ) => _$ExperimentStageDelayFromJson(json, fromJsonTResult);
 
   @override
   Map<String, dynamic> toJson(Object? Function(T_Result value) toJsonTResult) =>
