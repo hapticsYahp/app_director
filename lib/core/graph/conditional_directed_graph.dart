@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:wifi_app/core/graph/trigger.dart';
-import 'package:wifi_app/core/graph/condition_rule.dart';
+import 'package:yahp_director/core/graph/trigger.dart';
+import 'package:yahp_director/core/graph/condition_rule.dart';
 
 class ConditionalDirectedGraph<T_Node, T_Trigger_Input> {
   final List<ConditionRule<T_Node, T_Trigger_Input>> _rules;

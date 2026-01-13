@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:wifi_app/core/experiment/experiment.dart';
-import 'package:wifi_app/core/serialization/serializable_conditional_directed_graph.dart';
-import 'package:wifi_app/core/serialization/serializable_stage_converter.dart';
+import 'package:yahp_director/core/experiment/experiment.dart';
+import 'package:yahp_director/core/serialization/serializable_conditional_directed_graph.dart';
+import 'package:yahp_director/core/serialization/serializable_stage_converter.dart';
 import '../experiment/experiment_stage.dart';
 
 part 'serializable_experiment.g.dart';

@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:wifi_app/core/serialization/serializable_trigger_converter.dart';
+import 'package:yahp_director/core/serialization/serializable_trigger_converter.dart';
 import '../graph/condition_rule.dart';
 
 part 'serializable_condition_rule.g.dart';

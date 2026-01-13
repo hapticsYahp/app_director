@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wifi_app/core/graph/condition_rule.dart';
-import 'package:wifi_app/core/graph/trigger_always.dart';
-import 'package:wifi_app/core/graph/trigger_equals.dart';
-import 'package:wifi_app/core/graph/trigger_never.dart';
-import 'package:wifi_app/core/graph/trigger_greater_than.dart';
-import 'package:wifi_app/core/graph/trigger_lesser_than.dart';
+import 'package:yahp_director/core/graph/condition_rule.dart';
+import 'package:yahp_director/core/graph/trigger_always.dart';
+import 'package:yahp_director/core/graph/trigger_equals.dart';
+import 'package:yahp_director/core/graph/trigger_never.dart';
+import 'package:yahp_director/core/graph/trigger_greater_than.dart';
+import 'package:yahp_director/core/graph/trigger_lesser_than.dart';
 
 void main() {
   group('ConditionRule', () {

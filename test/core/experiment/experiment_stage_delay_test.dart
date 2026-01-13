@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:wifi_app/core/experiment/experiment.dart';
-import 'package:wifi_app/core/experiment/experiment_stage_delay.dart';
-import 'package:wifi_app/providers/poma/poma_client.dart';
+import 'package:yahp_director/core/experiment/experiment.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_delay.dart';
+import 'package:yahp_director/providers/poma/poma_client.dart';
 import 'experiment_stage_delay_test.mocks.dart';
 import 'test_experiment.dart';
 
@@ -96,6 +96,18 @@ void main() {
       stage.onEnter();
       expect(stage.delayMs, greaterThanOrEqualTo(minDelayMs));
       expect(stage.delayMs, lessThanOrEqualTo(maxDelayMs));
+    });
+
+    test('should NOT throw exception when minDelayMs == maxDelayMs', () {
+      final stage = ExperimentStageDelay<String>(
+        id: id,
+        completionResult: completionResult,
+        minDelayMs: minDelayMs,
+        maxDelayMs: minDelayMs,
+      );
+      stage.setExperiment(mockExperiment as Experiment<dynamic, String>);
+      expect(() => stage.onEnter(), returnsNormally);
+      expect(stage.delayMs, equals(minDelayMs));
     });
 
     test('should send EXIT command when stage is exited', () {

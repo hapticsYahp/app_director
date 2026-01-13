@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:uuid/uuid.dart';
-import 'package:wifi_app/core/serialization/serializable_experiment.dart';
-import 'package:wifi_app/core/trial/device_trial.dart';
-import 'package:wifi_app/core/trial/experiment_trial.dart';
-import 'package:wifi_app/core/trial/subject_trial.dart';
-import 'package:wifi_app/providers/config/config_notifier.dart';
+import 'package:yahp_director/core/serialization/serializable_experiment.dart';
+import 'package:yahp_director/core/trial/device_trial.dart';
+import 'package:yahp_director/core/trial/experiment_trial.dart';
+import 'package:yahp_director/core/trial/subject_trial.dart';
+import 'package:yahp_director/providers/config/config_notifier.dart';
 import '../../core/experiment/experiment.dart';
 
 class DataProvider {
@@ -23,8 +23,9 @@ class DataProvider {
     final Db db = await Db.create(config.dbUri);
     await db.open();
     final DbCollection experimentsCollection = db.collection('experiments');
-    List<Map<String, dynamic>> experimentsJson =
-        await experimentsCollection.find().toList();
+    List<Map<String, dynamic>> experimentsJson = await experimentsCollection
+        .find()
+        .toList();
     List<SerializableExperiment> experiments = experimentsJson
         .map((expJson) => SerializableExperiment.fromJson(expJson))
         .toList();
@@ -42,10 +43,12 @@ class DataProvider {
     final Db db = await Db.create(config.dbUri);
     await db.open();
     final DbCollection devicesCollection = db.collection('devices');
-    List<Map<String, dynamic>> devicesJson =
-        await devicesCollection.find().toList();
-    List<DeviceTrial> devices =
-        devicesJson.map((devJson) => DeviceTrial.fromJson(devJson)).toList();
+    List<Map<String, dynamic>> devicesJson = await devicesCollection
+        .find()
+        .toList();
+    List<DeviceTrial> devices = devicesJson
+        .map((devJson) => DeviceTrial.fromJson(devJson))
+        .toList();
     await db.close();
     return devices;
   }
@@ -55,12 +58,14 @@ class DataProvider {
     await db.open();
     final DbCollection devicesCollection = db.collection('devices');
     final query = {
-      'name': {'\$regex': name, '\$options': 'i'}
+      'name': {'\$regex': name, '\$options': 'i'},
     };
-    final List<Map<String, dynamic>> devicesJson =
-        await devicesCollection.find(query).toList();
-    final List<DeviceTrial> devices =
-        devicesJson.map((json) => DeviceTrial.fromJson(json)).toList();
+    final List<Map<String, dynamic>> devicesJson = await devicesCollection
+        .find(query)
+        .toList();
+    final List<DeviceTrial> devices = devicesJson
+        .map((json) => DeviceTrial.fromJson(json))
+        .toList();
     await db.close();
     return devices;
   }
@@ -69,10 +74,7 @@ class DataProvider {
     final Db db = await Db.create(config.dbUri);
     await db.open();
     final DbCollection devicesCollection = db.collection('devices');
-    Map<String, dynamic> deviceJson = {
-      'id': Uuid().v4(),
-      'name': name,
-    };
+    Map<String, dynamic> deviceJson = {'id': Uuid().v4(), 'name': name};
     final deviceJsonResult = await devicesCollection.insertOne(deviceJson);
     if (deviceJsonResult.isFailure) {
       throw deviceJsonResult.errmsg!;
@@ -102,10 +104,12 @@ class DataProvider {
     final Db db = await Db.create(config.dbUri);
     await db.open();
     final DbCollection subjectsCollection = db.collection('subjects');
-    List<Map<String, dynamic>> subjectsJson =
-        await subjectsCollection.find().toList();
-    List<SubjectTrial> subjects =
-        subjectsJson.map((subJson) => SubjectTrial.fromJson(subJson)).toList();
+    List<Map<String, dynamic>> subjectsJson = await subjectsCollection
+        .find()
+        .toList();
+    List<SubjectTrial> subjects = subjectsJson
+        .map((subJson) => SubjectTrial.fromJson(subJson))
+        .toList();
     await db.close();
     return subjects;
   }
@@ -149,12 +153,14 @@ class DataProvider {
     await db.open();
     final DbCollection subjectsCollection = db.collection('subjects');
     final query = {
-      'name': {'\$regex': name, '\$options': 'i'}
+      'name': {'\$regex': name, '\$options': 'i'},
     };
-    final List<Map<String, dynamic>> subjectsJson =
-        await subjectsCollection.find(query).toList();
-    final List<SubjectTrial> subjects =
-        subjectsJson.map((json) => SubjectTrial.fromJson(json)).toList();
+    final List<Map<String, dynamic>> subjectsJson = await subjectsCollection
+        .find(query)
+        .toList();
+    final List<SubjectTrial> subjects = subjectsJson
+        .map((json) => SubjectTrial.fromJson(json))
+        .toList();
     await db.close();
     return subjects;
   }

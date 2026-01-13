@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:wifi_app/core/experiment/experiment_stage.dart';
+import 'package:yahp_director/core/experiment/experiment_stage.dart';
 import '../../providers/poma/poma_client.dart';
 import '../graph/conditional_directed_graph.dart';
 import '../trial/experiment_trial.dart';
@@ -53,7 +53,7 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
 
   void saveTrialEvent(String name,
       {Map<String, dynamic> extraData = const {}}) {
-    this.trial?.saveTrialEvent(name, extraData: extraData);
+    trial?.saveTrialEvent(name, extraData: extraData);
   }
 
   void setPomaClient(PomaClient pomaClient) {
@@ -61,7 +61,7 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
   }
 
   void sendPomaCommand(String pomaCommand) {
-    this.saveTrialEvent("POMA_COMMAND", extraData: {
+    saveTrialEvent("POMA_COMMAND", extraData: {
       'command': pomaCommand,
       'stageId': _currentStageId,
     });
@@ -77,7 +77,7 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
       throw Exception('Invalid Stage ID "$stageId".');
     }
     if (_currentStageId != stageId) {
-      this.saveTrialEvent("EXPERIMENT_ADVANCE", extraData: {
+      saveTrialEvent("EXPERIMENT_ADVANCE", extraData: {
         'toStageId': stageId.toString(),
         'fromStageId': _currentStageId,
       });
@@ -86,7 +86,7 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
   }
 
   Future<void> advanceByResult(T_Stage_Result result) async {
-    this.saveTrialEvent("STAGE_RESULT", extraData: {
+    saveTrialEvent("STAGE_RESULT", extraData: {
       'result': result.toString(),
       'stageId': _currentStageId,
     });
@@ -100,30 +100,30 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
 
   Future<void> start(ExperimentTrial trial) async {
     this.trial = trial;
-    this.saveTrialEvent("EXPERIMENT_START");
+    saveTrialEvent("EXPERIMENT_START");
     advanceToStage(startingStageId);
   }
 
   ExperimentTrial? end() {
-    this.saveTrialEvent("EXPERIMENT_END");
+    saveTrialEvent("EXPERIMENT_END");
     currentStage.onExit();
     return trial;
   }
 
   void reset() {
-    this.saveTrialEvent("EXPERIMENT_RESET");
+    saveTrialEvent("EXPERIMENT_RESET");
     currentStage.onExit();
     advanceToStage(startingStageId);
   }
 
   void finish() {
-    this.saveTrialEvent("EXPERIMENT_FINISH");
+    saveTrialEvent("EXPERIMENT_FINISH");
     currentStage.onExit();
     advanceToStage(finalStageId);
   }
 
   void abort() {
-    this.saveTrialEvent("EXPERIMENT_ABORT");
+    saveTrialEvent("EXPERIMENT_ABORT");
     currentStage.onExit();
     advanceToStage(abortStageId);
   }

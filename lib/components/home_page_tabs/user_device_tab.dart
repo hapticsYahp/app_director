@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wifi_app/components/user_device_tab_forms/subject_form.dart';
+import 'package:yahp_director/components/user_device_tab_forms/subject_form.dart';
 import '../user_device_tab_forms/device_form.dart';
 
 class UserDeviceTab extends StatefulWidget {

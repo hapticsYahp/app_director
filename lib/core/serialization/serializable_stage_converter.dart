@@ -1,10 +1,12 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:wifi_app/core/experiment/experiment_stage.dart';
-import 'package:wifi_app/core/experiment/experiment_stage_confirm.dart';
-import 'package:wifi_app/core/experiment/experiment_stage_delay.dart';
-import 'package:wifi_app/core/experiment/experiment_stage_feedback.dart';
-import 'package:wifi_app/core/experiment/experiment_stage_message.dart';
-import 'package:wifi_app/core/experiment/experiment_stage_wait.dart';
+import 'package:yahp_director/core/experiment/experiment_stage.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_confirm.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_delay.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_feedback.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_message.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_wait.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_select.dart';
+import 'package:yahp_director/core/experiment/experiment_stage_shuffle.dart';
 import 'base_converter.dart';
 
 class ExperimentStageConverter extends BaseConverter
@@ -26,6 +28,10 @@ class ExperimentStageConverter extends BaseConverter
         return ExperimentStageMessage.fromJson(json, fromJsonString);
       case ExperimentStageWait.jsonType:
         return ExperimentStageWait.fromJson(json, fromJsonString);
+      case ExperimentStageSelect.jsonType:
+        return ExperimentStageSelect.fromJson(json, fromJsonString);
+      case ExperimentStageShuffle.jsonType:
+        return ExperimentStageShuffle.fromJson(json, fromJsonString);
       default:
         throw ArgumentError('Unknown ExperimentStage Json Type: $type');
     }

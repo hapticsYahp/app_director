@@ -1,4 +1,4 @@
-import 'package:wifi_app/core/graph/trigger.dart';
+import 'package:yahp_director/core/graph/trigger.dart';
 
 class ConditionRule<T_Node, T_Trigger_Input> {
   final T_Node origin;

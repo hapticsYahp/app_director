@@ -1,4 +1,4 @@
-import 'package:wifi_app/core/graph/trigger.dart';
+import 'package:yahp_director/core/graph/trigger.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'trigger_always.g.dart';

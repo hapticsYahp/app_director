@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:wifi_app/core/experiment/experiment_stage.dart';
+import 'package:yahp_director/core/experiment/experiment_stage.dart';
 import '../../components/experiment_stages/experiment_stage_wait_widget.dart';
 import '../serialization/icon_data_json_converter.dart';
 
@@ -18,6 +18,7 @@ class ExperimentStageWait<T_Result> extends ExperimentStage<T_Result> {
   final String waitFeedback;
   final String buttonLabel;
   final IconData buttonIcon;
+  final bool showProgressBar;
 
   ExperimentStageWait({
     required super.id,
@@ -30,6 +31,7 @@ class ExperimentStageWait<T_Result> extends ExperimentStage<T_Result> {
     this.waitFeedback = "Time:",
     this.buttonLabel = "Feedback",
     this.buttonIcon = Icons.thumb_up,
+    this.showProgressBar = true,
     super.pomaCommands = const {},
   });
 

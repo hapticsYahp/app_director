@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:wifi_app/core/experiment/experiment_stage.dart';
+import 'package:yahp_director/core/experiment/experiment_stage.dart';
 import '../../components/experiment_stages/experiment_stage_delay_widget.dart';
 
 part 'experiment_stage_delay.g.dart';
@@ -15,6 +15,7 @@ class ExperimentStageDelay<T_Result> extends ExperimentStage<T_Result> {
   final int maxDelayMs;
   final int tickProgressMs;
   final String delayFeedback;
+  final bool showProgressBar;
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   late int delayMs;
@@ -28,16 +29,17 @@ class ExperimentStageDelay<T_Result> extends ExperimentStage<T_Result> {
     this.maxDelayMs = 10_000,
     this.tickProgressMs = 100,
     this.delayFeedback = "Starting in...",
+    this.showProgressBar = true,
     super.pomaCommands = const {},
   });
 
   void _randomizeDelay() {
-    final random = Random();
-    this.delayMs =
-        this.minDelayMs + random.nextInt(this.maxDelayMs - this.minDelayMs);
-    experiment?.saveTrialEvent("TRIAL_ENV", extraData: {
-      'delayMs': this.delayMs,
-    });
+    delayMs = minDelayMs;
+    final range = maxDelayMs - minDelayMs;
+    if (range > 0) {
+      delayMs = delayMs + Random().nextInt(range);
+    }
+    experiment?.saveTrialEvent("TRIAL_ENV", extraData: {'delayMs': delayMs});
   }
 
   @override
@@ -61,8 +63,7 @@ class ExperimentStageDelay<T_Result> extends ExperimentStage<T_Result> {
   factory ExperimentStageDelay.fromJson(
     Map<String, dynamic> json,
     T_Result Function(Object? json) fromJsonTResult,
-  ) =>
-      _$ExperimentStageDelayFromJson(json, fromJsonTResult);
+  ) => _$ExperimentStageDelayFromJson(json, fromJsonTResult);
 
   @override
   Map<String, dynamic> toJson(Object? Function(T_Result value) toJsonTResult) =>

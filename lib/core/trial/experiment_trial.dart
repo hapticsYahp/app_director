@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wifi_app/core/trial/device_trial.dart';
-import 'package:wifi_app/core/trial/subject_trial.dart';
+import 'package:yahp_director/core/trial/device_trial.dart';
+import 'package:yahp_director/core/trial/subject_trial.dart';
 import '../experiment/experiment.dart';
 
 class ExperimentTrial {
