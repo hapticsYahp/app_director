@@ -14,11 +14,11 @@ completion of which triggers the evaluation of the graph to determine the next s
 
 An experiment in Yahp! Director is defined by four fundamental parts:
 
-1. **Metadata**: Unique identifier, titles, and operational descriptions.
-2. **Stages**: Atomic units of interaction that define the user interface and haptic behavior over a time interval.
-3. **Transition Graph**: A conditional directed graph that orchestrates the flow of the experiment based on the results
+1. **Metadata**: unique identifier, titles, and operational descriptions.
+2. **Stages**: atomic units of interaction that define the user interface and haptic behavior over a time interval.
+3. **Transition Graph**: a conditional directed graph that orchestrates the flow of the experiment based on the results
    produced by the stages.
-4. **Checkpoints**: Explicit definitions for the initial stage, successful completion, and abort.
+4. **Checkpoints**: explicit definitions for the initial stage, successful completion, and abort.
 
 ## Technical and Functional Specification
 
