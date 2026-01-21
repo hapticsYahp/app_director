@@ -1,57 +1,49 @@
-# Definición de Experimentos
+# Experiments Definition
 
-## Experimento
+## Experiment
 
-### Definición
+### Definition
 
-Un **Experimento** es la configuración de un ensayo ejecutable y repetible.
-La ejecución del Experimento se puede ver como el flujo de una máquina de estados,
-en donde cada estado es una **Etapa** del Experimento. En todo momento durante la ejecución del Experimento
-estará activa una y solo una de sus Etapas.
-Las reglas que determinan el pasaje entre una y otra Etapa de un Experimento (es decir, el flujo) se denominan *
-*Transiciones**.
+An **Experiment** is the configuration of an executable and repeatable trial.
+The execution of the Experiment can be viewed as the flow of a state machine, where each state is a **Stage** of the
+Experiment. At any given time during the execution of the Experiment, one and only one of its Stages will be active.
+The rules that determine the transition between one Stage and another of an Experiment (i.e., the flow) are called
+*Transitions*.
 
-El Experimento no posee comportamiento propio más allá de transicionar entre Etapas y comunicarse con el dispositivo
-háptico.
-El comportamiento específico que observa el usuario está determinado por las Etapas.
+The Experiment has no inherent behavior beyond transitioning between Stages and communicating with a haptic device.
+The Stages determine the specific behavior observed by the user.
 
-Una vez que una Etapa es activada, el comportamiento general es presentar al usuario los controles propios de su tipo y
-permitir la interacción con estos.
-La Etapa permanecerá activa hasta tanto algo en su comportamiento interno lance un **Resultado**. Este Resultado es
-interpretado dentro del Experimento y usado como input en las Transiciones definidas a fin de elegir la próxima Etapa a
-activar.
+Once a Stage is activated, its general behavior is to present the user with the controls specific to its type and
+allow interaction with them.
+The Stage will remain active until something in its internal behavior triggers a **Result**. This Result is
+interpreted within the Experiment and used as input in the defined Transitions to select the next Stage to
+activate.
 
-#### Estado del Experimento
+#### Experiment State
 
-El Experimento se considera en estado "activo" siempre que exista al menos una Transición cuyo origen sea la Etapa
-actual.
-Es decir, que sería posible avanzar a una siguiente Etapa. Esto no toma en consideración detalles internos de la
-Transición (solo se valida que haya una, aunque sea inválida o irrelevante en el contexto particular del ensayo actual).
+The Experiment is considered to be in an "active" state as long as there is at least one Transition originating from the
+current Stage. That is, it would be possible to advance to the next Stage. This does not take into account internal
+details of the Transition (it only validates that there is one, even if it is invalid or irrelevant in the particular
+context of the current trial).
 
-El Experimento se considera en estado "finalizado" cuando se activa una Etapa para la cual no existen Transiciones que
-la tengan como origen.
-Es decir, que ya no es posible avanzar a una siguiente Etapa.
+The Experiment is considered to be in a "finished" state when a Stage is activated for which there are no Transitions
+originating from it. That is, it is no longer possible to advance to the next Stage.
 
-Mientras el Experimento esté "activo" se pueden realizar las siguientes operaciones especiales: reiniciar, finalizar, y
-abortar.
-Al efectuar alguna de estas operaciones, en todos los casos se finalizará la Etapa activa actual y se alterará el flujo
-normal del Experimento.
-La Etapa que resultará activa luego de realizar la operación será:
+While the Experiment is "active" the following special operations can be performed: restart, finish, and abort.
+When performing any of these operations, the currently active Stage will always be terminated, and the normal flow of
+the Experiment will be altered.
+The Stage that will become active after performing the operation will be:
 
-* para la operación de "reiniciar", la etapa "inicial";
-* para la operación de "finalizar", la etapa "final";
-* para la operación de "abortar", la etapa "de aborto".
+* for the "restart" operation, the "initial" stage;
+* For the "finish" operation, the "finish" stage;
+* For the "abort" operation, the "abort" stage.
 
-El experimento podría continuar según las Transiciones que tenga configuradas.
+The experiment could continue depending on the Transitions configured.
 
-### Propiedades
+### Properties
 
-Un **Experimento** consta de las siguientes propiedades:
+An **Experiment** consists of the following properties:
 
-* **ID**: un identificador único del Experimento.
-  No se debe repetir entre todos los Experimentos del sistema.
-  No es visible al usuario.
-* **Título**: una descripción corta. Visible al usuario.
 * **Descripción**: un texto descriptivo. Visible al usuario.
 * **Etapas**: el conjunto de **Etapas** por las que puede pasar cada ensayo.
   Dentro del Experimento, cada Etapa es identificada por una Referencia única.
@@ -61,7 +53,19 @@ Un **Experimento** consta de las siguientes propiedades:
 * **Etapa de aborto**: la Etapa (perteneciente al conjunto de Etapas) que se debe visualizar cuando el Experimento es
   abortado.
 
-### Representación JSON
+* **ID**: a unique identifier for the Experiment. It must not be repeated among all Experiments in the system. It is not
+  visible to the user.
+* **Title**: a short description. Visible to the user.
+* **Description**: a descriptive text. Visible to the user.
+* **Stages**: the set of **Stages** that each trial can go through. Within the Experiment, each Stage is identified by a
+  unique Reference.
+* **Transitions**: the set of **Rules** that define the execution flow of the trial.
+* **Start Stage**: the Stage (belonging to the set of Stages) that should be displayed at the beginning of the
+  Experiment.
+* **End Stage**: the Stage (belonging to the set of Stages) that should be displayed when the Experiment ends.
+* **Abort Stage**: The Stage (belonging to the set of Stages) that must be visualized when the Experiment is aborted.
+
+### JSON Representation
 
 ```json
 {
@@ -70,19 +74,19 @@ Un **Experimento** consta de las siguientes propiedades:
   "description": "Experiment description. Lorem ipsum dolor sit amet, ...",
   "stages": {
     "ref_etapa_1": {
-      /* ... Definición Etapa 1 ... */
+      /* ... Definition Stage 1 ... */
     },
     "ref_etapa_2": {
-      /* ... Definición Etapa 2 ... */
+      /* ... Definition Etapa 2 ... */
     },
-    /* ... Otras Etapas ... */
+    /* ... Other Stages ... */
     "ref_etapa_n": {
-      /* ... Definición Etapa N ... */
+      /* ... Definition Etapa N ... */
     }
   },
   "transitions": {
     "rules": [
-      /* ... Reglas de Transición ... */
+      /* ... Transition Rules ... */
     ]
   },
   "startingStageId": "ref_etapa_1",
@@ -91,23 +95,23 @@ Un **Experimento** consta de las siguientes propiedades:
 }
 ```
 
-## Etapa
+## Stage
 
-### Definición
+### Definition
 
-Una **Etapa** es un estado en el que puede estar un Experimento en un momento dado. Es una porción del flujo del
-Experimento, que tiene un inicio y un fin, y puede repetirse.
+A **Stage** is a state that an Experiment can be in at any given time. It is a portion of the Experiment's flow, with a
+beginning and an end, and it can be repeated.
 
-Hay diferentes tipos de Etapa, cada uno define:
+There are different types of Stages, each defining:
 
-* lo que visualiza el usuario en pantalla, en particular los controles con los que puede interactuar;
-* el evento que marca la salida de la Etapa (es decir, arrojar un resultado, lo cual implica la transición a la
-  siguiente Etapa); y
-* el comportamiento del Experimento durante la Etapa.
+* what the user sees on the screen, specifically the controls they can interact with;
+* the event that marks the exit from the Stage (i.e., producing a result, which implies the transition to the next
+  Stage); and
+* the Experiment's behavior during the Stage.
 
-### Propiedades básicas
+### Basic Properties
 
-Toda **Etapa** consta de las siguientes propiedades básicas:
+Every **Stage** consists of the following basic properties:
 
 * **ID**: un identificador único de la Etapa. No se debe repetir entre todas las Etapas de todos los Experimentos.
 * **Tipo**: el tipo específico de Etapa.
@@ -116,9 +120,16 @@ Toda **Etapa** consta de las siguientes propiedades básicas:
 * **Comandos PoMA**: un conjunto de pares Evento-Comando que se usarán durante el transcurso de la Etapa. Cuando ocurra
   cada Evento, se enviará el Comando correspondiente al dispositivo PoMA conectado con el Experimento (pulsera háptica).
 
-Cada *tipo* de Etapa define propiedades adicionales.
+* **ID**: a unique identifier for the Stage. It must not be repeated across all Stages in all Experiments.
+* **Type**: the specific type of Stage.
+* **Title**: a short description. Visible to the user. Depending on the *type*, it has different default values.
+* **Description**: a descriptive text, visible to the user. Depending on the *type*, it has different default values.
+* **PoMA Commands**: a set of Event-Command pairs that will be used during the Stage. When each Event occurs, the
+  corresponding Command will be sent to the PoMA device connected to the Experiment (haptic wristband).
 
-### Representación JSON básica
+Each *type* of Stage defines additional properties.
+
+### Basic JSON representation
 
 ```json
 {
@@ -127,28 +138,27 @@ Cada *tipo* de Etapa define propiedades adicionales.
   "description": "Stage description. Lorem ipsum dolor sit amet, ...",
   "pomaCommands": {
     "ENTER": "= enabled_motors 1,1,0,0,0,0",
-    /* ... Otros pares Evento-Comando ... */
+    /* ... Other Event-Command pairs ... */
     "EXIT": "= enabled_motors 0,0,0,0,0,0"
   },
-  "$_class": "__TIPO_DE_LA_ETAPA__"
+  "$_class": "<<STAGE_TYPE>>"
 }
 ```
 
-### Tipos de Etapas
+### Types of Stages
 
-#### Confirmar
+#### Confirm
 
-El comportamiento de esta Etapa es presentar al usuario un botón de confirmación.
-La Etapa lanza un resultado fijo (y, por lo tanto, finaliza) cuando el usuario presiona el botón (es decir, cuando
-confirma).
+The behavior of this Stage is to present the user with a confirmation button.
+The Stage returns a fixed result (and therefore ends) when the user presses the button (i.e., when they confirm).
 
-Las propiedades adicionales de Etapas Confirmar son:
+The additional properties of Confirm Stages are:
 
-* **Resultado**: el valor del Resultado que se lanza al confirmar.
-* **Etiqueta**: el texto del botón de confirmación. Por defecto, `Start`.
-* **Ícono**: el ícono que acompaña el botón. Por defecto, ícono de "play" (triángulo).
+* **Result**: the value of the Result returned upon confirmation.
+* **Label**: the text of the confirmation button. By default, `Start`.
+* **Icon**: the icon that goes with the button. By default, a "play" icon (triangle).
 
-##### Representación JSON
+##### JSON Representation
 
 ```json
 {
@@ -159,21 +169,20 @@ Las propiedades adicionales de Etapas Confirmar son:
 }
 ```
 
-#### Demorar
+#### Delay
 
-El comportamiento de esta Etapa es visualizar una barra de progreso que se irá completando a medida que pasa el tiempo.
-Luego de transcurrido una cantidad de tiempo determinada (configurable), la Etapa lanza un resultado fijo.
+The behavior of this Stage is to display a progress bar that fills up as time passes.
+After a predetermined (configurable) amount of time has elapsed, the Stage returns a fixed result.
 
-Las propiedades adicionales de Etapas Demorar son:
+The additional properties of Delay Stages are:
 
-* **Resultado**: el valor del Resultado que se lanza al completarse el tiempo.
-* **Demora**: la cantidad de tiempo (en milisegundos) que se debe demorar. Por defecto, `10.000`.
-* **Tick**: la cantidad de tiempo (en milisegundos) que debe transcurrir antes de actualizar la barra de progreso. Por
-  defecto, `100`.
-* **Feedback**: el texto que acompaña a la barra de progreso. Por defecto, `Starting in...`.
-* **Mostrar Barra de Progreso**: un booleano que indica si se debe visualizar la barra de progreso. Por defecto, `true`.
+* **Result**: the value of the Result returned when the time is up.
+* **Delay**: the amount of time (in milliseconds) to delay. Default: `10,000`.
+* **Tick**: the amount of time (in milliseconds) to elapse before updating the progress bar. Default: `100`.
+* **Feedback**: the text that goes with the progress bar. Default: `Starting in...`.
+* **Show Progress Bar**: a boolean value indicating whether the progress bar should be displayed. Default: `true`.
 
-##### Representación JSON
+##### JSON Representation
 
 ```json
 {
@@ -186,25 +195,24 @@ Las propiedades adicionales de Etapas Demorar son:
 }
 ```
 
-#### Esperar
+#### Wait
 
-El comportamiento de esta Etapa es similar al de Demorar, con la diferencia de que se visualiza además un botón.
-La etapa lanza un resultado fijo cuando se alcanza una cantidad de tiempo determinada; y se lanza otro resultado fijo
-si el usuario presiona el botón.
+The behavior of this Stage is similar to that of the Delay stage, with the difference that a button is also displayed.
+The stage returns a fixed result when a certain amount of time has elapsed; and another fixed result is returned if the
+user presses the button.
 
-Las propiedades adicionales de Etapas Esperar son:
+The additional properties of Wait Stages are:
 
-* **Resultado Timeout**: el valor del Resultado que se lanza al completarse el tiempo.
-* **Resultado Feedback**: el valor del Resultado que se lanza al presionar el botón.
-* **Espera**: la cantidad de tiempo (en milisegundos) que se debe esperar. Por defecto, `10.000`.
-* **Tick**: la cantidad de tiempo (en milisegundos) que debe transcurrir antes de actualizar la barra de progreso. Por
-  defecto, `100`.
-* **Feedback**: el texto que acompaña a la barra de progreso. Por defecto, `Time:`.
-* **Etiqueta**: el texto del botón. Por defecto, `Feedback`.
-* **Ícono**: el ícono que acompaña el botón. Por defecto, ícono de "pulgar arriba".
-* **Mostrar Barra de Progreso**: un booleano que indica si se debe visualizar la barra de progreso. Por defecto, `true`.
+* **Timeout Result**: the value of the Result returned when the time is up.
+* **Feedback Result**: the value of the Result returned when the button is pressed.
+* **Wait**: the amount of time (in milliseconds) to wait. Default: `10,000`.
+* **Tick**: the amount of time (in milliseconds) to elapse before updating the progress bar. Default: `100`.
+* **Feedback**: the text that goes with the progress bar. Default: `Time:`.
+* **Label**: the text of the button. Default: `Feedback`.
+* **Icon**: the icon that goes with the button. By default, a "thumbs up" icon.
+* **Show Progress Bar**: a boolean value indicating whether the progress bar should be displayed. By default, `true`.
 
-##### Representación JSON
+##### JSON Representation
 
 ```json
 {
@@ -222,31 +230,30 @@ Las propiedades adicionales de Etapas Esperar son:
 
 #### Feedback
 
-El comportamiento de esta Etapa es presentar al usuario dos botones para dar feedback: un botón es afirmativo y otro
-negativo.
-Si el usuario presiona el botón afirmativo, se le presenta una escala de valores (configurable) y un tercer botón. Al
-presionar este tercer botón la Etapa lanza como resultado el valor seleccionado en la escala.
-Si, por lo contrario, el usuario presiona el botón negativo, entonces la Etapa lanza como resultado el valor mínimo de
-la
-escala (sin presentar la escala ni el tercer botón)
+The behavior of this Stage is to present the user with two buttons for providing feedback: one for affirmation and one
+for negation.
+If the user presses the affirmation button, a (configurable) scale of values and a third button are presented. Pressing
+this third button results in the Stage returning the selected value on the scale.
+Conversely, if the user presses the negation button, the Stage returns the minimum value on the scale (without
+presenting the scale or the third button).
 
-Las propiedades adicionales de Etapas Feedback son:
+Additional properties of Feedback Stages are:
 
-* **Valor Mínimo**: el valor mínimo seleccionable de la escala. Por defecto, `0`.
-* **Valor Máximo**: el valor máximo seleccionable de la escala. Por defecto, `10`.
-* **Valor Inicial**: el valor inicialmente seleccionado en la escala. Por defecto, `5`.
-* **Etiqueta Positiva**: el texto del botón afirmativo. Por defecto, `Yes`.
-* **Etiqueta Negativa**: el texto del botón negativo. Por defecto, `No`.
-* **Feedback**: el texto que acompaña a la escala de valores. Por defecto, `Indicate the perceived intensity:`.
-* **Etiqueta Confirmación**: el texto del botón final de confirmación. Por defecto, `Confirm`.
-* **Ícono Positivo**: el ícono que acompaña al botón positivo. Por defecto, ícono de "pulgar arriba".
-* **Ícono Negativo**: el ícono que acompaña al botón negativo. Por defecto, ícono de "pulgar abajo".
-* **Ícono Confirmación**: el ícono que acompaña al botón de confirmación. Por defecto, ícono de "marca de tilde".
-* **Generador de Resultado**: una función que traduce los resultados numéricos de la escala a los Resultados que lanza
-  la Etapa.
-* **Resultado Por Defecto**: el Resultado que se lanza si no se define una función *Generador de Resultado*.
+* **Minimum Value**: the minimum selectable value on the scale. Default is `0`.
+* **Maximum Value**: the maximum selectable value on the scale. Default is `10`.
+* **Initial Value**: the value initially selected on the scale. Default is `5`.
+* **Positive Label**: the text of the affirmation button. Default is `Yes`.
+* **Negative Label**: the text of the negative button. By default, `No`.
+* **Feedback**: the text accompanying the scale. By default, `Indicate the perceived intensity:`.
+* **Confirmation Label**: the text of the final confirmation button. By default, `Confirm`.
+* **Positive Icon**: the icon that goes with the positive button. By default, a "thumbs up" icon.
+* **Negative Icon**: the icon that goes with the negative button. By default, a "thumbs down" icon.
+* **Confirmation Icon**: the icon that goes with the confirmation button. By default, a "checkmark" icon.
+* **Result Generator**: a function that translates the numerical results of the scale into the Results that the Stage
+  returns.
+* **Default Result**: the Result that is returned if a *Result Generator* function is not defined.
 
-##### Representación JSON
+##### JSON Representation
 
 ```json
 {
@@ -263,41 +270,40 @@ Las propiedades adicionales de Etapas Feedback son:
   "negativeIcon": 58968,
   "confirmIcon": 57686,
   "resultGenerator": {
-    "$_class": "__TIPO_DE_GENERADOR__"
+    "$_class": "<<RESULT_GENERATOR_TYPE>>"
   }
 }
 ```
 
-#### Selección (Select)
+#### Select
 
-El comportamiento de esta Etapa es presentar al usuario una lista de opciones para seleccionar. Permite tanto selección
-única como múltiple, y las opciones pueden ser visualizadas como texto o imágenes.
-Al confirmar la selección, la Etapa lanza como resultado el valor de la opción seleccionada (o los valores concatenados
-por `;` en caso de selección múltiple).
+The behavior of this Stage is to present the user with a list of options to select. It allows both single and multiple
+selections, and the options can be displayed as text or images.
+Upon confirmation of the selection, the Stage returns the value of the selected option (or the values concatenated by
+`;` in the case of multiple selection).
 
-Las propiedades adicionales de Etapas Selección son:
+The additional properties of Selection Stages are:
 
-* **Pregunta**: el texto de la pregunta o instrucción que se visualiza al usuario. Por defecto, `Select an option:`.
-* **Selección Múltiple**: un booleano que indica si se permite seleccionar más de una opción. Por defecto, `false`.
-* **Barajar Opciones**: un booleano que indica si las opciones deben presentarse en orden aleatorio. Por defecto,
+* **Question**: the text of the question or instruction displayed to the user. By default, `Select an option:`.
+* **Multiple Selection**: a boolean value indicating whether more than one option can be selected. By default, `false`.
+* **Shuffle Options**: a boolean value indicating whether the options should be presented in random order. By default,
   `false`.
-* **Opciones**: una lista de objetos que definen las opciones disponibles
-  (ver [Opciones de Selección](#opciones-de-selección)).
-* **Etiqueta Confirmar**: el texto del botón de confirmación. Por defecto, `Confirm`.
-* **Ícono Confirmar**: el ícono que acompaña al botón de confirmación. Por defecto, ícono de "tilde".
-* **Etiqueta Limpiar**: el texto del botón para limpiar la selección. Por defecto, `Clear`.
-* **Ícono Limpiar**: el ícono que acompaña al botón de limpiar. Por defecto, ícono de "X".
+* **Options**: a list of objects that define the available options (see [Selection Options](#selection-options)).
+* **Confirm Label**: the text of the confirmation button. Default: `Confirm`.
+* **Confirm Icon**: the icon that goes with the confirmation button. Default: a "checkmark" icon.
+* **Clear Label**: the text of the button to clear the selection. Default: `Clear`.
+* **Clear Icon**: the icon that goes with the clear button. Default: an "X" icon.
 
-##### Opciones de Selección
+##### Selection Options
 
-Cada objeto dentro de la lista de **Opciones** consta de las siguientes propiedades:
+Each object within the **Options** list consists of the following properties:
 
-* **Etiqueta**: el texto descriptivo de la opción.
-* **Valor**: el valor que será lanzado como resultado si se selecciona esta opción.
-* **Imagen**: opcional. Una ruta a un recurso de imagen (puede ser un asset local como `assets/...` o una URL
-  remota `https://...`). Si se provee una imagen, esta se visualizará en lugar de la etiqueta de texto.
+* **Label**: the descriptive text for the option.
+* **Value**: the value that will be returned as a result if this option is selected.
+* **Image**: optional. A path to an image resource (this can be a local asset such as `assets/...` or a remote URL such
+  as `https://...`). If an image is provided, it will be displayed instead of the text label.
 
-##### Representación JSON
+##### JSON Representation
 
 ```json
 {
@@ -323,18 +329,18 @@ Cada objeto dentro de la lista de **Opciones** consta de las siguientes propieda
 }
 ```
 
-#### Mensaje
+#### Message
 
-El comportamiento de esta Etapa es presentar al usuario un mensaje sin ningún otro control accionable.
-Esta etapa no lanza nunca un resultado, de modo que nunca termina. La única forma de terminar sería reiniciar,
-finalizar o abortar el Experimento.
+The behavior of this Stage is to present the user with a message without any other actionable controls.
+This stage never returns a result, so it never ends. The only way to end it would be to restart, finish, or abort the
+Experiment.
 
-Las propiedades adicionales de Etapas Mensaje son:
+The additional properties of Message Stages are:
 
-* **Resultado**: el valor del Resultado que se lanza al finalizar la Etapa (solo posible de manera externa).
-* **Mensaje**: el texto de mensaje que se visualiza al usuario. Por defecto, `Thank you.`.
+* **Result**: the value of the Result that is returned when the Stage ends (only possible externally).
+* **Message**: the message text displayed to the user. By default, `Thank you.`.
 
-##### Representación JSON
+##### JSON Representation
 
 ```json
 {
@@ -344,55 +350,53 @@ Las propiedades adicionales de Etapas Mensaje son:
 }
 ```
 
-#### Randomización (Shuffle)
+#### Shuffle
 
-Esta Etapa especial permite ejecutar un conjunto (pool) de etapas en orden aleatorio. El comportamiento es redirigir
-automáticamente a la siguiente etapa del pool que no haya sido visitada aún.
+This special Stage allows you to execute a pool of stages in random order. Its behavior is to automatically redirect to
+the next stage in the pool that has not yet been visited.
 
-Para que el ciclo funcione, las etapas contenidas en el pool deben tener reglas de transición que las devuelvan a la
-etapa de randomización al finalizar. Una vez que todas las etapas del pool han sido visitadas, la etapa de randomización
-lanza un resultado final para continuar con el flujo normal.
+For the cycle to work, the stages in the pool must have transition rules that return them to the randomization stage
+upon completion. Once all stages in the pool have been visited, the Shuffle Stage returns a final result to continue the
+normal flow.
 
-Las propiedades adicionales de Etapas Randomización son:
+Additional properties of Shuffle Stages are:
 
-* **Etapas**: una lista de identificadores (referencias) de las etapas que deben ser ejecutadas en orden aleatorio.
-* **Resultado**: el valor del Resultado que se lanza una vez que se han completado todas las etapas del pool.
+* **Stages**: a list of the identifiers (references) of the stages in the pool.
+* **Result**: the value of the Result that is returned once all stages in the pool have been completed.
 
-##### Representación JSON
+##### JSON Representation
 
 ```json
 {
   "$_class": "shuffle",
   "stages": [
-    "etapa_a",
-    "etapa_b",
-    "etapa_c"
+    "stage_a",
+    "stage_b",
+    "stage_c"
   ],
   "completionResult": "POOL_COMPLETED"
 }
 ```
 
-### Eventos / Ciclo de vida de Etapas
+### Events / Stages Lifecycle
 
-Durante el transcurso de una Etapa ocurren Eventos. Hay dos Eventos que transcurren en toda Etapa:
-cuando se activa (y, por lo tanto, se ingresa a) una Etapa, ocurre el evento "ENTER"; mientras que cuando la etapa
-finaliza, ocurre el evento "EXIT".
+Events occur during the lifecycle a Stage. There are two Events that occur in every Stage: when a Stage is activated
+(and therefore entered), the "ENTER" event occurs; while when the stage ends, the "EXIT" event occurs.
 
-En las etapas de tipo Demorar y Esperar, dado que interactúan con el tiempo transcurrido, ocurren también eventos
-"TICK_XXXX", siendo "XXXX" los milisegundos transcurridos desde el inicio de la etapa. Por ejemplo, los eventos
-`TICK_1000` y `TICK_5000` sucederán: el primero, transcurrido un segundo desde el inicio de la Etapa; y luego,
-transcurridos cuatro segundos más, el segundo.
+In Delay and Wait stages, since they interact with elapsed time, "TICK_XXXX" events also occur, where "XXXX" is the
+number of milliseconds elapsed since the start of the stage. For example, the events "TICK_1000" and "TICK_5000" will
+occur: the first one second after the start of the Stage; and then, four seconds later, the second.
 
-Actualmente, estos son los únicos Eventos posibles. A futuro, cada tipo de Etapa podría definir Eventos propios.
+Currently, these are the only possible events. In the future, each Stage type could define its own events.
 
-### Comandos PoMA
+### PoMA Commandos
 
-Para toda Etapa se puede definir un conjunto de comandos PoMA.
-Cada comando se asocia a un Evento; de modo tal que al momento de ocurrir dicho Evento el Experimento contenedor de la
-Etapa se encargará de enviar el comando al dispositivo PoMA conectado. En caso que no hubiera un dispositivo conectado
-al momento de ocurrir el Evento, entonces no se enviará el comando correspondiente.
+A set of PoMA commands can be defined for each Stage.
+Each command is associated with an Event; therefore, when that Event occurs, the Experiment containing the Stage will
+send the command to the connected PoMA device. If no device is connected when the Event occurs, the command will not be
+sent.
 
-Ejemplo, si se definen los siguientes pares Evento-Comando:
+For example, if the following Event-Command pairs are defined:
 
 ```json
 {
@@ -410,46 +414,50 @@ Al entrar en la Etapa se enviará el comando PoMA `= enabled_motors 1,1,0,0,0,0`
 enviará el comando `= intensity 50,50`; transcurridos cuatro segundos más se enviará `= intensity 0,0`; finalmente, al
 salir de la Etapa, se enviará, `= enabled_motors 0,0,0,0,0,0`.
 
-## Regla de Transición
+Upon entering the Stage, the command PoMA `= enabled_motors 1,1,0,0,0,0` will be sent; then, after one second, the
+command `= intensity 50,50` will be sent; after four more seconds, `= intensity 0,0` will be sent; finally, upon exiting
+the Stage, `= enabled_motors 0,0,0,0,0,0` will be sent.
 
-Una **Regla de Transición** define una decisión dentro del flujo de un Experimento. La Regla se compone de una Etapa
-origen, una etapa destino, y una condición de activación, la cual es una función booleana.
+## Transition Rules
 
-Al finalizar una Etapa se evalúan, en orden, todas las Reglas del Experimento que tengan a dicha etapa como "origen".
-La evaluación consiste en invocar la función condición de activación mencionada.
-La primera Regla que dé como resultado `TRUE` se utilizará para determinar la siguiente Etapa a activar (la etapa
-"destino"); omitiéndose evaluar las Reglas restantes. La función condición se invoca utilizando el resultado de la Etapa
-como input.
+A **Transition Rule** defines a decision within the flow of an Experiment. The Rule consists of an origin Stage, a
+destination Stage, and an activation condition, which is a boolean function.
 
-Existen distintos tipos de función condición.
+Upon completion of a Stage, all Rules of the Experiment that have that stage as their "origin" are evaluated in order.
+The evaluation consists of invoking the aforementioned activation condition function.
+The first Rule that results in `TRUE` will be used to determine the next stage to activate (the "destination" stage);
+the remaining Rules are not evaluated. The condition function is invoked using the result of the Stage as input.
 
-### Propiedades
+There are different types of condition functions.
 
-Una **Regla** consta de las siguientes propiedades:
+### Properties
 
-* **Origen**: la referencia de la Etapa "origen" dentro del Experimento.
-* **Destino**: la referencia de la Etapa "destino" dentro del Experimento.
-* **Función Condición**: el tipo específico de función condición que se debe invocar para evaluar la transición.
+A **Rule** consists of the following properties:
 
-### Representación JSON
+* **Origin**: the reference to the "origin" Stage within the Experiment.
+* **Destination**: the reference to the "destination" Stage within the Experiment.
+* **Condition Function**: the specific type of condition function that must be invoked to evaluate the transition.
+
+### JSON Representation
 
 ```json
 {
-  "origin": "ref_etapa_origen",
+  "origin": "ref_stage_origin",
   "trigger": {
-    "$_class": "__TIPO_DE_FUNCION_CONDICION__"
+    "$_class": "<<CONDITION_FUNCTION_TYPE>>"
   },
-  "destination": "ref_etapa_destino"
+  "destination": "ref_stage_destination"
 }
 ```
 
-### Tipos de Función Condición
+### Types of Condition Functions
 
-#### Siempre
+#### Always
 
-Esta función ignora el input recibido y siempre evalúa `TRUE`. De modo que nunca se evaluarán Reglas posteriores a esta.
+This function ignores the received input and always evaluates to `TRUE`. Therefore, Rules subsequent to this one will
+never be evaluated.
 
-##### Representación JSON
+##### JSON Representation
 
 ```json
 {
@@ -457,12 +465,12 @@ Esta función ignora el input recibido y siempre evalúa `TRUE`. De modo que nun
 }
 ```
 
-#### Nunca
+#### Never
 
-Esta función ignora el input recibido y siempre evalúa `FALSE`. De modo que la transición que corresponda con esta regla
-nunca se ejecutará.
+This function ignores the received input and always evaluates to `FALSE`. Therefore, the transition corresponding to
+this rule will never be executed.
 
-##### Representación JSON
+##### JSON Representation
 
 ```json
 {
@@ -470,45 +478,45 @@ nunca se ejecutará.
 }
 ```
 
-#### Distinto
+#### Distinct
 
-Esta función toma un valor de referencia. Al momento de evaluar la función, se retorna `FALSE` si el input coincide con
-el valor de referencia. En cualquier otro caso, retorna `TRUE`.
+This function takes a reference value. When the function is evaluated, it returns `FALSE` if the input matches the
+reference value. Otherwise, it returns `TRUE`.
 
-##### Representación JSON
+##### JSON Representation
 
 ```json
 {
   "$_class": "distinct",
-  "notExpected": "valor_de_referencia"
+  "notExpected": "<<REFERENCE_VALUE>>"
 }
 ```
 
-#### Igual
+#### Equals
 
-Esta función es la inversa a la anterior. Se evalúa `TRUE` si y sólo si el input es igual al valor de referencia.
+This function is the inverse of the previous one. `TRUE` is evaluated if and only if the input is equal to the reference
+value.
 
-##### Representación JSON
+##### JSON Representation
 
 ```json
 {
   "$_class": "equals",
-  "expected": "valor_de_referencia"
+  "expected": "<<REFERENCE_VALUE>>"
 }
 ```
 
-#### Mayor
+#### Greater Than
 
-Esta función toma un valor numérico entero de referencia. Al momento de evaluar la función, se retorna `TRUE` si el
-input es *mayor* al valor de referencia, o `FALSE` en caso contrario.
+This function takes an integer reference value. When the function is evaluated, it returns `TRUE` if the input is
+*greater than* the reference value, or `FALSE` otherwise.
 
-Esta función tiene como requisito una función interna que convierta el input a valores numéricos comparables con el
-valor de referencia. Actualmente, la función por defecto es la única permitida; esta función retorna 0 para valores
-nulos, en caso de valores enteros retorna el valor dado, en caso de valores decimales los convierte a enteros, y para
-cualquier otro valor lo convierte a string y luego intenta parsearlo a entero, retorna el resultado del parseo o bien 0
-en caso de que falle el parseo.
+This function requires an internal function that converts the input to numeric values comparable to the reference
+value. Currently, the default function is the only one allowed; this function returns 0 for null values, returns the
+given value for integers, converts decimal values to integers, and for any other value, converts it to a string and
+then attempts to parse it to an integer, returning the parsing result or 0 if the parsing fails.
 
-##### Representación JSON
+##### JSON Representation
 
 ```json
 {
@@ -517,12 +525,12 @@ en caso de que falle el parseo.
 }
 ```
 
-#### Menor
+#### Lesser Than
 
-Esta función es equivalente a la función **Mayor**, con la diferencia que evalúa `TRUE` sólo si el input es *menor* que
-el valor de referencia dado.
+This function is equivalent to the **Greater Than** function, with the difference that it evaluates to `TRUE` only if
+the input is *less than* the given reference value.
 
-##### Representación JSON
+##### JSON Representation
 
 ```json
 {
@@ -531,15 +539,15 @@ el valor de referencia dado.
 }
 ```
 
-# Íconos
+# Icons
 
-Para tomar los valores numéricos de los íconos:
+To get the numerical values of the icons:
 
 [Google Icons](https://fonts.google.com/icons?icon.size=24&icon.color=%231f1f1f&icon.set=Material+Icons)
 
 [Flutter Material Icons](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart)
 
-# Definición pUML de un Experimento
+# pUML Definition of an Experiment *(WIP)*
 
 ```puml
 @startuml

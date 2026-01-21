@@ -1,145 +1,145 @@
 # Yahp! Director
 
-**Yahp!** (Yet Another Haptic Project) **Director** es un motor de orquestación y ejecución de ensayos
-experimentales diseñado para la investigación en interfaces hápticas. La plataforma permite la definición, serialización
-y ejecución de experimentos flexibles mediante una modelización en etapas (símil máquinas de estados) con transiciones
-entre ellas (grafos dirigidos condicionales).
+**Yahp!** (Yet Another Haptic Project) **Director** is an experimental orchestration and execution engine designed for
+haptic interface research. The platform allows the definition, serialization, and execution of flexible experiments
+through staged modeling (similar to state machines) with transitions between stages (conditional directed graphs).
 
-## Fundamentos del Sistema
+## System Fundamentals
 
-El sistema modela un experimento como un conjunto de estados discretos denominados **Etapas** (`Stages`) y un conjunto
-de reglas de control de flujo denominadas **Transiciones** (`Transitions`). La ejecución del ensayo garantiza que en
-todo
-momento exista una única etapa activa, cuya finalización dispara la evaluación del grafo para determinar el siguiente
-estado (etapa).
+The system models an experiment as a set of discrete states called **Stages** and a set of flow control rules called
+**Transitions**. The execution of the experiment ensures that at any given time there is only one active stage, the
+completion of which triggers the evaluation of the graph to determine the next state (stage).
 
-### Arquitectura de Experimentos
+### Experiment Architecture
 
-Un experimento en Yahp! Director se define mediante cuatro componentes fundamentales:
+An experiment in Yahp! Director is defined by four fundamental parts:
 
-1. **Metadatos**: Identificación única, títulos y descripciones operativas.
-2. **Etapas (`Stages`)**: Unidades atómicas de interacción que definen la interfaz de usuario y el comportamiento
-   háptico durante un intervalo de tiempo.
-3. **Grafo de Transiciones**: Un grafo dirigido condicional que orquesta el flujo del experimento basándose en los
-   resultados producidos por las etapas.
-4. **Puntos de Control**: Definiciones explícitas para la etapa inicial, de finalización exitosa y de aborto.
+1. **Metadata**: Unique identifier, titles, and operational descriptions.
+2. **Stages**: Atomic units of interaction that define the user interface and haptic behavior over a time interval.
+3. **Transition Graph**: A conditional directed graph that orchestrates the flow of the experiment based on the results
+   produced by the stages.
+4. **Checkpoints**: Explicit definitions for the initial stage, successful completion, and abort.
 
-## Especificación Técnica y Funcional
+## Technical and Functional Specification
 
-### Tipos de Etapas
+### Stage Types
 
-El motor soporta diversos tipos de etapas especializadas, cada una con un ciclo de vida propio y parámetros de
-configuración específicos:
+The engine supports various types of specialized stages, each with its own lifecycle and specific configuration
+parameters:
 
-- **Confirmación**: espera una acción explícita del usuario.
-- **Demora**: espera una cantidad de tiempo antes de continuar.
-- **Espera**: combina una espera temporal con la posibilidad de interrupción por parte del usuario.
-- **Feedback**: recolección de datos cuantitativos mediante escalas (ej.: un valor de 1 a 10).
-- **Selección**: presentación de opciones múltiples (texto o imagen) con soporte para aleatorización.
-- **Mensaje**: visualización de un mensaje estático sin controles de transición.
-- **Randomización**: orquestador de sub-flujos con ejecución aleatoria de un pool de etapas. Útil para definir
-  transiciones aleatorias.
+- **Confirm**: waits for an explicit action from the user.
+- **Delay**: waits a certain amount of time before continuing.
+- **Wait**: combines a temporary wait with the possibility of interruption by the user.
+- **Feedback**: obtains quantitative data using scales (e.g., a value from 1 to 10).
+- **Select**: presents multiple options (text or image) with support for randomization.
+- **Message**: displays a static message without transition controls.
+- **Shuffle**: An orchestrator for sub-flows that randomly executes a collection of stages, ideal for establishing
+  non-deterministic transitions.
 
-### Ciclo de Vida y Protocolo PoMA
+### Lifecycle and PoMA Protocol
 
-Cada etapa gestiona eventos de ciclo de vida que pueden disparar comandos hacia dispositivos hápticos externos mediante
-el protocolo **PoMA**. Estos eventos son:
+Each stage manages lifecycle events that can trigger commands to external haptic devices using the **PoMA** protocol.
+These events are:
 
-- `ENTER`: Ejecutado al activar la etapa.
-- `EXIT`: Ejecutado al abandonar la etapa.
-- `TICK_<ms>`: Ejecutados periódicamente en etapas temporales, permitiendo patrones hápticos sincronizados; `ms` indica
-  un valor en milisegundos (ej.: `TICK_1000`, `TICK_2500`, etc.).
+- `ENTER`: executed when the stage is activated.
+- `EXIT`: executed when the stage is exited.
+- `TICK_<ms>`: executed periodically at timed stages, allowing synchronized haptic patterns; `ms` indicates a value in
+  milliseconds (e.g., `TICK_1000`, `TICK_2500`, etc.).
 
-Los comandos deben seguir la sintaxis de la especificación PoMA y ser compatibles con la plataforma Yahp!, por ejemplo:
+Commands must follow the PoMA specification syntax and be compatible with the "Yahp!" platform, for example:
 
-- `= enabled_motors 1,1,0,0,0,0` (activación de actuadores).
-- `= intensity 50,50` (ajuste de potencia).
+- `= enabled_motors 1,1,0,0,0,0` (activation of actuators).
+- `= intensity 50,50` (power adjustment).
 
-Mantener esta coherencia es responsabilidad del autor de la definición del experimento.
+Maintaining this consistency is the responsibility of the experiment definition author.
 
-### Sistema de Reglas (`Triggers`)
+### Rule System (`Triggers`)
 
-Las transiciones entre etapas se rigen por funciones lógicas que evalúan el resultado de una etapa para determinar la
-siguiente etapa a ejecutar (activar):
+Transitions between stages are governed by logic functions that evaluate the result of a stage to determine the next
+stage to execute (activate):
 
-- **Lógica Incondicional**: `Always`, `Never`. La transición es estática.
-- **Comparación Directa**: `Equals`, `Distinct`. La transición es condicional, se evalúa por igualdad el resultado de la
-  etapa previa.
-- **Relaciones de Magnitud**: `GreaterThan`, `LesserThan`. El resultao de la etapa previa se compara numéricamente
-  contra valores de referencia.
+- **Unconditional Logic**: `Always`, `Never`. The transition is static.
+- **Direct Comparison**: `Equals`, `Distinct`. The transition is conditional; the result of the previous stage is
+  evaluated for equality.
+- **Magnitude Relationships**: `GreaterThan`, `LesserThan`. The result of the previous stage is compared numerically
+  against reference values.
 
-### Serialización JSON
+### JSON Serialization
 
-El sistema utiliza una especificación JSON formal para la persistencia y carga de experimentos. Esto permite que los
-experimentos sean portables, versionables y fácilmente modificables sin alterar el código fuente del motor.
+The system uses a formal JSON specification for experiment persistence and loading. This allows experiments to be
+portable, versionable, and easily modified without altering the engine's source code.
 
-### Ejecución de Ensayos (`Trials`)
+### Experiments Execution (`Trials`)
 
-Un **Ensayo** (`Trial`) representa una instancia única de ejecución de un experimento. Para iniciar un ensayo, el
-sistema requiere la definición de tres elementos:
+A **Trial** represents a single instance of an experiment being executed. To start a trial, the system requires the
+definition of three elements:
 
-1. **Experimento**: la definición lógica del flujo y las etapas.
-2. **Sujeto**: el individuo o entidad que participa en el ensayo, permitiendo la trazabilidad de los resultados.
-3. **Dispositivo Háptico**: un dispositivo compatible con el protocolo PoMA encargado de ejecutar los estímulos
-   programados.
+1. **Experiment**: the logical definition of the flow and stages.
+2. **Subject**: the individual participating in the trial, allowing for traceability of the results.
+3. **Haptic Device**: a PoMA-compliant device responsible for executing the programmed stimuli.
 
-Durante el ensayo, el sistema registra de forma persistente todos los eventos (cambios de etapa, comandos enviados,
-respuestas del usuario) para su posterior análisis.
+During the experiment, the system persistently records all events (stage changes, commands sent, user responses) for
+later analysis.
 
-### Documentación Adicional
+### Additional Documentation
 
-Para detalles exhaustivos sobre la modelización de experimentos y ejemplos con gráficos pUML,
-consultar [Definición de Experimentos](doc/experiments/README.md).
+For comprehensive details on experiment modeling and examples with pUML graphs,
+see [Experiment Definition](doc/experiments/README.md).
 
-## Implementación y Uso
+## Implementation and Use
 
-### Requisitos de Ejecución
+### Runtime Requirements
 
-Para el funcionamiento del motor, es necesario contar con:
+For the engine to function, the following is required:
 
-- **Base de Datos**: una instancia de **MongoDB** configurada. El sistema utiliza colecciones especializadas (
-  `experiments`, `subjects`, `devices`, `trials`) para la persistencia. La conexión se define mediante la variable
-  `MONGODB_CONN_STR` en el archivo de entorno (`.env`).
-- **Conectividad PoMA**: un dispositivo háptico habilitado y accesible vía red (TCP/IP) para la orquestación de
-  comandos.
-- **Ambiente de Ejecución**: Flutter SDK (canal stable) configurado para el desarrollo móvil.
+- **Database**: a configured **MongoDB** instance. The system uses specialized collections (`experiments`, `subjects`,
+  `devices`, `trials`) for persistence. The connection is defined using the `MONGODB_CONN_STR` variable in the
+  environment file (`.env`).
+- **PoMA Connectivity**: a haptic device enabled and accessible via network (TCP/IP) for command orchestration.
+- **Execution Environment**: a Flutter SDK (stable channel) configured for mobile development.
 
-### Configuración del Ambiente de Desarrollo
+### Setting Up the Development Environment
 
-Para establecer un entorno de desarrollo local, se debe seguir estos pasos:
+To set up a local development environment, follow these steps:
 
-1. **Clonar el repositorio** y ubicarse en la carpeta root del proyecto:
+1. **Clone the repository** and navigate to the project's root folder:
    ```bash
    git clone <repository_url>
    cd <project_root_folder>
    ```
-2. **Instalar dependencias**:
-   descargar los paquetes necesarios definidos en `pubspec.yaml`:
+
+2. **Install dependencies**:
+
+   download the necessary packages defined in `pubspec.yaml`:
    ```bash
    flutter pub get
    ```
-3. **Configurar variables de entorno**:
-   copiar el archivo de ejemplo (`.env.example`) y configurar las variables necesarias (ej.: la URI de MongoDB):
+
+3. **Configure environment variables**:
+
+   copy the example file (`.env.example`) and configure the necessary variables (e.g., the MongoDB URI):
    ```bash
    cp .env.example .env
+   vi .env
    ```
-4. **Generar código fuente**:
-   el proyecto utiliza generación de código para la serialización JSON y otros componentes. Ejecutar el siguiente
-   comando para generar los archivos `.g.dart`:
+
+4. **Generate source code**:
+
+   the project uses code generation for JSON serialization and other components. Run the following command to generate
+   the `.g.dart` files:
    ```bash
    flutter pub run build_runner build --delete-conflicting-outputs
    ```
 
-### Despliegue y Ejecución
+### Deployment and Execution
 
-Para iniciar el entorno de desarrollo y ejecutar la aplicación en un emulador o dispositivo conectado:
+To start the development environment and run the application on an emulator or connected device:
 
 ```bash
 flutter run
 ```
 
-Para el despliegue en un dispositivo físico **Android**, asegurarse de tener habilitado el modo de depuración USB y
-ejecutar:
+For deployment on a physical **Android** device, ensure USB debugging is enabled and run:
 
 ```bash
 flutter run --release
@@ -147,10 +147,10 @@ flutter run --release
 
 ---
 
-*Yahp! Director es un desarrollo en colaboración de:*
+*Yahp! Director is a collaborative development by:*
 
 - ***LIFIA** (Laboratorio de Investigación y Formación en Informática Avanzada), Facultad de Informática, Universidad
-  Nacional de La Plata; y*
+  Nacional de La Plata; and*
 - *Stream S.A.*
 
 *La Plata, Argentina.*
