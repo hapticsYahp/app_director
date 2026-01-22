@@ -5,7 +5,7 @@ import '../../providers/poma/poma_client.dart';
 import '../graph/conditional_directed_graph.dart';
 import '../trial/experiment_trial.dart';
 
-class Experiment<T_Stage_Id, T_Stage_Result> {
+class Experiment<T_Stage_Id, T_Stage_Result> extends ChangeNotifier {
   final String id;
   final String title;
   final String description;
@@ -82,6 +82,7 @@ class Experiment<T_Stage_Id, T_Stage_Result> {
         'fromStageId': _currentStageId,
       });
       _currentStageId = stageId;
+      notifyListeners();
     }
   }
 

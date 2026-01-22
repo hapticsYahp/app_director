@@ -126,18 +126,19 @@ class _ExperimentsTabState extends State<ExperimentsTab>
   }
 
   void _onStageResult(String result) {
-    setState(() {
-      selectedExperiment?.advanceByResult(result);
-    });
+    selectedExperiment?.advanceByResult(result);
   }
 
   void _onCancel() {
-    setState(() {
-      selectedExperiment?.abort();
-    });
+    selectedExperiment?.abort();
+  }
+
+  void _onExperimentUpdate() {
+    setState(() {});
   }
 
   Future<void> _onClose() async {
+    selectedExperiment?.removeListener(_onExperimentUpdate);
     ExperimentTrial? trial = selectedExperiment?.end();
     if (trial != null) {
       await dataProvider.saveTrialEvents(trial);
@@ -163,6 +164,7 @@ class _ExperimentsTabState extends State<ExperimentsTab>
         );
       } else {
         experiment.setPomaClient(pomaClient);
+        experiment.addListener(_onExperimentUpdate);
         experiment.start(await dataProvider.createTrial(
             experiment, selectedSubject, selectedDevice));
       }

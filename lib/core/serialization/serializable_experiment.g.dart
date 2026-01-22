@@ -9,6 +9,7 @@ part of 'serializable_experiment.dart';
 Map<String, dynamic> _$SerializableExperimentToJson(
   SerializableExperiment instance,
 ) => <String, dynamic>{
+  'hasListeners': instance.hasListeners,
   'id': instance.id,
   'title': instance.title,
   'description': instance.description,

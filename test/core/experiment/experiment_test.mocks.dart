@@ -25,7 +25,6 @@ import 'package:yahp_director/providers/poma/poma_client.dart' as _i6;
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
-// ignore_for_file: invalid_use_of_internal_member
 
 class _FakeWidget_0 extends _i1.SmartFake implements _i2.Widget {
   _FakeWidget_0(Object parent, Invocation parentInvocation)
@@ -84,9 +83,9 @@ class MockExperimentStage<T_Result> extends _i1.Mock
           as Map<String, String>);
 
   @override
-  set experiment(_i5.Experiment<dynamic, T_Result>? value) =>
+  set experiment(_i5.Experiment<dynamic, T_Result>? _experiment) =>
       super.noSuchMethod(
-        Invocation.setter(#experiment, value),
+        Invocation.setter(#experiment, _experiment),
         returnValueForMissingStub: null,
       );
 

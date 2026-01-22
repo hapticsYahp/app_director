@@ -4,6 +4,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i8;
+import 'dart:ui' as _i9;
 
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i5;
@@ -28,7 +29,6 @@ import 'test_experiment.dart' as _i4;
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
-// ignore_for_file: invalid_use_of_internal_member
 
 class _FakeConditionalDirectedGraph_0<T_Node, T_Trigger_Input>
     extends _i1.SmartFake
@@ -150,34 +150,39 @@ class MockTestExperiment extends _i1.Mock implements _i4.TestExperiment {
           as bool);
 
   @override
-  set pomaClient(_i6.PomaClient? value) => super.noSuchMethod(
-    Invocation.setter(#pomaClient, value),
+  set pomaClient(_i6.PomaClient? _pomaClient) => super.noSuchMethod(
+    Invocation.setter(#pomaClient, _pomaClient),
     returnValueForMissingStub: null,
   );
 
   @override
-  set trial(_i7.ExperimentTrial? value) => super.noSuchMethod(
-    Invocation.setter(#trial, value),
+  set trial(_i7.ExperimentTrial? _trial) => super.noSuchMethod(
+    Invocation.setter(#trial, _trial),
     returnValueForMissingStub: null,
   );
 
   @override
-  set startingStageId(String? value) => super.noSuchMethod(
-    Invocation.setter(#startingStageId, value),
+  set startingStageId(String? _startingStageId) => super.noSuchMethod(
+    Invocation.setter(#startingStageId, _startingStageId),
     returnValueForMissingStub: null,
   );
 
   @override
-  set finalStageId(String? value) => super.noSuchMethod(
-    Invocation.setter(#finalStageId, value),
+  set finalStageId(String? _finalStageId) => super.noSuchMethod(
+    Invocation.setter(#finalStageId, _finalStageId),
     returnValueForMissingStub: null,
   );
 
   @override
-  set abortStageId(String? value) => super.noSuchMethod(
-    Invocation.setter(#abortStageId, value),
+  set abortStageId(String? _abortStageId) => super.noSuchMethod(
+    Invocation.setter(#abortStageId, _abortStageId),
     returnValueForMissingStub: null,
   );
+
+  @override
+  bool get hasListeners =>
+      (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
+          as bool);
 
   @override
   void saveTrialEvent(
@@ -239,6 +244,30 @@ class MockTestExperiment extends _i1.Mock implements _i4.TestExperiment {
   @override
   void abort() => super.noSuchMethod(
     Invocation.method(#abort, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void addListener(_i9.VoidCallback? listener) => super.noSuchMethod(
+    Invocation.method(#addListener, [listener]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void removeListener(_i9.VoidCallback? listener) => super.noSuchMethod(
+    Invocation.method(#removeListener, [listener]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void dispose() => super.noSuchMethod(
+    Invocation.method(#dispose, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void notifyListeners() => super.noSuchMethod(
+    Invocation.method(#notifyListeners, []),
     returnValueForMissingStub: null,
   );
 }
