@@ -54,6 +54,7 @@ class _SettingsTabState extends State<SettingsTab>
 
   @override
   void dispose() {
+    configNotifier.removeListener(_onConfigChanged);
     _pomaHostController.dispose();
     _pomaPortController.dispose();
     _dbUriController.dispose();
@@ -66,7 +67,19 @@ class _SettingsTabState extends State<SettingsTab>
     _pomaHostController.text = configNotifier.deviceHost;
     _pomaPortController.text = configNotifier.devicePort.toString();
     _dbUriController.text = configNotifier.dbUri;
+    configNotifier.addListener(_onConfigChanged);
     super.initState();
+  }
+
+  void _onConfigChanged() {
+    if (!mounted) return;
+    if (_dbUriController.text.isEmpty && configNotifier.dbUri.isNotEmpty) {
+      _dbUriController.text = configNotifier.dbUri;
+    }
+    if (_pomaHostController.text.isEmpty &&
+        configNotifier.deviceHost.isNotEmpty) {
+      _pomaHostController.text = configNotifier.deviceHost;
+    }
   }
 
   void _onPomaSave() {
@@ -78,17 +91,27 @@ class _SettingsTabState extends State<SettingsTab>
       setState(() {
         pomaTestResult = "";
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('PoMA config saved.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
   void _onDbSave() {
     if (_isDbFormValid && !isDbTesting) {
-      configNotifier.updateSettings(
-        dbUri: _dbUriController.text,
-      );
+      configNotifier.updateSettings(dbUri: _dbUriController.text);
       setState(() {
         dbTestResult = "";
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('BD config saved.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
@@ -155,7 +178,8 @@ class _SettingsTabState extends State<SettingsTab>
       mongo_dart.DbCollection col = db.collection(testingCollectionName);
       await col.insertOne({idColumn: idVal, testingColumn: testingVal});
       Map<String, dynamic>? testFind = await col.findOne(
-          mongo_dart.where.eq(idColumn, idVal).fields([testingColumn]));
+        mongo_dart.where.eq(idColumn, idVal).fields([testingColumn]),
+      );
       final bool couldRet =
           (testFind != null) && (testFind[testingColumn] == testingVal);
       await db.dropCollection(testingCollectionName);
@@ -206,13 +230,15 @@ class _SettingsTabState extends State<SettingsTab>
                           if (value == null || value.isEmpty) {
                             return 'Invalid host.';
                           }
-                          final RegExp ipv4RegExp =
-                              RegExp(r'^(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.'
-                                  r'(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.'
-                                  r'(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.'
-                                  r'(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)$');
+                          final RegExp ipv4RegExp = RegExp(
+                            r'^(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.'
+                            r'(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.'
+                            r'(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.'
+                            r'(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)$',
+                          );
                           final RegExp domainRegExp = RegExp(
-                              r'^(localhost|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})$');
+                            r'^(localhost|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})$',
+                          );
                           if (!ipv4RegExp.hasMatch(value) &&
                               !domainRegExp.hasMatch(value)) {
                             return 'Invalid host; not a valid domain or IP address.';
@@ -258,16 +284,12 @@ class _SettingsTabState extends State<SettingsTab>
                           ? SizedBox(
                               width: 20,
                               height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Text("Test PoMA"),
                     ),
                     SizedBox(width: 16.0),
-                    Expanded(
-                      child: Text(pomaTestResult),
-                    ),
+                    Expanded(child: Text(pomaTestResult)),
                   ],
                 ),
               ],
@@ -299,19 +321,22 @@ class _SettingsTabState extends State<SettingsTab>
                           if (value == null || value.isEmpty) {
                             return 'Invalid URI.';
                           }
-                          final uriRegExp = RegExp(r'^(mongodb(\+srv)?):\/\/'
-                              r'(?:[a-zA-Z0-9._%+-]+(?::[^@]+)?@)?'
-                              r'([a-zA-Z0-9.-]+)'
-                              r'(?::\d+)?'
-                              r'(?:\/[a-zA-Z0-9_\-]+)?'
-                              r'(?:\?.*)?$');
+                          final uriRegExp = RegExp(
+                            r'^(mongodb(\+srv)?):\/\/'
+                            r'(?:[a-zA-Z0-9._%+-]+(?::[^@]+)?@)?'
+                            r'([a-zA-Z0-9.-]+)'
+                            r'(?::\d+)?'
+                            r'(?:\/[a-zA-Z0-9_\-]+)?'
+                            r'(?:\?.*)?$',
+                          );
                           final match = uriRegExp.firstMatch(value);
                           if (match == null) {
                             return 'Invalid MongoDB URI.';
                           }
                           final isSrv = match.group(2) == '+srv';
-                          final hasPort =
-                              value.contains(RegExp(r'@[a-zA-Z0-9.-]+:\d+'));
+                          final hasPort = value.contains(
+                            RegExp(r'@[a-zA-Z0-9.-]+:\d+'),
+                          );
                           if (isSrv && hasPort) {
                             return 'mongodb+srv URI must not include a port.';
                           }
@@ -335,16 +360,12 @@ class _SettingsTabState extends State<SettingsTab>
                           ? SizedBox(
                               width: 20,
                               height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Text("Test DB"),
                     ),
                     SizedBox(width: 16.0),
-                    Expanded(
-                      child: Text(dbTestResult),
-                    ),
+                    Expanded(child: Text(dbTestResult)),
                   ],
                 ),
               ],
