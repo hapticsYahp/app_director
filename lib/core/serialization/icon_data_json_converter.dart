@@ -6,6 +6,7 @@ class IconDataJsonConverter extends JsonConverter<IconData, int> {
 
   @override
   IconData fromJson(int json) {
+    // ignore: non_const_argument_for_const_parameter
     return IconData(json, fontFamily: 'MaterialIcons');
   }
 

@@ -3,6 +3,7 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+
 import 'dart:async' as _i8;
 import 'dart:ui' as _i9;
 
@@ -13,6 +14,8 @@ import 'package:yahp_director/core/graph/conditional_directed_graph.dart'
     as _i2;
 import 'package:yahp_director/core/trial/experiment_trial.dart' as _i7;
 import 'package:yahp_director/providers/poma/poma_client.dart' as _i6;
+import 'package:yahp_director/providers/poma/transport/poma_transport.dart'
+    as _i10;
 
 import 'test_experiment.dart' as _i4;
 
@@ -29,6 +32,7 @@ import 'test_experiment.dart' as _i4;
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: invalid_use_of_internal_member
 
 class _FakeConditionalDirectedGraph_0<T_Node, T_Trigger_Input>
     extends _i1.SmartFake
@@ -150,32 +154,32 @@ class MockTestExperiment extends _i1.Mock implements _i4.TestExperiment {
           as bool);
 
   @override
-  set pomaClient(_i6.PomaClient? _pomaClient) => super.noSuchMethod(
-    Invocation.setter(#pomaClient, _pomaClient),
+  set pomaClient(_i6.PomaClient? value) => super.noSuchMethod(
+    Invocation.setter(#pomaClient, value),
     returnValueForMissingStub: null,
   );
 
   @override
-  set trial(_i7.ExperimentTrial? _trial) => super.noSuchMethod(
-    Invocation.setter(#trial, _trial),
+  set trial(_i7.ExperimentTrial? value) => super.noSuchMethod(
+    Invocation.setter(#trial, value),
     returnValueForMissingStub: null,
   );
 
   @override
-  set startingStageId(String? _startingStageId) => super.noSuchMethod(
-    Invocation.setter(#startingStageId, _startingStageId),
+  set startingStageId(String? value) => super.noSuchMethod(
+    Invocation.setter(#startingStageId, value),
     returnValueForMissingStub: null,
   );
 
   @override
-  set finalStageId(String? _finalStageId) => super.noSuchMethod(
-    Invocation.setter(#finalStageId, _finalStageId),
+  set finalStageId(String? value) => super.noSuchMethod(
+    Invocation.setter(#finalStageId, value),
     returnValueForMissingStub: null,
   );
 
   @override
-  set abortStageId(String? _abortStageId) => super.noSuchMethod(
-    Invocation.setter(#abortStageId, _abortStageId),
+  set abortStageId(String? value) => super.noSuchMethod(
+    Invocation.setter(#abortStageId, value),
     returnValueForMissingStub: null,
   );
 
@@ -289,6 +293,15 @@ class MockPomaClient extends _i1.Mock implements _i6.PomaClient {
           as _i8.Stream<String>);
 
   @override
+  _i8.Future<void> reconfigure(_i10.PomaTransport? transport) =>
+      (super.noSuchMethod(
+            Invocation.method(#reconfigure, [transport]),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
+          )
+          as _i8.Future<void>);
+
+  @override
   bool isConnected() =>
       (super.noSuchMethod(
             Invocation.method(#isConnected, []),
@@ -297,34 +310,9 @@ class MockPomaClient extends _i1.Mock implements _i6.PomaClient {
           as bool);
 
   @override
-  bool isValidHost(String? host) =>
+  _i8.Future<void> connect({bool? cancelOnError}) =>
       (super.noSuchMethod(
-            Invocation.method(#isValidHost, [host]),
-            returnValue: false,
-          )
-          as bool);
-
-  @override
-  bool isValidPort(int? port) =>
-      (super.noSuchMethod(
-            Invocation.method(#isValidPort, [port]),
-            returnValue: false,
-          )
-          as bool);
-
-  @override
-  _i8.Future<void> connect(
-    String? serverHost,
-    int? serverPort, {
-    Duration? timeout = const Duration(seconds: 3),
-    bool? cancelOnError,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(
-              #connect,
-              [serverHost, serverPort],
-              {#timeout: timeout, #cancelOnError: cancelOnError},
-            ),
+            Invocation.method(#connect, [], {#cancelOnError: cancelOnError}),
             returnValue: _i8.Future<void>.value(),
             returnValueForMissingStub: _i8.Future<void>.value(),
           )
@@ -379,4 +367,13 @@ class MockPomaClient extends _i1.Mock implements _i6.PomaClient {
             returnValue: _i8.Future<bool>.value(false),
           )
           as _i8.Future<bool>);
+
+  @override
+  _i8.Future<void> dispose() =>
+      (super.noSuchMethod(
+            Invocation.method(#dispose, []),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
+          )
+          as _i8.Future<void>);
 }

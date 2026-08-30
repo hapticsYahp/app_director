@@ -3,6 +3,7 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+
 import 'dart:async' as _i7;
 
 import 'package:flutter/material.dart' as _i2;
@@ -11,6 +12,8 @@ import 'package:mockito/src/dummies.dart' as _i4;
 import 'package:yahp_director/core/experiment/experiment.dart' as _i5;
 import 'package:yahp_director/core/experiment/experiment_stage.dart' as _i3;
 import 'package:yahp_director/providers/poma/poma_client.dart' as _i6;
+import 'package:yahp_director/providers/poma/transport/poma_transport.dart'
+    as _i8;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -25,6 +28,7 @@ import 'package:yahp_director/providers/poma/poma_client.dart' as _i6;
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: invalid_use_of_internal_member
 
 class _FakeWidget_0 extends _i1.SmartFake implements _i2.Widget {
   _FakeWidget_0(Object parent, Invocation parentInvocation)
@@ -83,9 +87,9 @@ class MockExperimentStage<T_Result> extends _i1.Mock
           as Map<String, String>);
 
   @override
-  set experiment(_i5.Experiment<dynamic, T_Result>? _experiment) =>
+  set experiment(_i5.Experiment<dynamic, T_Result>? value) =>
       super.noSuchMethod(
-        Invocation.setter(#experiment, _experiment),
+        Invocation.setter(#experiment, value),
         returnValueForMissingStub: null,
       );
 
@@ -165,6 +169,15 @@ class MockPomaClient extends _i1.Mock implements _i6.PomaClient {
           as _i7.Stream<String>);
 
   @override
+  _i7.Future<void> reconfigure(_i8.PomaTransport? transport) =>
+      (super.noSuchMethod(
+            Invocation.method(#reconfigure, [transport]),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
+          )
+          as _i7.Future<void>);
+
+  @override
   bool isConnected() =>
       (super.noSuchMethod(
             Invocation.method(#isConnected, []),
@@ -173,34 +186,9 @@ class MockPomaClient extends _i1.Mock implements _i6.PomaClient {
           as bool);
 
   @override
-  bool isValidHost(String? host) =>
+  _i7.Future<void> connect({bool? cancelOnError}) =>
       (super.noSuchMethod(
-            Invocation.method(#isValidHost, [host]),
-            returnValue: false,
-          )
-          as bool);
-
-  @override
-  bool isValidPort(int? port) =>
-      (super.noSuchMethod(
-            Invocation.method(#isValidPort, [port]),
-            returnValue: false,
-          )
-          as bool);
-
-  @override
-  _i7.Future<void> connect(
-    String? serverHost,
-    int? serverPort, {
-    Duration? timeout = const Duration(seconds: 3),
-    bool? cancelOnError,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(
-              #connect,
-              [serverHost, serverPort],
-              {#timeout: timeout, #cancelOnError: cancelOnError},
-            ),
+            Invocation.method(#connect, [], {#cancelOnError: cancelOnError}),
             returnValue: _i7.Future<void>.value(),
             returnValueForMissingStub: _i7.Future<void>.value(),
           )
@@ -255,4 +243,13 @@ class MockPomaClient extends _i1.Mock implements _i6.PomaClient {
             returnValue: _i7.Future<bool>.value(false),
           )
           as _i7.Future<bool>);
+
+  @override
+  _i7.Future<void> dispose() =>
+      (super.noSuchMethod(
+            Invocation.method(#dispose, []),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
+          )
+          as _i7.Future<void>);
 }

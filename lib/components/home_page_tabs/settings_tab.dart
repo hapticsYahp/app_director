@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:yahp_director/providers/poma/poma_exception.dart';
 import '../../providers/config/config_notifier.dart';
 import '../../providers/poma/poma_client.dart';
-import '../../providers/poma/poma_socket_impl.dart';
+import '../../providers/poma/transport/tcp_poma_transport.dart';
 
 const String pomaTopicTest = "intensity";
 
@@ -105,11 +105,12 @@ class _SettingsTabState extends State<SettingsTab>
     });
     String result;
     try {
-      PomaClient pomaClient = PomaClient(PomaSocketImpl());
-      await pomaClient.connect(
-        configNotifier.deviceHost,
-        configNotifier.devicePort,
-      );
+      PomaClient pomaClient = PomaClient(TcpPomaTransport(
+        host: configNotifier.deviceHost,
+        port: configNotifier.devicePort,
+        timeout: Duration(seconds: configNotifier.deviceConnectionTimeout),
+      ));
+      await pomaClient.connect();
       List<String> topics = await pomaClient.getTopics();
       result = topics.contains(pomaTopicTest)
           ? "Success."

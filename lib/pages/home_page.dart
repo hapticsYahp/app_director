@@ -8,7 +8,7 @@ import '../components/home_page_tabs/settings_tab.dart';
 import '../providers/config/config_notifier.dart';
 import '../providers/config/subject_trial_notifier.dart';
 import '../providers/poma/poma_client.dart';
-import '../providers/poma/poma_socket_impl.dart';
+import '../providers/poma/transport/tcp_poma_transport.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -23,7 +23,19 @@ class HomePage extends StatelessWidget {
             create: (_) => DeviceTrialNotifier()),
         ChangeNotifierProvider<SubjectTrialNotifier>(
             create: (_) => SubjectTrialNotifier()),
-        Provider<PomaClient>(create: (context) => PomaClient(PomaSocketImpl())),
+        Provider<PomaClient>(
+          create: (context) {
+            final configNotifier =
+                Provider.of<ConfigNotifier>(context, listen: false);
+            return PomaClient(TcpPomaTransport(
+              host: configNotifier.deviceHost,
+              port: configNotifier.devicePort,
+              timeout:
+                  Duration(seconds: configNotifier.deviceConnectionTimeout),
+            ));
+          },
+          dispose: (_, client) => client.dispose(),
+        ),
         ProxyProvider<ConfigNotifier, DataProvider>(
           update: (_, configNotifier, _) => DataProvider(configNotifier),
         ),
