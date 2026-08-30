@@ -8,6 +8,7 @@ import '../components/home_page_tabs/settings_tab.dart';
 import '../providers/config/config_notifier.dart';
 import '../providers/config/subject_trial_notifier.dart';
 import '../providers/poma/poma_client.dart';
+import '../providers/poma/transport/ble_poma_transport.dart';
 import '../providers/poma/transport/tcp_poma_transport.dart';
 
 class HomePage extends StatelessWidget {
@@ -27,12 +28,19 @@ class HomePage extends StatelessWidget {
           create: (context) {
             final configNotifier =
                 Provider.of<ConfigNotifier>(context, listen: false);
-            return PomaClient(TcpPomaTransport(
-              host: configNotifier.deviceHost,
-              port: configNotifier.devicePort,
-              timeout:
-                  Duration(seconds: configNotifier.deviceConnectionTimeout),
-            ));
+            final transport = configNotifier.connectionType == ConnectionType.ble
+                ? BlePomaTransport(
+                    deviceId: configNotifier.deviceMac,
+                    timeout: Duration(
+                        seconds: configNotifier.deviceConnectionTimeout),
+                  )
+                : TcpPomaTransport(
+                    host: configNotifier.deviceHost,
+                    port: configNotifier.devicePort,
+                    timeout: Duration(
+                        seconds: configNotifier.deviceConnectionTimeout),
+                  );
+            return PomaClient(transport);
           },
           dispose: (_, client) => client.dispose(),
         ),

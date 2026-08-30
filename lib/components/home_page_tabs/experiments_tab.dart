@@ -8,6 +8,8 @@ import '../../providers/config/device_trial_notifier.dart';
 import '../../providers/config/subject_trial_notifier.dart';
 import '../../providers/poma/poma_client.dart';
 import '../../providers/poma/poma_exception.dart';
+import '../../providers/poma/transport/ble_poma_transport.dart';
+import '../../providers/poma/transport/poma_transport.dart';
 import '../../providers/poma/transport/tcp_poma_transport.dart';
 
 class ExperimentsTab extends StatefulWidget {
@@ -66,11 +68,19 @@ class _ExperimentsTabState extends State<ExperimentsTab>
         connectionCommandInProgress = true;
       });
       try {
-        final transport = TcpPomaTransport(
-          host: configNotifier.deviceHost,
-          port: configNotifier.devicePort,
-          timeout: Duration(seconds: configNotifier.deviceConnectionTimeout),
-        );
+        final PomaTransport transport;
+        if (configNotifier.connectionType == ConnectionType.ble) {
+          transport = BlePomaTransport(
+            deviceId: configNotifier.deviceMac,
+            timeout: Duration(seconds: configNotifier.deviceConnectionTimeout),
+          );
+        } else {
+          transport = TcpPomaTransport(
+            host: configNotifier.deviceHost,
+            port: configNotifier.devicePort,
+            timeout: Duration(seconds: configNotifier.deviceConnectionTimeout),
+          );
+        }
         await pomaClient.reconfigure(transport);
         await pomaClient.connect();
       } on PomaException catch (e, stackTrace) {
