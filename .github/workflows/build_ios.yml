@@ -10,6 +10,7 @@ jobs:
   build:
     name: Build iOS Unsigned IPA
     runs-on: macos-14
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
