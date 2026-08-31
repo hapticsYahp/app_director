@@ -5,6 +5,9 @@ import 'package:yahp_director/core/experiment/experiment.dart';
 import 'package:yahp_director/core/experiment/experiment_stage.dart';
 import 'package:yahp_director/core/graph/conditional_directed_graph.dart';
 import 'package:yahp_director/core/graph/trigger_always.dart';
+import 'package:yahp_director/core/trial/device_trial.dart';
+import 'package:yahp_director/core/trial/experiment_trial.dart';
+import 'package:yahp_director/core/trial/subject_trial.dart';
 import 'package:yahp_director/providers/poma/poma_client.dart';
 
 import 'experiment_test.mocks.dart';
@@ -79,51 +82,99 @@ void main() {
 
     test('should throw exception when initializing with empty stages', () {
       expect(
-          () => Experiment<String, String>(
-                id: experimentId,
-                title: title,
-                description: description,
-                stages: {},
-                transitions: transitions,
-              ),
-          throwsException);
+        () => Experiment<String, String>(
+          id: experimentId,
+          title: title,
+          description: description,
+          stages: {},
+          transitions: transitions,
+        ),
+        throwsException,
+      );
     });
 
-    test('advanceToStage should change current stage', () {
-      expect(experiment.currentStage, equals(mockStage1));
-      experiment.advanceToStage(stageId2);
-      expect(experiment.currentStage, equals(mockStage2));
-    });
+    test(
+      'advanceToStage should change current stage and trigger lifecycle callbacks',
+      () {
+        expect(experiment.currentStage, equals(mockStage1));
+        experiment.advanceToStage(stageId2);
+        verify(mockStage1.onExit()).called(1);
+        verify(mockStage2.onEnter()).called(1);
+        expect(experiment.currentStage, equals(mockStage2));
+      },
+    );
 
     test('advanceToStage should throw exception for invalid stage ID', () {
       expect(() => experiment.advanceToStage('invalid_stage'), throwsException);
     });
 
-    test('advanceByResult should follow transition rules', () async {
-      expect(experiment.currentStage, equals(mockStage1));
-      await experiment.advanceByResult('any_result');
-      expect(experiment.currentStage, equals(mockStage2));
+    test(
+      'advanceByResult should follow transition rules and trigger lifecycle callbacks',
+      () async {
+        expect(experiment.currentStage, equals(mockStage1));
+        await experiment.advanceByResult('any_result');
+        verify(mockStage1.onExit()).called(1);
+        verify(mockStage2.onEnter()).called(1);
+        expect(experiment.currentStage, equals(mockStage2));
+      },
+    );
+
+    test('start should trigger onEnter on starting stage', () async {
+      final trial = ExperimentTrial(
+        'trial_1',
+        experiment,
+        SubjectTrial(id: 'subj_1', name: 'Subject 1'),
+        DeviceTrial(id: 'dev_1', name: 'Device 1'),
+      );
+      await experiment.start(trial);
+      verify(mockStage1.onEnter()).called(1);
+      expect(experiment.trial, equals(trial));
     });
 
-    test('reset should call onExit and return to initial stage', () {
-      experiment.advanceToStage(stageId2);
-      expect(experiment.currentStage, equals(mockStage2));
-      experiment.reset();
-      verify(mockStage2.onExit()).called(1);
-      expect(experiment.currentStage, equals(mockStage1));
-    });
-
-    test('finish should call onExit and go to end stage', () {
-      experiment.finish();
+    test('end should call onExit on current stage and return trial', () async {
+      final trial = ExperimentTrial(
+        'trial_1',
+        experiment,
+        SubjectTrial(id: 'subj_1', name: 'Subject 1'),
+        DeviceTrial(id: 'dev_1', name: 'Device 1'),
+      );
+      await experiment.start(trial);
+      final endedTrial = experiment.end();
       verify(mockStage1.onExit()).called(1);
-      expect(experiment.currentStage, equals(mockStage3));
+      expect(endedTrial, equals(trial));
     });
 
-    test('abort should call onExit and go to abort stage', () {
-      experiment.abort();
-      verify(mockStage1.onExit()).called(1);
-      expect(experiment.currentStage, equals(mockStage3));
-    });
+    test(
+      'reset should call onExit and return to initial stage triggering onEnter',
+      () {
+        experiment.advanceToStage(stageId2);
+        expect(experiment.currentStage, equals(mockStage2));
+        experiment.reset();
+        verify(mockStage2.onExit()).called(1);
+        verify(mockStage1.onEnter()).called(1);
+        expect(experiment.currentStage, equals(mockStage1));
+      },
+    );
+
+    test(
+      'finish should call onExit on current stage and go to end stage with onEnter',
+      () {
+        experiment.finish();
+        verify(mockStage1.onExit()).called(1);
+        verify(mockStage3.onEnter()).called(1);
+        expect(experiment.currentStage, equals(mockStage3));
+      },
+    );
+
+    test(
+      'abort should call onExit on current stage and go to abort stage with onEnter',
+      () {
+        experiment.abort();
+        verify(mockStage1.onExit()).called(1);
+        verify(mockStage3.onEnter()).called(1);
+        expect(experiment.currentStage, equals(mockStage3));
+      },
+    );
 
     test('canAdvance should return true when transitions exist', () {
       expect(experiment.canAdvance, isTrue);

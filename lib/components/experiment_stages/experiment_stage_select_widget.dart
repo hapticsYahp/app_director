@@ -25,7 +25,6 @@ class _ExperimentStageSelectWidgetState<T_Result>
   @override
   void initState() {
     super.initState();
-    widget.stage.onEnter();
     _options = List<SelectOption>.from(widget.stage.options);
     if (widget.stage.shuffleOptions) {
       _options.shuffle();
@@ -36,7 +35,6 @@ class _ExperimentStageSelectWidgetState<T_Result>
   void didUpdateWidget(covariant ExperimentStageSelectWidget<T_Result> old) {
     super.didUpdateWidget(old);
     if (widget.stage != old.stage) {
-      widget.stage.onEnter();
       _options = List<SelectOption>.from(widget.stage.options);
       if (widget.stage.shuffleOptions) {
         _options.shuffle();
@@ -57,7 +55,6 @@ class _ExperimentStageSelectWidgetState<T_Result>
       result = _singleSelected ?? "";
     }
     widget.onComplete(result as T_Result);
-    widget.stage.onExit();
   }
 
   void _onClear() {

@@ -23,13 +23,11 @@ class ExperimentStageFeedbackWidgetState<T_Result>
 
   void _onCompleteStage(int scaleFeedback) {
     widget.onFeedback(widget.stage.getResult(scaleFeedback));
-    widget.stage.onExit();
   }
 
   @override
   void initState() {
     super.initState();
-    widget.stage.onEnter();
     _scaleSelectedValue = widget.stage.initialSelectedValue;
   }
 
@@ -44,8 +42,10 @@ class ExperimentStageFeedbackWidgetState<T_Result>
             child: ElevatedButton.icon(
               onPressed: () => setState(() => _showScale = true),
               icon: Icon(widget.stage.positiveIcon, size: 32),
-              label: Text(widget.stage.positiveLabel,
-                  style: TextStyle(fontSize: 20)),
+              label: Text(
+                widget.stage.positiveLabel,
+                style: TextStyle(fontSize: 20),
+              ),
             ),
           ),
           SizedBox(height: 20),
@@ -53,15 +53,20 @@ class ExperimentStageFeedbackWidgetState<T_Result>
             child: ElevatedButton.icon(
               onPressed: () => _onCompleteStage(widget.stage.minScaleValue),
               icon: Icon(widget.stage.negativeIcon, size: 32),
-              label: Text(widget.stage.negativeLabel,
-                  style: TextStyle(fontSize: 20)),
+              label: Text(
+                widget.stage.negativeLabel,
+                style: TextStyle(fontSize: 20),
+              ),
             ),
           ),
         ] else ...[
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text("${widget.stage.feedbackLabel} $_scaleSelectedValue",
-                textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
+            child: Text(
+              "${widget.stage.feedbackLabel} $_scaleSelectedValue",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18),
+            ),
           ),
           Slider(
             value: _scaleSelectedValue.toDouble(),
@@ -82,8 +87,10 @@ class ExperimentStageFeedbackWidgetState<T_Result>
             child: ElevatedButton.icon(
               onPressed: () => _onCompleteStage(_scaleSelectedValue),
               icon: Icon(widget.stage.confirmIcon, size: 32),
-              label: Text(widget.stage.confirmLabel,
-                  style: TextStyle(fontSize: 20)),
+              label: Text(
+                widget.stage.confirmLabel,
+                style: TextStyle(fontSize: 20),
+              ),
             ),
           ),
         ],

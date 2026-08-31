@@ -41,7 +41,6 @@ class ExperimentStageWaitWidgetState<T_Result>
   }
 
   void _startStage() {
-    widget.stage.onEnter();
     setState(() {
       _stageCompleted = false;
     });
@@ -89,7 +88,6 @@ class ExperimentStageWaitWidgetState<T_Result>
     if (!_stageCompleted) {
       _stageCompleted = true;
       _timer?.cancel();
-      widget.stage.onExit();
     }
   }
 

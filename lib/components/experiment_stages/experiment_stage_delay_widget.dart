@@ -26,7 +26,7 @@ class ExperimentStageDelayWidgetState<T_Result>
   @override
   void initState() {
     super.initState();
-    _startStage();
+    _resetTimer();
   }
 
   @override
@@ -35,13 +35,8 @@ class ExperimentStageDelayWidgetState<T_Result>
   ) {
     super.didUpdateWidget(oldWidget);
     if (widget.stage != oldWidget.stage) {
-      _startStage();
+      _resetTimer();
     }
-  }
-
-  void _startStage() {
-    widget.stage.onEnter();
-    _resetTimer();
   }
 
   void _resetTimer() {
@@ -74,7 +69,6 @@ class ExperimentStageDelayWidgetState<T_Result>
 
   void _onCompleteStage() {
     widget.onComplete(widget.stage.completionResult);
-    widget.stage.onExit();
   }
 
   @override

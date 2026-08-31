@@ -51,8 +51,10 @@ class Experiment<T_Stage_Id, T_Stage_Result> extends ChangeNotifier {
     _currentStageId = startingStageId;
   }
 
-  void saveTrialEvent(String name,
-      {Map<String, dynamic> extraData = const {}}) {
+  void saveTrialEvent(
+    String name, {
+    Map<String, dynamic> extraData = const {},
+  }) {
     trial?.saveTrialEvent(name, extraData: extraData);
   }
 
@@ -61,10 +63,10 @@ class Experiment<T_Stage_Id, T_Stage_Result> extends ChangeNotifier {
   }
 
   void sendPomaCommand(String pomaCommand) {
-    saveTrialEvent("POMA_COMMAND", extraData: {
-      'command': pomaCommand,
-      'stageId': _currentStageId,
-    });
+    saveTrialEvent(
+      "POMA_COMMAND",
+      extraData: {'command': pomaCommand, 'stageId': _currentStageId},
+    );
     if (pomaClient?.isConnected() == true) {
       pomaClient!.send(pomaCommand);
     } else {
@@ -77,22 +79,28 @@ class Experiment<T_Stage_Id, T_Stage_Result> extends ChangeNotifier {
       throw Exception('Invalid Stage ID "$stageId".');
     }
     if (_currentStageId != stageId) {
-      saveTrialEvent("EXPERIMENT_ADVANCE", extraData: {
-        'toStageId': stageId.toString(),
-        'fromStageId': _currentStageId,
-      });
+      currentStage.onExit();
+      saveTrialEvent(
+        "EXPERIMENT_ADVANCE",
+        extraData: {
+          'toStageId': stageId.toString(),
+          'fromStageId': _currentStageId,
+        },
+      );
       _currentStageId = stageId;
+      currentStage.onEnter();
       notifyListeners();
     }
   }
 
   Future<void> advanceByResult(T_Stage_Result result) async {
-    saveTrialEvent("STAGE_RESULT", extraData: {
-      'result': result.toString(),
-      'stageId': _currentStageId,
-    });
+    saveTrialEvent(
+      "STAGE_RESULT",
+      extraData: {'result': result.toString(), 'stageId': _currentStageId},
+    );
     advanceToStage(
-        transitions.getDestination(_currentStageId, result) ?? abortStageId);
+      transitions.getDestination(_currentStageId, result) ?? abortStageId,
+    );
   }
 
   bool get canAdvance {
@@ -102,7 +110,9 @@ class Experiment<T_Stage_Id, T_Stage_Result> extends ChangeNotifier {
   Future<void> start(ExperimentTrial trial) async {
     this.trial = trial;
     saveTrialEvent("EXPERIMENT_START");
-    advanceToStage(startingStageId);
+    _currentStageId = startingStageId;
+    currentStage.onEnter();
+    notifyListeners();
   }
 
   ExperimentTrial? end() {
@@ -113,19 +123,22 @@ class Experiment<T_Stage_Id, T_Stage_Result> extends ChangeNotifier {
 
   void reset() {
     saveTrialEvent("EXPERIMENT_RESET");
-    currentStage.onExit();
-    advanceToStage(startingStageId);
+    if (_currentStageId != startingStageId) {
+      advanceToStage(startingStageId);
+    } else {
+      currentStage.onExit();
+      currentStage.onEnter();
+      notifyListeners();
+    }
   }
 
   void finish() {
     saveTrialEvent("EXPERIMENT_FINISH");
-    currentStage.onExit();
     advanceToStage(finalStageId);
   }
 
   void abort() {
     saveTrialEvent("EXPERIMENT_ABORT");
-    currentStage.onExit();
     advanceToStage(abortStageId);
   }
 }

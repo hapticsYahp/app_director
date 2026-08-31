@@ -21,7 +21,6 @@ class ExperimentStageShuffleWidgetState<T_Result>
   @override
   void initState() {
     super.initState();
-    widget.stage.onEnter();
     _handleShuffle();
   }
 
