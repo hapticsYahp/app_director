@@ -9,7 +9,21 @@ import '../providers/config/config_notifier.dart';
 import '../providers/config/subject_trial_notifier.dart';
 import '../providers/poma/poma_client.dart';
 import '../providers/poma/transport/ble_poma_transport.dart';
+import '../providers/poma/transport/poma_transport.dart';
 import '../providers/poma/transport/tcp_poma_transport.dart';
+
+PomaTransport _createPomaTransport(ConfigNotifier configNotifier) {
+  return configNotifier.connectionType == ConnectionType.ble
+      ? BlePomaTransport(
+          deviceId: configNotifier.deviceMac,
+          timeout: Duration(seconds: configNotifier.deviceConnectionTimeout),
+        )
+      : TcpPomaTransport(
+          host: configNotifier.deviceHost,
+          port: configNotifier.devicePort,
+          timeout: Duration(seconds: configNotifier.deviceConnectionTimeout),
+        );
+}
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -27,28 +41,14 @@ class HomePage extends StatelessWidget {
         ChangeNotifierProvider<SubjectTrialNotifier>(
           create: (_) => SubjectTrialNotifier(),
         ),
-        Provider<PomaClient>(
-          create: (context) {
-            final configNotifier = Provider.of<ConfigNotifier>(
-              context,
-              listen: false,
-            );
-            final transport =
-                configNotifier.connectionType == ConnectionType.ble
-                ? BlePomaTransport(
-                    deviceId: configNotifier.deviceMac,
-                    timeout: Duration(
-                      seconds: configNotifier.deviceConnectionTimeout,
-                    ),
-                  )
-                : TcpPomaTransport(
-                    host: configNotifier.deviceHost,
-                    port: configNotifier.devicePort,
-                    timeout: Duration(
-                      seconds: configNotifier.deviceConnectionTimeout,
-                    ),
-                  );
-            return PomaClient(transport);
+        ProxyProvider<ConfigNotifier, PomaClient>(
+          update: (_, configNotifier, previous) {
+            final transport = _createPomaTransport(configNotifier);
+            if (previous == null) {
+              return PomaClient(transport);
+            }
+            previous.reconfigure(transport);
+            return previous;
           },
           dispose: (_, client) => client.dispose(),
         ),

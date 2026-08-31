@@ -24,11 +24,14 @@ class PomaClient {
   Stream<String> get onDebug => _debugController.stream;
 
   PomaTransport _transport;
+
+  PomaTransport get transport => _transport;
   StreamSubscription<String>? _transportDebugSubscription;
 
   PomaClient(this._transport) {
-    _transportDebugSubscription =
-        _transport.onDebug.listen((msg) => _debug("[transport] $msg"));
+    _transportDebugSubscription = _transport.onDebug.listen(
+      (msg) => _debug("[transport] $msg"),
+    );
     _debug("PoMA Client init.");
   }
 
@@ -37,11 +40,12 @@ class PomaClient {
     if (isConnected()) {
       await _transport.close();
     }
-    await _transportDebugSubscription?.cancel();
+    _transportDebugSubscription?.cancel();
     _transport.dispose();
     _transport = transport;
-    _transportDebugSubscription =
-        _transport.onDebug.listen((msg) => _debug("[transport] $msg"));
+    _transportDebugSubscription = _transport.onDebug.listen(
+      (msg) => _debug("[transport] $msg"),
+    );
     _debug("Transport reconfigured.");
   }
 
@@ -185,8 +189,9 @@ class PomaClient {
   Future<String?> getTopicValue(String topic) async {
     String? value;
     if (isConnected()) {
-      String? topicValueResponse =
-          await sendAndWait("$_getTopicValueCommandChar $topic");
+      String? topicValueResponse = await sendAndWait(
+        "$_getTopicValueCommandChar $topic",
+      );
       if (topicValueResponse != "Getter Key not found") {
         value = topicValueResponse;
       }
@@ -197,8 +202,9 @@ class PomaClient {
   Future<bool> setTopicValue(String topic, String value) async {
     bool success = false;
     if (isConnected()) {
-      String? setValueResponse =
-          await sendAndWait("$_setTopicValueCommandChar $topic $value");
+      String? setValueResponse = await sendAndWait(
+        "$_setTopicValueCommandChar $topic $value",
+      );
       success = (setValueResponse == "done");
     }
     return success;
