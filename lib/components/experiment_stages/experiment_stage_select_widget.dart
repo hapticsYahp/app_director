@@ -123,7 +123,7 @@ class _ExperimentStageSelectWidgetState<T_Result>
                   });
                 },
                 child: AnimatedContainer(
-                  duration: const Duration(microseconds: 150),
+                  duration: const Duration(milliseconds: 150),
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: selected ? Colors.blue : Colors.grey.shade300,
