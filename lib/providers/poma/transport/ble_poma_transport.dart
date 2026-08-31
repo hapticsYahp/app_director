@@ -17,14 +17,56 @@ class BlePomaTransport implements PomaTransport {
 
   static int get _chunkSize => _mtu - 3;
 
+  // Multicast registry for UniversalBle.onConnectionChange to prevent clobbering
+  // global callbacks across multiple instances or external BLE listeners.
+  static final Set<
+    void Function(String deviceId, bool isConnected, String? error)
+  >
+  _connectionChangeListeners = {};
+  static bool _isGlobalConnectionCallbackInitialized = false;
+
+  static void _ensureGlobalConnectionCallback() {
+    if (!_isGlobalConnectionCallbackInitialized) {
+      UniversalBle.onConnectionChange =
+          (String deviceId, bool isConnected, String? error) {
+            for (final listener in List.of(_connectionChangeListeners)) {
+              try {
+                listener(deviceId, isConnected, error);
+              } catch (_) {
+                // Ignore listener errors to avoid disrupting other subscribers.
+              }
+            }
+          };
+      _isGlobalConnectionCallbackInitialized = true;
+    }
+  }
+
+  static void _registerConnectionListener(
+    void Function(String deviceId, bool isConnected, String? error) listener,
+  ) {
+    _ensureGlobalConnectionCallback();
+    _connectionChangeListeners.add(listener);
+  }
+
+  static void _unregisterConnectionListener(
+    void Function(String deviceId, bool isConnected, String? error) listener,
+  ) {
+    _connectionChangeListeners.remove(listener);
+    if (_connectionChangeListeners.isEmpty &&
+        _isGlobalConnectionCallbackInitialized) {
+      UniversalBle.onConnectionChange = null;
+      _isGlobalConnectionCallbackInitialized = false;
+    }
+  }
+
   final String _deviceId;
   final Duration _timeout;
   final String _serviceUuid;
   final String _characteristicUuid;
 
-  final StreamController<Uint8List> _incomingController =
+  StreamController<Uint8List> _incomingController =
       StreamController<Uint8List>.broadcast();
-  final StreamController<String> _debugController =
+  StreamController<String> _debugController =
       StreamController<String>.broadcast();
 
   StreamSubscription<Uint8List>? _valueSubscription;
@@ -36,18 +78,38 @@ class BlePomaTransport implements PomaTransport {
     Duration timeout = const Duration(seconds: 10),
     String serviceUuid = pomaServiceUuid,
     String characteristicUuid = pomaCharacteristicUuid,
-  })  : _deviceId = deviceId,
-        _timeout = timeout,
-        _serviceUuid = serviceUuid,
-        _characteristicUuid = characteristicUuid;
+  }) : _deviceId = deviceId,
+       _timeout = timeout,
+       _serviceUuid = serviceUuid,
+       _characteristicUuid = characteristicUuid;
 
   void _debug(String message) {
-    _debugController.add(message);
+    if (!_debugController.isClosed) {
+      _debugController.add(message);
+    }
   }
 
   void _checkValidMacOrId(String macOrId) {
     if (!isValidMacOrId(macOrId)) {
       throw PomaException("Invalid BLE device ID '$macOrId'.");
+    }
+  }
+
+  void _onBleConnectionChange(
+    String deviceId,
+    bool isConnected,
+    String? error,
+  ) {
+    if (deviceId == _deviceId && !isConnected) {
+      _debug("BLE device disconnected.");
+      _connected = false;
+      _valueSubscription?.cancel();
+      _valueSubscription = null;
+      if (error != null && !_incomingController.isClosed) {
+        _incomingController.addError(
+          PomaException("BLE connection lost: $error"),
+        );
+      }
     }
   }
 
@@ -57,9 +119,7 @@ class BlePomaTransport implements PomaTransport {
   }
 
   static bool isValidMacOrId(String macOrId) {
-    final macRegex = RegExp(
-      r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$',
-    );
+    final macRegex = RegExp(r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$');
     return macOrId.isNotEmpty &&
         (macOrId.isUUID() || macRegex.hasMatch(macOrId));
   }
@@ -76,12 +136,19 @@ class BlePomaTransport implements PomaTransport {
   @override
   Future<void> open() async {
     _checkValidMacOrId(_deviceId);
+    if (_incomingController.isClosed) {
+      _incomingController = StreamController<Uint8List>.broadcast();
+    }
+    if (_debugController.isClosed) {
+      _debugController = StreamController<String>.broadcast();
+    }
     _debug("Checking Bluetooth availability...");
     try {
       final availability = await UniversalBle.getBluetoothAvailabilityState();
       if (availability != AvailabilityState.poweredOn) {
         throw PomaException(
-            "Bluetooth not available (state: ${availability.name}).");
+          "Bluetooth not available (state: ${availability.name}).",
+        );
       }
       await UniversalBle.requestPermissions();
 
@@ -90,8 +157,10 @@ class BlePomaTransport implements PomaTransport {
       _connected = true;
 
       _debug("Discovering services...");
-      final services =
-          await UniversalBle.discoverServices(_deviceId, timeout: _timeout);
+      final services = await UniversalBle.discoverServices(
+        _deviceId,
+        timeout: _timeout,
+      );
 
       // Locate the PoMA characteristic to inspect its supported properties.
       BleCharacteristic? pomaChar;
@@ -106,7 +175,8 @@ class BlePomaTransport implements PomaTransport {
       }
       if (pomaChar == null) {
         throw PomaException(
-            "PoMA characteristic $_characteristicUuid not found on device.");
+          "PoMA characteristic $_characteristicUuid not found on device.",
+        );
       }
 
       try {
@@ -130,19 +200,24 @@ class BlePomaTransport implements PomaTransport {
         _debug("Connection priority not supported.");
       }
 
-      _valueSubscription = UniversalBle.characteristicValueStream(
-        _deviceId,
-        _characteristicUuid,
-      ).listen(
-        (Uint8List data) {
-          _debug("RX ${data.length} bytes");
-          _incomingController.add(data);
-        },
-        onError: (Object error) {
-          _debug("BLE value stream error: $error");
-          _incomingController.addError(error);
-        },
-      );
+      _valueSubscription =
+          UniversalBle.characteristicValueStream(
+            _deviceId,
+            _characteristicUuid,
+          ).listen(
+            (Uint8List data) {
+              _debug("RX ${data.length} bytes");
+              if (!_incomingController.isClosed) {
+                _incomingController.add(data);
+              }
+            },
+            onError: (Object error) {
+              _debug("BLE value stream error: $error");
+              if (!_incomingController.isClosed) {
+                _incomingController.addError(error);
+              }
+            },
+          );
 
       final props = pomaChar.properties;
       if (props.contains(CharacteristicProperty.notify)) {
@@ -161,23 +236,12 @@ class BlePomaTransport implements PomaTransport {
         );
       } else {
         throw PomaException(
-            "PoMA characteristic does not support notify or indicate.");
+          "PoMA characteristic does not support notify or indicate.",
+        );
       }
 
-      // Forward connection-loss events to close the transport gracefully.
-      UniversalBle.onConnectionChange =
-          (String deviceId, bool isConnected, String? error) {
-        if (deviceId == _deviceId && !isConnected) {
-          _debug("BLE device disconnected.");
-          _connected = false;
-          if (error != null) {
-            _incomingController.addError(error);
-          }
-          if (!_incomingController.isClosed) {
-            _incomingController.close();
-          }
-        }
-      };
+      // Register connection change listener via multicast registry.
+      _registerConnectionListener(_onBleConnectionChange);
 
       _debug("BLE device connected.");
     } on PomaException {
@@ -185,6 +249,7 @@ class BlePomaTransport implements PomaTransport {
     } catch (e) {
       _debug("BLE connect error: $e");
       _connected = false;
+      _unregisterConnectionListener(_onBleConnectionChange);
       throw PomaException("BLE connection failure: $e");
     }
   }
@@ -234,7 +299,10 @@ class BlePomaTransport implements PomaTransport {
         _debug("BLE disconnect error: $e");
       }
     }
-    dispose();
+    _connected = false;
+    _valueSubscription?.cancel();
+    _valueSubscription = null;
+    _unregisterConnectionListener(_onBleConnectionChange);
   }
 
   @override
@@ -242,6 +310,12 @@ class BlePomaTransport implements PomaTransport {
     _connected = false;
     _valueSubscription?.cancel();
     _valueSubscription = null;
-    UniversalBle.onConnectionChange = null;
+    _unregisterConnectionListener(_onBleConnectionChange);
+    if (!_incomingController.isClosed) {
+      _incomingController.close();
+    }
+    if (!_debugController.isClosed) {
+      _debugController.close();
+    }
   }
 }

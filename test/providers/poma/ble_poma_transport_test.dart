@@ -59,6 +59,34 @@ void main() {
       await transport.close();
       expect(transport.isConnected(), isFalse);
     });
+
+    test(
+      'dispose cancels subscriptions and closes stream controllers cleanly',
+      () async {
+        final transport = BlePomaTransport(deviceId: 'AA:BB:CC:DD:EE:FF');
+        expect(transport.incoming, isNotNull);
+        expect(transport.onDebug, isNotNull);
+
+        transport.dispose();
+        expect(transport.isConnected(), isFalse);
+      },
+    );
+
+    test(
+      'multiple instances can be created and disposed independently',
+      () async {
+        final transport1 = BlePomaTransport(deviceId: 'AA:BB:CC:DD:EE:11');
+        final transport2 = BlePomaTransport(deviceId: 'AA:BB:CC:DD:EE:22');
+
+        expect(transport1.isConnected(), isFalse);
+        expect(transport2.isConnected(), isFalse);
+
+        transport1.dispose();
+        expect(transport2.isConnected(), isFalse);
+
+        transport2.dispose();
+      },
+    );
   });
 
   group('ConfigNotifier connectionType settings', () {
