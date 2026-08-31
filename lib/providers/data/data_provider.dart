@@ -10,8 +10,73 @@ import '../../core/experiment/experiment.dart';
 
 class DataProvider {
   final ConfigNotifier config;
+  Db? _db;
+  String? _connectedDbUri;
 
   DataProvider(this.config);
+
+  /// Returns an open Db instance, reusing the existing connection if possible
+  /// and connected to the current configured URI.
+  Future<Db> _getDb() async {
+    final String currentUri = config.dbUri;
+
+    if (_db != null && (_connectedDbUri != currentUri || !_isDbOpen(_db!))) {
+      await _closeDb();
+    }
+
+    if (_db == null) {
+      final db = await Db.create(currentUri);
+      await db.open();
+      _db = db;
+      _connectedDbUri = currentUri;
+    }
+
+    return _db!;
+  }
+
+  bool _isDbOpen(Db db) {
+    return db.isConnected;
+  }
+
+  Future<void> _closeDb() async {
+    if (_db != null) {
+      try {
+        if (_db!.isConnected) {
+          await _db!.close();
+        }
+      } catch (e) {
+        debugPrint("Error closing DB: $e");
+      } finally {
+        _db = null;
+        _connectedDbUri = null;
+      }
+    }
+  }
+
+  /// Executes an operation on the database with error handling and connection recovery.
+  Future<T> _withDb<T>(Future<T> Function(Db db) action) async {
+    Db db;
+    try {
+      db = await _getDb();
+    } catch (e) {
+      await _closeDb();
+      rethrow;
+    }
+
+    try {
+      return await action(db);
+    } catch (e) {
+      if (!_isDbOpen(db)) {
+        await _closeDb();
+      }
+      rethrow;
+    }
+  }
+
+  /// Closes any active database connection and releases resources.
+  Future<void> dispose() async {
+    await _closeDb();
+  }
 
   /*
   -----------------------------------
@@ -20,17 +85,14 @@ class DataProvider {
    */
 
   Future<List<SerializableExperiment>> getExperiments() async {
-    final Db db = await Db.create(config.dbUri);
-    await db.open();
-    final DbCollection experimentsCollection = db.collection('experiments');
-    List<Map<String, dynamic>> experimentsJson = await experimentsCollection
-        .find()
-        .toList();
-    List<SerializableExperiment> experiments = experimentsJson
-        .map((expJson) => SerializableExperiment.fromJson(expJson))
-        .toList();
-    await db.close();
-    return experiments;
+    return _withDb((db) async {
+      final DbCollection experimentsCollection = db.collection('experiments');
+      final List<Map<String, dynamic>> experimentsJson =
+          await experimentsCollection.find().toList();
+      return experimentsJson
+          .map((expJson) => SerializableExperiment.fromJson(expJson))
+          .toList();
+    });
   }
 
   /*
@@ -40,58 +102,53 @@ class DataProvider {
    */
 
   Future<List<DeviceTrial>> getDevices() async {
-    final Db db = await Db.create(config.dbUri);
-    await db.open();
-    final DbCollection devicesCollection = db.collection('devices');
-    List<Map<String, dynamic>> devicesJson = await devicesCollection
-        .find()
-        .toList();
-    List<DeviceTrial> devices = devicesJson
-        .map((devJson) => DeviceTrial.fromJson(devJson))
-        .toList();
-    await db.close();
-    return devices;
+    return _withDb((db) async {
+      final DbCollection devicesCollection = db.collection('devices');
+      final List<Map<String, dynamic>> devicesJson = await devicesCollection
+          .find()
+          .toList();
+      return devicesJson
+          .map((devJson) => DeviceTrial.fromJson(devJson))
+          .toList();
+    });
   }
 
   Future<List<DeviceTrial>> searchDevicesByName(String name) async {
-    final Db db = await Db.create(config.dbUri);
-    await db.open();
-    final DbCollection devicesCollection = db.collection('devices');
-    final query = {
-      'name': {'\$regex': name, '\$options': 'i'},
-    };
-    final List<Map<String, dynamic>> devicesJson = await devicesCollection
-        .find(query)
-        .toList();
-    final List<DeviceTrial> devices = devicesJson
-        .map((json) => DeviceTrial.fromJson(json))
-        .toList();
-    await db.close();
-    return devices;
+    return _withDb((db) async {
+      final DbCollection devicesCollection = db.collection('devices');
+      final query = {
+        'name': {'\$regex': name, '\$options': 'i'},
+      };
+      final List<Map<String, dynamic>> devicesJson = await devicesCollection
+          .find(query)
+          .toList();
+      return devicesJson.map((json) => DeviceTrial.fromJson(json)).toList();
+    });
   }
 
   Future<DeviceTrial> createDeviceTrial(String name) async {
-    final Db db = await Db.create(config.dbUri);
-    await db.open();
-    final DbCollection devicesCollection = db.collection('devices');
-    Map<String, dynamic> deviceJson = {'id': Uuid().v4(), 'name': name};
-    final deviceJsonResult = await devicesCollection.insertOne(deviceJson);
-    if (deviceJsonResult.isFailure) {
-      throw deviceJsonResult.errmsg!;
-    }
-    await db.close();
-    return DeviceTrial.fromJson(deviceJson);
+    return _withDb((db) async {
+      final DbCollection devicesCollection = db.collection('devices');
+      final Map<String, dynamic> deviceJson = {
+        'id': const Uuid().v4(),
+        'name': name,
+      };
+      final deviceJsonResult = await devicesCollection.insertOne(deviceJson);
+      if (deviceJsonResult.isFailure) {
+        throw deviceJsonResult.errmsg ?? 'Failed to create device';
+      }
+      return DeviceTrial.fromJson(deviceJson);
+    });
   }
 
   Future<void> saveDevice(DeviceTrial device) async {
-    final Db db = await Db.create(config.dbUri);
-    await db.open();
-    final DbCollection devicesCollection = db.collection('devices');
-    await devicesCollection.updateOne(
-      where.eq('id', device.id),
-      modify.set('name', device.name),
-    );
-    await db.close();
+    return _withDb((db) async {
+      final DbCollection devicesCollection = db.collection('devices');
+      await devicesCollection.updateOne(
+        where.eq('id', device.id),
+        modify.set('name', device.name),
+      );
+    });
   }
 
   /*
@@ -101,17 +158,15 @@ class DataProvider {
    */
 
   Future<List<SubjectTrial>> getSubjects() async {
-    final Db db = await Db.create(config.dbUri);
-    await db.open();
-    final DbCollection subjectsCollection = db.collection('subjects');
-    List<Map<String, dynamic>> subjectsJson = await subjectsCollection
-        .find()
-        .toList();
-    List<SubjectTrial> subjects = subjectsJson
-        .map((subJson) => SubjectTrial.fromJson(subJson))
-        .toList();
-    await db.close();
-    return subjects;
+    return _withDb((db) async {
+      final DbCollection subjectsCollection = db.collection('subjects');
+      final List<Map<String, dynamic>> subjectsJson = await subjectsCollection
+          .find()
+          .toList();
+      return subjectsJson
+          .map((subJson) => SubjectTrial.fromJson(subJson))
+          .toList();
+    });
   }
 
   Future<SubjectTrial> createSubjectTrial({
@@ -123,64 +178,59 @@ class DataProvider {
     double? weightKg,
     double? wristCircumferenceCm,
   }) async {
-    final Db db = await Db.create(config.dbUri);
-    await db.open();
-    final DbCollection subjectsCollection = db.collection('subjects');
-    if (name == null || name.trim().isEmpty) {
-      final count = await subjectsCollection.count();
-      name = 'Subject #${count + 1}';
-    }
-    Map<String, dynamic> subjectJson = {
-      'id': Uuid().v4(),
-      'name': name,
-      'age': age,
-      'gender': gender,
-      'dominantHand': dominantHand,
-      'heightCm': heightCm,
-      'weightKg': weightKg,
-      'wristCircumferenceCm': wristCircumferenceCm,
-    };
-    final subjectJsonResult = await subjectsCollection.insertOne(subjectJson);
-    if (subjectJsonResult.isFailure) {
-      throw subjectJsonResult.errmsg!;
-    }
-    await db.close();
-    return SubjectTrial.fromJson(subjectJson);
+    return _withDb((db) async {
+      final DbCollection subjectsCollection = db.collection('subjects');
+      String finalName = name ?? '';
+      if (finalName.trim().isEmpty) {
+        final count = await subjectsCollection.count();
+        finalName = 'Subject #${count + 1}';
+      }
+      final Map<String, dynamic> subjectJson = {
+        'id': const Uuid().v4(),
+        'name': finalName,
+        'age': age,
+        'gender': gender,
+        'dominantHand': dominantHand,
+        'heightCm': heightCm,
+        'weightKg': weightKg,
+        'wristCircumferenceCm': wristCircumferenceCm,
+      };
+      final subjectJsonResult = await subjectsCollection.insertOne(subjectJson);
+      if (subjectJsonResult.isFailure) {
+        throw subjectJsonResult.errmsg ?? 'Failed to create subject';
+      }
+      return SubjectTrial.fromJson(subjectJson);
+    });
   }
 
   Future<List<SubjectTrial>> searchSubjectsByName(String name) async {
-    final Db db = await Db.create(config.dbUri);
-    await db.open();
-    final DbCollection subjectsCollection = db.collection('subjects');
-    final query = {
-      'name': {'\$regex': name, '\$options': 'i'},
-    };
-    final List<Map<String, dynamic>> subjectsJson = await subjectsCollection
-        .find(query)
-        .toList();
-    final List<SubjectTrial> subjects = subjectsJson
-        .map((json) => SubjectTrial.fromJson(json))
-        .toList();
-    await db.close();
-    return subjects;
+    return _withDb((db) async {
+      final DbCollection subjectsCollection = db.collection('subjects');
+      final query = {
+        'name': {'\$regex': name, '\$options': 'i'},
+      };
+      final List<Map<String, dynamic>> subjectsJson = await subjectsCollection
+          .find(query)
+          .toList();
+      return subjectsJson.map((json) => SubjectTrial.fromJson(json)).toList();
+    });
   }
 
   Future<void> saveSubject(SubjectTrial subject) async {
-    final Db db = await Db.create(config.dbUri);
-    await db.open();
-    final DbCollection subjectsCollection = db.collection('subjects');
-    await subjectsCollection.updateOne(
-      where.eq('id', subject.id),
-      modify
-          .set('name', subject.name)
-          .set('age', subject.age)
-          .set('gender', subject.gender)
-          .set('dominantHand', subject.dominantHand)
-          .set('heightCm', subject.heightCm)
-          .set('weightKg', subject.weightKg)
-          .set('wristCircumferenceCm', subject.wristCircumferenceCm),
-    );
-    await db.close();
+    return _withDb((db) async {
+      final DbCollection subjectsCollection = db.collection('subjects');
+      await subjectsCollection.updateOne(
+        where.eq('id', subject.id),
+        modify
+            .set('name', subject.name)
+            .set('age', subject.age)
+            .set('gender', subject.gender)
+            .set('dominantHand', subject.dominantHand)
+            .set('heightCm', subject.heightCm)
+            .set('weightKg', subject.weightKg)
+            .set('wristCircumferenceCm', subject.wristCircumferenceCm),
+      );
+    });
   }
 
   /*
@@ -194,22 +244,21 @@ class DataProvider {
     SubjectTrial subject,
     DeviceTrial device,
   ) async {
-    final Db db = await Db.create(config.dbUri);
-    await db.open();
-    final DbCollection trialsCollection = db.collection('trials');
-    final ObjectId id = ObjectId();
-    final trialJsonResult = await trialsCollection.insertOne({
-      '_id': id,
-      'experimentId': experiment.id,
-      'subjectId': subject.id,
-      'deviceId': device.id,
-      'events': [],
+    return _withDb((db) async {
+      final DbCollection trialsCollection = db.collection('trials');
+      final ObjectId id = ObjectId();
+      final trialJsonResult = await trialsCollection.insertOne({
+        '_id': id,
+        'experimentId': experiment.id,
+        'subjectId': subject.id,
+        'deviceId': device.id,
+        'events': [],
+      });
+      if (trialJsonResult.isFailure) {
+        throw trialJsonResult.errmsg ?? 'Failed to create trial';
+      }
+      return ExperimentTrial(id.oid, experiment, subject, device);
     });
-    if (trialJsonResult.isFailure) {
-      throw trialJsonResult.errmsg!;
-    }
-    await db.close();
-    return ExperimentTrial(id.oid, experiment, subject, device);
   }
 
   /*
@@ -221,20 +270,19 @@ class DataProvider {
   Future<void> saveTrialEvents(ExperimentTrial trial) async {
     final List<Map<String, dynamic>> events = trial.getBufferedEvents();
     if (events.isNotEmpty) {
-      final Db db = await Db.create(config.dbUri);
-      await db.open();
-      final DbCollection trialsCollection = db.collection('trials');
       try {
-        await trialsCollection.updateOne(
-          where.id(ObjectId.fromHexString(trial.id)),
-          modify.set('events', events),
-        );
-        debugPrint("Saved ${events.length} events to DB.");
+        await _withDb((db) async {
+          final DbCollection trialsCollection = db.collection('trials');
+          await trialsCollection.updateOne(
+            where.id(ObjectId.fromHexString(trial.id)),
+            modify.set('events', events),
+          );
+          debugPrint("Saved ${events.length} events to DB.");
+        });
       } catch (e, stack) {
         debugPrint("Error saving to DB: $e");
         debugPrintStack(stackTrace: stack);
       }
-      await db.close();
     }
   }
 }

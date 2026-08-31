@@ -19,33 +19,43 @@ class HomePage extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<ConfigNotifier>(
-            create: (context) => ConfigNotifier()),
+          create: (context) => ConfigNotifier(),
+        ),
         ChangeNotifierProvider<DeviceTrialNotifier>(
-            create: (_) => DeviceTrialNotifier()),
+          create: (_) => DeviceTrialNotifier(),
+        ),
         ChangeNotifierProvider<SubjectTrialNotifier>(
-            create: (_) => SubjectTrialNotifier()),
+          create: (_) => SubjectTrialNotifier(),
+        ),
         Provider<PomaClient>(
           create: (context) {
-            final configNotifier =
-                Provider.of<ConfigNotifier>(context, listen: false);
-            final transport = configNotifier.connectionType == ConnectionType.ble
+            final configNotifier = Provider.of<ConfigNotifier>(
+              context,
+              listen: false,
+            );
+            final transport =
+                configNotifier.connectionType == ConnectionType.ble
                 ? BlePomaTransport(
                     deviceId: configNotifier.deviceMac,
                     timeout: Duration(
-                        seconds: configNotifier.deviceConnectionTimeout),
+                      seconds: configNotifier.deviceConnectionTimeout,
+                    ),
                   )
                 : TcpPomaTransport(
                     host: configNotifier.deviceHost,
                     port: configNotifier.devicePort,
                     timeout: Duration(
-                        seconds: configNotifier.deviceConnectionTimeout),
+                      seconds: configNotifier.deviceConnectionTimeout,
+                    ),
                   );
             return PomaClient(transport);
           },
           dispose: (_, client) => client.dispose(),
         ),
         ProxyProvider<ConfigNotifier, DataProvider>(
-          update: (_, configNotifier, _) => DataProvider(configNotifier),
+          update: (_, configNotifier, previous) =>
+              previous ?? DataProvider(configNotifier),
+          dispose: (_, dataProvider) => dataProvider.dispose(),
         ),
       ],
       child: DefaultTabController(
@@ -54,28 +64,15 @@ class HomePage extends StatelessWidget {
           appBar: AppBar(
             bottom: const TabBar(
               tabs: [
-                Tab(
-                  icon: Icon(Icons.assignment_ind),
-                  text: "Subject/Device",
-                ),
-                Tab(
-                  icon: Icon(Icons.sensors),
-                  text: 'Experiments',
-                ),
-                Tab(
-                  icon: Icon(Icons.tune),
-                  text: 'Settings',
-                ),
+                Tab(icon: Icon(Icons.assignment_ind), text: "Subject/Device"),
+                Tab(icon: Icon(Icons.sensors), text: 'Experiments'),
+                Tab(icon: Icon(Icons.tune), text: 'Settings'),
               ],
             ),
             title: const Text('Haptic Interface'),
           ),
           body: const TabBarView(
-            children: [
-              UserDeviceTab(),
-              ExperimentsTab(),
-              SettingsTab(),
-            ],
+            children: [UserDeviceTab(), ExperimentsTab(), SettingsTab()],
           ),
         ),
       ),
