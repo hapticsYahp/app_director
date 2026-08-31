@@ -8,6 +8,9 @@ import '../../providers/config/device_trial_notifier.dart';
 import '../../providers/config/subject_trial_notifier.dart';
 import '../../providers/poma/poma_client.dart';
 import '../../providers/poma/poma_exception.dart';
+import '../../providers/poma/transport/ble_poma_transport.dart';
+import '../../providers/poma/transport/poma_transport.dart';
+import '../../providers/poma/transport/tcp_poma_transport.dart';
 
 class ExperimentsTab extends StatefulWidget {
   const ExperimentsTab({super.key});
@@ -65,11 +68,21 @@ class _ExperimentsTabState extends State<ExperimentsTab>
         connectionCommandInProgress = true;
       });
       try {
-        await pomaClient.connect(
-          configNotifier.deviceHost,
-          configNotifier.devicePort,
-          timeout: Duration(seconds: configNotifier.deviceConnectionTimeout),
-        );
+        final PomaTransport transport;
+        if (configNotifier.connectionType == ConnectionType.ble) {
+          transport = BlePomaTransport(
+            deviceId: configNotifier.deviceMac,
+            timeout: Duration(seconds: configNotifier.deviceConnectionTimeout),
+          );
+        } else {
+          transport = TcpPomaTransport(
+            host: configNotifier.deviceHost,
+            port: configNotifier.devicePort,
+            timeout: Duration(seconds: configNotifier.deviceConnectionTimeout),
+          );
+        }
+        await pomaClient.reconfigure(transport);
+        await pomaClient.connect();
       } on PomaException catch (e, stackTrace) {
         debugPrint("PoMA Exception: $e");
         debugPrintStack(stackTrace: stackTrace);
@@ -180,9 +193,8 @@ class _ExperimentsTabState extends State<ExperimentsTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final selectedSubject =
-        context.watch<SubjectTrialNotifier>().selectedSubject;
-    final selectedDevice = context.watch<DeviceTrialNotifier>().selectedDevice;
+    context.watch<SubjectTrialNotifier>();
+    context.watch<DeviceTrialNotifier>();
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

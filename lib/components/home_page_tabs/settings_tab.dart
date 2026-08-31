@@ -2,10 +2,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mongo_dart/mongo_dart.dart' as mongo_dart;
 import 'package:provider/provider.dart';
+import 'package:yahp_director/components/ble_scan_dialog.dart';
 import 'package:yahp_director/providers/poma/poma_exception.dart';
 import '../../providers/config/config_notifier.dart';
 import '../../providers/poma/poma_client.dart';
-import '../../providers/poma/poma_socket_impl.dart';
+import '../../providers/poma/transport/ble_poma_transport.dart';
+import '../../providers/poma/transport/poma_transport.dart';
+import '../../providers/poma/transport/tcp_poma_transport.dart';
 
 const String pomaTopicTest = "intensity";
 
@@ -20,6 +23,8 @@ class _SettingsTabState extends State<SettingsTab>
     with AutomaticKeepAliveClientMixin {
   late final ConfigNotifier configNotifier;
 
+  ConnectionType _connectionType = ConnectionType.tcp;
+
   bool isPomaTesting = false;
   String pomaTestResult = "";
 
@@ -29,6 +34,7 @@ class _SettingsTabState extends State<SettingsTab>
   final GlobalKey<FormState> _pomaFormKey = GlobalKey<FormState>();
   final _pomaHostController = TextEditingController();
   final _pomaPortController = TextEditingController();
+  final _pomaMacController = TextEditingController();
 
   final GlobalKey<FormState> _dbFormKey = GlobalKey<FormState>();
   final _dbUriController = TextEditingController();
@@ -42,14 +48,63 @@ class _SettingsTabState extends State<SettingsTab>
   }
 
   bool get _isPomaFormChanged {
-    return _isPomaFormValid &&
-        ((_pomaHostController.text != configNotifier.deviceHost) ||
-            (int.tryParse(_pomaPortController.text) !=
-                configNotifier.devicePort));
+    if (!_isPomaFormValid) return false;
+    if (_connectionType != configNotifier.connectionType) return true;
+    if (_connectionType == ConnectionType.tcp) {
+      return (_pomaHostController.text != configNotifier.deviceHost) ||
+          (int.tryParse(_pomaPortController.text) != configNotifier.devicePort);
+    } else {
+      return _pomaMacController.text.trim() != configNotifier.deviceMac;
+    }
   }
 
   bool get _isDbFormChanged {
     return _isDbFormValid && (_dbUriController.text != configNotifier.dbUri);
+  }
+
+  String? _validatePomaHost(String? host) {
+    if (_connectionType != ConnectionType.tcp) {
+      return null;
+    }
+    if ((host == null) || host.isEmpty || !TcpPomaTransport.isValidHost(host)) {
+      return 'Invalid host; not a valid domain or IP address.';
+    }
+    return null;
+  }
+
+  String? _validatePomaPort(String? portString) {
+    if (_connectionType != ConnectionType.tcp) {
+      return null;
+    }
+    final port = int.tryParse(portString ?? "");
+    if ((portString == null) ||
+        portString.isEmpty ||
+        (port == null) ||
+        !TcpPomaTransport.isValidPort(port)) {
+      return 'Invalid port; out of range (1-65535).';
+    }
+    return null;
+  }
+
+  String? _validatePomaMac(String? mac) {
+    if (_connectionType != ConnectionType.ble) {
+      return null;
+    }
+    if ((mac == null) ||
+        mac.trim().isEmpty ||
+        !BlePomaTransport.isValidMacOrId(mac.trim())) {
+      return 'Invalid device MAC or UUID.';
+    }
+    return null;
+  }
+
+  Future<void> _onScanBleDevices() async {
+    final device = await showBleScanDialog(context);
+    if (device != null) {
+      setState(() {
+        _pomaMacController.text = device.deviceId;
+      });
+    }
   }
 
   @override
@@ -57,6 +112,7 @@ class _SettingsTabState extends State<SettingsTab>
     configNotifier.removeListener(_onConfigChanged);
     _pomaHostController.dispose();
     _pomaPortController.dispose();
+    _pomaMacController.dispose();
     _dbUriController.dispose();
     super.dispose();
   }
@@ -64,8 +120,10 @@ class _SettingsTabState extends State<SettingsTab>
   @override
   void initState() {
     configNotifier = Provider.of<ConfigNotifier>(context, listen: false);
+    _connectionType = configNotifier.connectionType;
     _pomaHostController.text = configNotifier.deviceHost;
     _pomaPortController.text = configNotifier.devicePort.toString();
+    _pomaMacController.text = configNotifier.deviceMac;
     _dbUriController.text = configNotifier.dbUri;
     configNotifier.addListener(_onConfigChanged);
     super.initState();
@@ -80,13 +138,25 @@ class _SettingsTabState extends State<SettingsTab>
         configNotifier.deviceHost.isNotEmpty) {
       _pomaHostController.text = configNotifier.deviceHost;
     }
+    if (_pomaMacController.text.isEmpty &&
+        configNotifier.deviceMac.isNotEmpty) {
+      _pomaMacController.text = configNotifier.deviceMac;
+    }
+    if (_connectionType != configNotifier.connectionType) {
+      setState(() {
+        _connectionType = configNotifier.connectionType;
+      });
+    }
   }
 
   void _onPomaSave() {
     if (_isPomaFormValid && !isPomaTesting) {
       configNotifier.updateSettings(
+        connectionType: _connectionType,
         deviceHost: _pomaHostController.text,
-        devicePort: int.tryParse(_pomaPortController.text)!,
+        devicePort:
+            int.tryParse(_pomaPortController.text) ?? configNotifier.devicePort,
+        deviceMac: _pomaMacController.text.trim(),
       );
       setState(() {
         pomaTestResult = "";
@@ -128,11 +198,21 @@ class _SettingsTabState extends State<SettingsTab>
     });
     String result;
     try {
-      PomaClient pomaClient = PomaClient(PomaSocketImpl());
-      await pomaClient.connect(
-        configNotifier.deviceHost,
-        configNotifier.devicePort,
-      );
+      final PomaTransport transport;
+      if (configNotifier.connectionType == ConnectionType.ble) {
+        transport = BlePomaTransport(
+          deviceId: configNotifier.deviceMac,
+          timeout: Duration(seconds: configNotifier.deviceConnectionTimeout),
+        );
+      } else {
+        transport = TcpPomaTransport(
+          host: configNotifier.deviceHost,
+          port: configNotifier.devicePort,
+          timeout: Duration(seconds: configNotifier.deviceConnectionTimeout),
+        );
+      }
+      PomaClient pomaClient = PomaClient(transport);
+      await pomaClient.connect();
       List<String> topics = await pomaClient.getTopics();
       result = topics.contains(pomaTopicTest)
           ? "Success."
@@ -213,63 +293,85 @@ class _SettingsTabState extends State<SettingsTab>
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: Text(
-                    "PoMA Server",
+                    "PoMA Target",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _pomaHostController,
-                        decoration: InputDecoration(
-                          labelText: "Host",
-                          hintText: "Ex: example.com, 192.168.0.100",
-                        ),
-                        validator: (String? value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Invalid host.';
-                          }
-                          final RegExp ipv4RegExp = RegExp(
-                            r'^(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.'
-                            r'(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.'
-                            r'(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.'
-                            r'(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)$',
-                          );
-                          final RegExp domainRegExp = RegExp(
-                            r'^(localhost|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})$',
-                          );
-                          if (!ipv4RegExp.hasMatch(value) &&
-                              !domainRegExp.hasMatch(value)) {
-                            return 'Invalid host; not a valid domain or IP address.';
-                          }
-                          return null;
-                        },
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: SegmentedButton<ConnectionType>(
+                    segments: const [
+                      ButtonSegment<ConnectionType>(
+                        value: ConnectionType.tcp,
+                        label: Text("TCP"),
+                        icon: Icon(Icons.lan),
                       ),
-                    ),
-                    SizedBox(width: 16.0),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _pomaPortController,
-                        decoration: InputDecoration(
-                          labelText: "Port",
-                          hintText: "Ex: 3333",
-                        ),
-                        keyboardType: TextInputType.number,
-                        validator: (String? value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Invalid port.';
-                          }
-                          final port = int.tryParse(value);
-                          if (port == null || port < 1 || port > 65535) {
-                            return 'Invalid port; out of range (1-65535).';
-                          }
-                          return null;
-                        },
+                      ButtonSegment<ConnectionType>(
+                        value: ConnectionType.ble,
+                        label: Text("BLE"),
+                        icon: Icon(Icons.bluetooth),
                       ),
-                    ),
-                  ],
+                    ],
+                    selected: <ConnectionType>{_connectionType},
+                    onSelectionChanged: (Set<ConnectionType> selection) {
+                      setState(() {
+                        _connectionType = selection.first;
+                      });
+                    },
+                  ),
                 ),
+                if (_connectionType == ConnectionType.tcp)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _pomaHostController,
+                          decoration: InputDecoration(
+                            labelText: "Host",
+                            hintText: "Ex: example.com, 192.168.0.100",
+                          ),
+                          validator: _validatePomaHost,
+                        ),
+                      ),
+                      SizedBox(width: 16.0),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _pomaPortController,
+                          decoration: InputDecoration(
+                            labelText: "Port",
+                            hintText: "Ex: 3333",
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: _validatePomaPort,
+                        ),
+                      ),
+                    ],
+                  ),
+                if (_connectionType == ConnectionType.ble)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _pomaMacController,
+                          decoration: InputDecoration(
+                            labelText: "MAC / Device ID",
+                            hintText: "Ex: AA:BB:CC:DD:EE:FF",
+                          ),
+                          validator: _validatePomaMac,
+                        ),
+                      ),
+                      SizedBox(width: 8.0),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: FilledButton.tonalIcon(
+                          onPressed: _onScanBleDevices,
+                          icon: const Icon(Icons.bluetooth_searching),
+                          label: const Text("Scan"),
+                        ),
+                      ),
+                    ],
+                  ),
                 SizedBox(height: 24.0),
                 Row(
                   children: [

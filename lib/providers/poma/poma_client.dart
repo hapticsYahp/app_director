@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:convert';
 import 'dart:typed_data';
-import 'package:string_validator/string_validator.dart';
+
 import 'package:yahp_director/providers/poma/poma_exception.dart';
-import 'package:yahp_director/providers/poma/poma_socket.dart';
+import 'package:yahp_director/providers/poma/transport/poma_transport.dart';
 
 class PomaClient {
   static final String _listTopicsCommandChar = "*";
@@ -16,16 +16,33 @@ class PomaClient {
 
   final StringBuffer _responseBuffer = StringBuffer();
   Completer<String>? _bufferedResponseCompleter;
+  Future<void> _sendAndWaitQueue = Future.value();
 
   final StreamController<String> _debugController =
       StreamController.broadcast();
 
   Stream<String> get onDebug => _debugController.stream;
 
-  final PomaSocket _socket;
+  PomaTransport _transport;
+  StreamSubscription<String>? _transportDebugSubscription;
 
-  PomaClient(this._socket) {
+  PomaClient(this._transport) {
+    _transportDebugSubscription =
+        _transport.onDebug.listen((msg) => _debug("[transport] $msg"));
     _debug("PoMA Client init.");
+  }
+
+  Future<void> reconfigure(PomaTransport transport) async {
+    _debug("Reconfiguring transport...");
+    if (isConnected()) {
+      await _transport.close();
+    }
+    await _transportDebugSubscription?.cancel();
+    _transport.dispose();
+    _transport = transport;
+    _transportDebugSubscription =
+        _transport.onDebug.listen((msg) => _debug("[transport] $msg"));
+    _debug("Transport reconfigured.");
   }
 
   void _debug(String message) {
@@ -33,7 +50,7 @@ class PomaClient {
   }
 
   bool isConnected() {
-    return _socket.isConnected();
+    return _transport.isConnected();
   }
 
   void _completeBufferedResponse(String response) {
@@ -70,92 +87,37 @@ class PomaClient {
 
   void _onSocketError(Object error) {
     _debug("Socket error: $error");
-    _socket.dispose();
+    _transport.dispose();
     _failBufferedResponse(PomaException(error.toString()));
   }
 
   void _onSocketDone() {
     _debug("Socket stream done.");
-    _socket.dispose();
+    _transport.dispose();
     _failBufferedResponse(PomaException("Socket done."));
   }
 
-  bool isValidHost(String host) {
-    if (host.isEmpty) {
-      return false;
-    }
-    final List<RegExp> invalidIpPatterns = [
-      RegExp(r'^0\.0\.0\.0$'), // Catch-all.
-      RegExp(r'^255\.255\.255\.255$'), // Broadcast.
-      RegExp(r'^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$'), // Loopback (127.x.x.x).
-      RegExp(r'^169\.254\.\d{1,3}\.\d{1,3}$'), // DHCP local link (169.254.x.x).
-      RegExp(r'^224\.\d{1,3}\.\d{1,3}\.\d{1,3}$'), // Multicast (224.x.x.x).
-    ];
-    if (host.isIP(4)) {
-      bool hasTrailingZeroes = host
-          .split(".")
-          .where((octet) => (octet.length > 1) && octet.startsWith("0"))
-          .isNotEmpty;
-      return !hasTrailingZeroes &&
-          !invalidIpPatterns.any((pattern) => pattern.hasMatch(host));
-    }
-    if (host.isFQDN()) {
-      bool hasLongLabels =
-          host.split(".").where((octet) => (octet.length > 63)).isNotEmpty;
-      return !hasLongLabels;
-    }
-    return false;
-  }
-
-  void _checkValidHost(String host) {
-    if (!isValidHost(host)) {
-      throw PomaException(
-          "Invalid PoMA host. '$host' is not a valid domain or IP address.");
-    }
-  }
-
-  bool isValidPort(int port) {
-    // FIXME: It should invalidate well-known ports (1-1023).
-    return (port >= 1) && (port <= 65_535);
-  }
-
-  void _checkPort(int port) {
-    if (!isValidPort(port)) {
-      throw PomaException("PoMA port '$port' is out of range (1-65535).");
-    }
-  }
-
-  Future<void> connect(
-    String serverHost,
-    int serverPort, {
-    Duration timeout = const Duration(seconds: 3),
-    bool? cancelOnError,
-  }) async {
+  Future<void> connect({bool? cancelOnError}) async {
     if (!isConnected()) {
-      _checkValidHost(serverHost);
-      _checkPort(serverPort);
-      _debug(
-          "Connecting to server '$serverHost:$serverPort', with a TimeOut of ${timeout.inSeconds}s, cancel on error: $cancelOnError...");
-      try {
-        await _socket.connect(serverHost, serverPort, timeout: timeout);
-        _socket.stream.listen(
-          _onSocketDataReceived,
-          onError: _onSocketError,
-          onDone: _onSocketDone,
-          cancelOnError: cancelOnError,
-        );
-        _debug("Server connected.");
-      } on SocketException catch (e) {
-        _debug("Socket connect error: ${e.message}.");
-        throw PomaException("Connection failure: ${e.message}.");
+      _debug("Connecting transport...");
+      await _transport.open();
+      if (!isConnected()) {
+        throw PomaException("A connection could not be established.");
       }
+      _transport.incoming.listen(
+        _onSocketDataReceived,
+        onError: _onSocketError,
+        onDone: _onSocketDone,
+        cancelOnError: cancelOnError,
+      );
+      _debug("Transport connected.");
     }
   }
 
   Future<void> disconnect() async {
     if (isConnected()) {
       _debug("Disconnecting from server...");
-      await _socket.close();
+      await _transport.close();
       _debug("Server disconnected.");
     }
   }
@@ -164,19 +126,42 @@ class PomaClient {
     if (!isConnected()) {
       throw PomaException("Cannot send messages to a disconnected server.");
     }
+    message = "$message$_messageTerminationChar";
     _debug("Sending message: '$message'...");
-    await _socket.write("$message$_messageTerminationChar");
+    final Uint8List bytes = Uint8List.fromList(utf8.encode(message));
+    await _transport.send(bytes);
   }
 
   Future<String?> sendAndWait(String message) async {
+    final previousCommand = _sendAndWaitQueue;
+    final currentCommand = Completer<void>();
+    _sendAndWaitQueue = currentCommand.future;
+
+    await previousCommand;
+
     if (!isConnected()) {
+      currentCommand.complete();
       throw PomaException("Cannot send messages to a disconnected server.");
     }
+
     _debug("Sending message and waiting response...");
-    _bufferedResponseCompleter = Completer<String>();
+    final completer = Completer<String>();
+    _bufferedResponseCompleter = completer;
     _responseBuffer.clear();
-    await send(message);
-    return _bufferedResponseCompleter!.future;
+
+    try {
+      await send(message);
+      return await completer.future;
+    } catch (e) {
+      if (_bufferedResponseCompleter == completer) {
+        _bufferedResponseCompleter = null;
+      }
+      rethrow;
+    } finally {
+      if (!currentCommand.isCompleted) {
+        currentCommand.complete();
+      }
+    }
   }
 
   Future<List<String>> getTopics() async {
@@ -217,5 +202,11 @@ class PomaClient {
       success = (setValueResponse == "done");
     }
     return success;
+  }
+
+  Future<void> dispose() async {
+    await _transportDebugSubscription?.cancel();
+    _transportDebugSubscription = null;
+    await _debugController.close();
   }
 }
