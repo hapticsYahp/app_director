@@ -32,7 +32,8 @@ class ExperimentStageWaitWidgetState<T_Result>
 
   @override
   void didUpdateWidget(
-      covariant ExperimentStageWaitWidget<T_Result> oldWidget) {
+    covariant ExperimentStageWaitWidget<T_Result> oldWidget,
+  ) {
     super.didUpdateWidget(oldWidget);
     if (widget.stage != oldWidget.stage) {
       _startStage();
@@ -52,19 +53,26 @@ class ExperimentStageWaitWidgetState<T_Result>
     _remainingTimeMs = widget.stage.waitingMs;
     _progress = 0;
 
-    _timer = Timer.periodic(Duration(milliseconds: widget.stage.tickProgressMs),
-        (timer) {
-      if (_remainingTimeMs > 0) {
-        setState(() {
-          _remainingTimeMs = _remainingTimeMs - widget.stage.tickProgressMs;
-          _progress = (widget.stage.waitingMs - _remainingTimeMs) /
-              widget.stage.waitingMs;
-        });
-        widget.stage.onTick(widget.stage.waitingMs - _remainingTimeMs);
-      } else {
-        _onTimeout();
-      }
-    });
+    _timer = Timer.periodic(
+      Duration(milliseconds: widget.stage.tickProgressMs),
+      (timer) {
+        if (!mounted) {
+          timer.cancel();
+          return;
+        }
+        if (_remainingTimeMs > 0) {
+          setState(() {
+            _remainingTimeMs = _remainingTimeMs - widget.stage.tickProgressMs;
+            _progress =
+                (widget.stage.waitingMs - _remainingTimeMs) /
+                widget.stage.waitingMs;
+          });
+          widget.stage.onTick(widget.stage.waitingMs - _remainingTimeMs);
+        } else {
+          _onTimeout();
+        }
+      },
+    );
   }
 
   void _onTimeout() {

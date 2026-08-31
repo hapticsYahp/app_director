@@ -31,7 +31,8 @@ class ExperimentStageDelayWidgetState<T_Result>
 
   @override
   void didUpdateWidget(
-      covariant ExperimentStageDelayWidget<T_Result> oldWidget) {
+    covariant ExperimentStageDelayWidget<T_Result> oldWidget,
+  ) {
     super.didUpdateWidget(oldWidget);
     if (widget.stage != oldWidget.stage) {
       _startStage();
@@ -48,20 +49,27 @@ class ExperimentStageDelayWidgetState<T_Result>
     _remainingTimeMs = widget.stage.delayMs;
     _progress = 0;
 
-    _timer = Timer.periodic(Duration(milliseconds: widget.stage.tickProgressMs),
-        (timer) {
-      if (_remainingTimeMs > 0) {
-        setState(() {
-          _remainingTimeMs = _remainingTimeMs - widget.stage.tickProgressMs;
-          _progress =
-              (widget.stage.delayMs - _remainingTimeMs) / widget.stage.delayMs;
-        });
-        widget.stage.onTick(widget.stage.delayMs - _remainingTimeMs);
-      } else {
-        _timer?.cancel();
-        _onCompleteStage();
-      }
-    });
+    _timer = Timer.periodic(
+      Duration(milliseconds: widget.stage.tickProgressMs),
+      (timer) {
+        if (!mounted) {
+          timer.cancel();
+          return;
+        }
+        if (_remainingTimeMs > 0) {
+          setState(() {
+            _remainingTimeMs = _remainingTimeMs - widget.stage.tickProgressMs;
+            _progress =
+                (widget.stage.delayMs - _remainingTimeMs) /
+                widget.stage.delayMs;
+          });
+          widget.stage.onTick(widget.stage.delayMs - _remainingTimeMs);
+        } else {
+          _timer?.cancel();
+          _onCompleteStage();
+        }
+      },
+    );
   }
 
   void _onCompleteStage() {
@@ -83,8 +91,9 @@ class ExperimentStageDelayWidgetState<T_Result>
       children: [
         if (widget.stage.showProgressBar) ...[
           Text(
-              "${widget.stage.delayFeedback} ${(_remainingTimeMs / 1000).ceil()}s...",
-              style: TextStyle(fontSize: 18)),
+            "${widget.stage.delayFeedback} ${(_remainingTimeMs / 1000).ceil()}s...",
+            style: TextStyle(fontSize: 18),
+          ),
           SizedBox(height: 20),
           LinearProgressIndicator(value: _progress, minHeight: 10),
         ],

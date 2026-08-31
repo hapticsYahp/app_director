@@ -126,7 +126,7 @@ class DataProvider {
     final Db db = await Db.create(config.dbUri);
     await db.open();
     final DbCollection subjectsCollection = db.collection('subjects');
-    if (name != null) {
+    if (name == null || name.trim().isEmpty) {
       final count = await subjectsCollection.count();
       name = 'Subject #${count + 1}';
     }

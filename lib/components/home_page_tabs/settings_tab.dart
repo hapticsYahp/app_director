@@ -178,7 +178,7 @@ class _SettingsTabState extends State<SettingsTab>
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('BD config saved.'),
+          content: Text('DB config saved.'),
           duration: Duration(seconds: 2),
         ),
       );
@@ -241,8 +241,9 @@ class _SettingsTabState extends State<SettingsTab>
       dbTestResult = "Testing DB connection...";
     });
     String result;
+    mongo_dart.Db? db;
     try {
-      mongo_dart.Db db = await mongo_dart.Db.create(configNotifier.dbUri);
+      db = await mongo_dart.Db.create(configNotifier.dbUri);
       await db.open().timeout(
         const Duration(seconds: 5),
         onTimeout: () {
@@ -254,7 +255,7 @@ class _SettingsTabState extends State<SettingsTab>
       final int idVal = 123;
       final String testingColumn = "testing_column";
       final String testingVal = "testing_val";
-      db.createCollection(testingCollectionName);
+      await db.createCollection(testingCollectionName);
       mongo_dart.DbCollection col = db.collection(testingCollectionName);
       await col.insertOne({idColumn: idVal, testingColumn: testingVal});
       Map<String, dynamic>? testFind = await col.findOne(
@@ -263,11 +264,13 @@ class _SettingsTabState extends State<SettingsTab>
       final bool couldRet =
           (testFind != null) && (testFind[testingColumn] == testingVal);
       await db.dropCollection(testingCollectionName);
-      await db.close();
-      result = couldRet ? "Succes." : "Failed.";
+      result = couldRet ? "Success." : "Failed.";
     } catch (e) {
       result = "Error ${e.toString()}.";
+    } finally {
+      await db?.close();
     }
+    if (!mounted) return;
     setState(() {
       isDbTesting = false;
       dbTestResult = result;
