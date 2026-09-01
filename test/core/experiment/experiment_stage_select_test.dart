@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:yahp_director/components/experiment_stages/experiment_stage_select_widget.dart';
 import 'package:yahp_director/core/experiment/experiment_stage_select.dart';
 import 'package:yahp_director/providers/poma/poma_client.dart';
 import 'experiment_stage_select_test.mocks.dart';
@@ -98,6 +99,79 @@ void main() {
       verify(mockExperiment.sendPomaCommand(enterCommand)).called(1);
       stage.onExit();
       verify(mockExperiment.sendPomaCommand(exitCommand)).called(1);
+    });
+
+    test('getResult should return String when T_Result is String', () {
+      final stage = ExperimentStageSelect<String>(
+        id: id,
+        options: [SelectOption(label: 'Option 1', value: 'opt_1')],
+      );
+      expect(stage.getResult('opt_1'), equals('opt_1'));
+    });
+
+    test('getResult should use resultConverter when provided for custom types', () {
+      final stage = ExperimentStageSelect<int>(
+        id: id,
+        options: [
+          SelectOption(label: 'One', value: '1'),
+          SelectOption(label: 'Two', value: '2'),
+        ],
+        resultConverter: (value) => int.parse(value),
+      );
+      expect(stage.getResult('2'), equals(2));
+    });
+
+    test('getResult should throw StateError if type mismatch without resultConverter', () {
+      final stage = ExperimentStageSelect<int>(
+        id: id,
+        options: [
+          SelectOption(label: 'One', value: '1'),
+        ],
+      );
+      expect(() => stage.getResult('1'), throwsA(isA<StateError>()));
+    });
+
+    testWidgets('ExperimentStageSelectWidget with custom generic type and converter completes correctly', (
+      WidgetTester tester,
+    ) async {
+      int? completedResult;
+      final stage = ExperimentStageSelect<int>(
+        id: 'select_custom',
+        question: 'Choose a number:',
+        options: [
+          SelectOption(label: 'Option 10', value: '10'),
+          SelectOption(label: 'Option 20', value: '20'),
+        ],
+        resultConverter: (val) => int.parse(val),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExperimentStageSelectWidget<int>(
+              key: const ValueKey('select_custom'),
+              stage: stage,
+              onComplete: (result) {
+                completedResult = result;
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Choose a number:'), findsOneWidget);
+      expect(find.text('Option 10'), findsOneWidget);
+      expect(find.text('Option 20'), findsOneWidget);
+
+      // Tap Option 20
+      await tester.tap(find.text('Option 20'));
+      await tester.pumpAndSettle();
+
+      // Tap Confirm
+      await tester.tap(find.text('Confirm'));
+      await tester.pumpAndSettle();
+
+      expect(completedResult, equals(20));
     });
   });
 }

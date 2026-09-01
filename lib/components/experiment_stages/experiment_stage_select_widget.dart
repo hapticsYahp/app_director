@@ -54,7 +54,7 @@ class _ExperimentStageSelectWidgetState<T_Result>
     } else {
       result = _singleSelected ?? "";
     }
-    widget.onComplete(result as T_Result);
+    widget.onComplete(widget.stage.getResult(result));
   }
 
   void _onClear() {

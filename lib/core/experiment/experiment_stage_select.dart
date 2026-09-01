@@ -40,6 +40,12 @@ class ExperimentStageSelect<T_Result> extends ExperimentStage<T_Result> {
   final String clearButtonLabel;
   final IconData clearButtonIcon;
 
+  @JsonKey(
+    includeToJson: false,
+    includeFromJson: false,
+  )
+  final T_Result Function(String selectedValue)? resultConverter;
+
   ExperimentStageSelect({
     required super.id,
     super.title = "Select",
@@ -52,15 +58,29 @@ class ExperimentStageSelect<T_Result> extends ExperimentStage<T_Result> {
     this.confirmButtonIcon = Icons.check,
     this.clearButtonLabel = "Clear",
     this.clearButtonIcon = Icons.clear,
+    this.resultConverter,
     super.pomaCommands = const {},
   });
+
+  T_Result getResult(String selectedValue) {
+    if (resultConverter != null) {
+      return resultConverter!(selectedValue);
+    }
+    if (selectedValue is T_Result) {
+      return selectedValue as T_Result;
+    }
+    throw StateError(
+      'Cannot convert String "$selectedValue" to $T_Result for ExperimentStageSelect "$id". '
+      'Please provide a resultConverter callback.',
+    );
+  }
 
   @override
   Widget buildWidget(
     BuildContext context,
     void Function(T_Result result) onResult,
   ) {
-    return ExperimentStageSelectWidget(
+    return ExperimentStageSelectWidget<T_Result>(
       key: ValueKey(id),
       stage: this,
       onComplete: onResult,
