@@ -3,14 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:yahp_director/providers/data/data_provider.dart';
 import '../../core/experiment/experiment.dart';
 import '../../core/trial/experiment_trial.dart';
-import '../../providers/config/config_notifier.dart';
 import '../../providers/config/device_trial_notifier.dart';
 import '../../providers/config/subject_trial_notifier.dart';
 import '../../providers/poma/poma_client.dart';
 import '../../providers/poma/poma_exception.dart';
-import '../../providers/poma/transport/ble_poma_transport.dart';
-import '../../providers/poma/transport/poma_transport.dart';
-import '../../providers/poma/transport/tcp_poma_transport.dart';
 
 class ExperimentsTab extends StatefulWidget {
   const ExperimentsTab({super.key});
@@ -72,26 +68,10 @@ class _ExperimentsTabState extends State<ExperimentsTab>
 
   void _onConnect() async {
     if (!connectionCommandInProgress && !pomaClient.isConnected()) {
-      final ConfigNotifier configNotifier =
-          Provider.of<ConfigNotifier>(context, listen: false);
       setState(() {
         connectionCommandInProgress = true;
       });
       try {
-        final PomaTransport transport;
-        if (configNotifier.connectionType == ConnectionType.ble) {
-          transport = BlePomaTransport(
-            deviceId: configNotifier.deviceMac,
-            timeout: Duration(seconds: configNotifier.deviceConnectionTimeout),
-          );
-        } else {
-          transport = TcpPomaTransport(
-            host: configNotifier.deviceHost,
-            port: configNotifier.devicePort,
-            timeout: Duration(seconds: configNotifier.deviceConnectionTimeout),
-          );
-        }
-        await pomaClient.reconfigure(transport);
         await pomaClient.connect();
       } on PomaException catch (e, stackTrace) {
         debugPrint("PoMA Exception: $e");

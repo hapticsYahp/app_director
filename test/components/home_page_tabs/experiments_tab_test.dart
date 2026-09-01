@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +18,51 @@ import 'package:yahp_director/providers/config/device_trial_notifier.dart';
 import 'package:yahp_director/providers/config/subject_trial_notifier.dart';
 import 'package:yahp_director/providers/data/data_provider.dart';
 import 'package:yahp_director/providers/poma/poma_client.dart';
+import 'package:yahp_director/providers/poma/transport/poma_transport.dart';
 import 'package:yahp_director/providers/poma/transport/tcp_poma_transport.dart';
+
+class FakePomaTransport implements PomaTransport {
+  bool connected = false;
+  final StreamController<Uint8List> _incomingController =
+      StreamController<Uint8List>.broadcast();
+  final StreamController<String> _debugController =
+      StreamController<String>.broadcast();
+
+  bool openCalled = false;
+  bool closeCalled = false;
+
+  @override
+  bool isValidConnection() => true;
+
+  @override
+  bool isConnected() => connected;
+
+  @override
+  Future<void> open() async {
+    openCalled = true;
+    connected = true;
+  }
+
+  @override
+  Future<void> close() async {
+    closeCalled = true;
+    connected = false;
+  }
+
+  @override
+  Stream<Uint8List> get incoming => _incomingController.stream;
+
+  @override
+  Stream<String> get onDebug => _debugController.stream;
+
+  @override
+  Future<void> send(Uint8List data) async {}
+
+  @override
+  void dispose() {
+    connected = false;
+  }
+}
 
 class TestSerializableExperiment extends SerializableExperiment {
   TestSerializableExperiment({
@@ -86,11 +132,13 @@ void main() {
     required FakeDataProvider dataProvider,
     required SubjectTrialNotifier subjectNotifier,
     required DeviceTrialNotifier deviceNotifier,
+    PomaClient? pomaClient,
   }) {
     final configNotifier = ConfigNotifier();
-    final pomaClient = PomaClient(
-      TcpPomaTransport(host: '127.0.0.1', port: 8080),
-    );
+    final client = pomaClient ??
+        PomaClient(
+          TcpPomaTransport(host: '127.0.0.1', port: 8080),
+        );
 
     return MultiProvider(
       providers: [
@@ -101,7 +149,7 @@ void main() {
         ChangeNotifierProvider<DeviceTrialNotifier>.value(
           value: deviceNotifier,
         ),
-        Provider<PomaClient>.value(value: pomaClient),
+        Provider<PomaClient>.value(value: client),
         Provider<DataProvider>.value(value: dataProvider),
       ],
       child: const MaterialApp(home: Scaffold(body: ExperimentsTab())),
@@ -195,6 +243,47 @@ void main() {
 
       // When disposed, removeListener was called
       expect(sampleExp.hasAnyListeners, isFalse);
+    },
+  );
+
+  testWidgets(
+    'ExperimentsTab connects and disconnects using provided PomaClient directly',
+    (WidgetTester tester) async {
+      final fakeTransport = FakePomaTransport();
+      final pomaClient = PomaClient(fakeTransport);
+      final dataProvider = FakeDataProvider(ConfigNotifier());
+      final subjectNotifier = SubjectTrialNotifier();
+      final deviceNotifier = DeviceTrialNotifier();
+
+      await tester.pumpWidget(
+        createTestWidget(
+          dataProvider: dataProvider,
+          subjectNotifier: subjectNotifier,
+          deviceNotifier: deviceNotifier,
+          pomaClient: pomaClient,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Connect'), findsOneWidget);
+      expect(pomaClient.isConnected(), isFalse);
+      expect(fakeTransport.openCalled, isFalse);
+
+      // Tap Connect
+      await tester.tap(find.text('Connect'));
+      await tester.pumpAndSettle();
+
+      expect(fakeTransport.openCalled, isTrue);
+      expect(pomaClient.isConnected(), isTrue);
+      expect(find.text('Disconnect'), findsOneWidget);
+
+      // Tap Disconnect
+      await tester.tap(find.text('Disconnect'));
+      await tester.pumpAndSettle();
+
+      expect(fakeTransport.closeCalled, isTrue);
+      expect(pomaClient.isConnected(), isFalse);
+      expect(find.text('Connect'), findsOneWidget);
     },
   );
 }
