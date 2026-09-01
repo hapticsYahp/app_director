@@ -100,6 +100,7 @@ class _SettingsTabState extends State<SettingsTab>
 
   Future<void> _onScanBleDevices() async {
     final device = await showBleScanDialog(context);
+    if (!mounted) return;
     if (device != null) {
       setState(() {
         _pomaMacController.text = device.deviceId;

@@ -39,6 +39,10 @@ class _BleScanDialogState extends State<_BleScanDialog> {
   }
 
   Future<void> _startScan() async {
+    await _stopScan();
+
+    if (!mounted) return;
+
     setState(() {
       _error = null;
       _devices.clear();
@@ -46,6 +50,7 @@ class _BleScanDialogState extends State<_BleScanDialog> {
     });
     try {
       final state = await UniversalBle.getBluetoothAvailabilityState();
+      if (!_scanning || !mounted) return;
       if (state != AvailabilityState.poweredOn) {
         setState(() {
           _error = "Bluetooth not available (state: ${state.name}).";
@@ -54,13 +59,16 @@ class _BleScanDialogState extends State<_BleScanDialog> {
         return;
       }
       await UniversalBle.requestPermissions();
+      if (!_scanning || !mounted) return;
       _scanSubscription = UniversalBle.scanStream.listen(
         (device) {
+          if (!_scanning || !mounted) return;
           setState(() {
             _devices[device.deviceId] = device;
           });
         },
         onError: (Object err) {
+          if (!_scanning || !mounted) return;
           setState(() {
             _error = "Scan error: $err";
             _scanning = false;
@@ -68,7 +76,15 @@ class _BleScanDialogState extends State<_BleScanDialog> {
         },
       );
       await UniversalBle.startScan();
+      if (!_scanning) {
+        await _scanSubscription?.cancel();
+        _scanSubscription = null;
+        try {
+          await UniversalBle.stopScan();
+        } catch (_) {}
+      }
     } catch (e) {
+      if (!_scanning || !mounted) return;
       setState(() {
         _error = "Failed to start scan: $e";
         _scanning = false;
@@ -77,17 +93,17 @@ class _BleScanDialogState extends State<_BleScanDialog> {
   }
 
   Future<void> _stopScan() async {
-    await _scanSubscription?.cancel();
+    _scanning = false;
+    final sub = _scanSubscription;
     _scanSubscription = null;
+    unawaited(sub?.cancel());
     try {
       await UniversalBle.stopScan();
     } catch (_) {
       // Ignore errors on stop.
     }
     if (mounted) {
-      setState(() {
-        _scanning = false;
-      });
+      setState(() {});
     }
   }
 
