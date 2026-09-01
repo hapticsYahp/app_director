@@ -104,6 +104,23 @@ void main() {
       },
     );
 
+    test(
+      'advanceToStage should support self-loops (advancing to the same stage)',
+      () {
+        expect(experiment.currentStage, equals(mockStage1));
+        bool notified = false;
+        experiment.addListener(() {
+          notified = true;
+        });
+
+        experiment.advanceToStage(stageId1);
+        verify(mockStage1.onExit()).called(1);
+        verify(mockStage1.onEnter()).called(1);
+        expect(experiment.currentStage, equals(mockStage1));
+        expect(notified, isTrue);
+      },
+    );
+
     test('advanceToStage should throw exception for invalid stage ID', () {
       expect(() => experiment.advanceToStage('invalid_stage'), throwsException);
     });
@@ -116,6 +133,26 @@ void main() {
         verify(mockStage1.onExit()).called(1);
         verify(mockStage2.onEnter()).called(1);
         expect(experiment.currentStage, equals(mockStage2));
+      },
+    );
+
+    test(
+      'advanceByResult should support self-loop transition back to the same stage',
+      () async {
+        final loopTransitions = ConditionalDirectedGraph<String, String>();
+        loopTransitions.addRule(stageId1, TriggerAlways<String>(), stageId1);
+        final loopExperiment = Experiment<String, String>(
+          id: experimentId,
+          title: title,
+          description: description,
+          stages: stages,
+          transitions: loopTransitions,
+        );
+        expect(loopExperiment.currentStage, equals(mockStage1));
+        await loopExperiment.advanceByResult('loop_result');
+        verify(mockStage1.onExit()).called(1);
+        verify(mockStage1.onEnter()).called(1);
+        expect(loopExperiment.currentStage, equals(mockStage1));
       },
     );
 
@@ -151,6 +188,17 @@ void main() {
         expect(experiment.currentStage, equals(mockStage2));
         experiment.reset();
         verify(mockStage2.onExit()).called(1);
+        verify(mockStage1.onEnter()).called(1);
+        expect(experiment.currentStage, equals(mockStage1));
+      },
+    );
+
+    test(
+      'reset when already at initial stage should call onExit and onEnter on initial stage',
+      () {
+        expect(experiment.currentStage, equals(mockStage1));
+        experiment.reset();
+        verify(mockStage1.onExit()).called(1);
         verify(mockStage1.onEnter()).called(1);
         expect(experiment.currentStage, equals(mockStage1));
       },

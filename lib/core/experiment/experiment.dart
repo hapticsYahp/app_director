@@ -51,8 +51,7 @@ class Experiment<T_Stage_Id, T_Stage_Result> extends ChangeNotifier {
     _currentStageId = startingStageId;
   }
 
-  void saveTrialEvent(
-    String name, {
+  void saveTrialEvent(String name, {
     Map<String, dynamic> extraData = const {},
   }) {
     trial?.saveTrialEvent(name, extraData: extraData);
@@ -78,19 +77,18 @@ class Experiment<T_Stage_Id, T_Stage_Result> extends ChangeNotifier {
     if (!stages.containsKey(stageId)) {
       throw Exception('Invalid Stage ID "$stageId".');
     }
-    if (_currentStageId != stageId) {
-      currentStage.onExit();
-      saveTrialEvent(
-        "EXPERIMENT_ADVANCE",
-        extraData: {
-          'toStageId': stageId.toString(),
-          'fromStageId': _currentStageId,
-        },
-      );
-      _currentStageId = stageId;
-      currentStage.onEnter();
-      notifyListeners();
-    }
+    final previousStageId = _currentStageId;
+    currentStage.onExit();
+    saveTrialEvent(
+      "EXPERIMENT_ADVANCE",
+      extraData: {
+        'toStageId': stageId.toString(),
+        'fromStageId': previousStageId.toString(),
+      },
+    );
+    _currentStageId = stageId;
+    currentStage.onEnter();
+    notifyListeners();
   }
 
   Future<void> advanceByResult(T_Stage_Result result) async {
@@ -104,7 +102,9 @@ class Experiment<T_Stage_Id, T_Stage_Result> extends ChangeNotifier {
   }
 
   bool get canAdvance {
-    return transitions.getDestinationsFromOrigin(_currentStageId).isNotEmpty;
+    return transitions
+        .getDestinationsFromOrigin(_currentStageId)
+        .isNotEmpty;
   }
 
   Future<void> start(ExperimentTrial trial) async {
@@ -123,13 +123,7 @@ class Experiment<T_Stage_Id, T_Stage_Result> extends ChangeNotifier {
 
   void reset() {
     saveTrialEvent("EXPERIMENT_RESET");
-    if (_currentStageId != startingStageId) {
-      advanceToStage(startingStageId);
-    } else {
-      currentStage.onExit();
-      currentStage.onEnter();
-      notifyListeners();
-    }
+    advanceToStage(startingStageId);
   }
 
   void finish() {
