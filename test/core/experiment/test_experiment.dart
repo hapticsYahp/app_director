@@ -11,4 +11,6 @@ class TestExperiment extends Experiment<String, String> {
     super.lastStageId,
     super.cancelStageId,
   });
+
+  bool get hasAnyListeners => hasListeners;
 }

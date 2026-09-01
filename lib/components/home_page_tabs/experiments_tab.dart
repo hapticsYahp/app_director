@@ -38,6 +38,12 @@ class _ExperimentsTabState extends State<ExperimentsTab>
     _getExperiments();
   }
 
+  @override
+  void dispose() {
+    selectedExperiment?.removeListener(_onExperimentUpdate);
+    super.dispose();
+  }
+
   Future<void> _getExperiments() async {
     if (!loadingExperiments) {
       setState(() {
@@ -185,6 +191,7 @@ class _ExperimentsTabState extends State<ExperimentsTab>
 
   Future<void> _onSelectExperiment(
       Experiment<String, String>? experiment) async {
+    selectedExperiment?.removeListener(_onExperimentUpdate);
     if (experiment != null) {
       final selectedSubject =
           Provider.of<SubjectTrialNotifier>(context, listen: false)
