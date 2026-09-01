@@ -45,17 +45,21 @@ class _ExperimentsTabState extends State<ExperimentsTab>
       });
       try {
         final result = await dataProvider.getExperiments();
+        if (!mounted) return;
         setState(() {
           experiments = result;
         });
       } catch (e, stackTrace) {
         debugPrint("Error: $e");
         debugPrintStack(stackTrace: stackTrace);
+        if (!mounted) return;
         _showAlert("Error", e.toString());
       } finally {
-        setState(() {
-          loadingExperiments = false;
-        });
+        if (mounted) {
+          setState(() {
+            loadingExperiments = false;
+          });
+        }
       }
     }
   }
@@ -86,15 +90,22 @@ class _ExperimentsTabState extends State<ExperimentsTab>
       } on PomaException catch (e, stackTrace) {
         debugPrint("PoMA Exception: $e");
         debugPrintStack(stackTrace: stackTrace);
-        _showAlert("PoMA Exception", e.message);
+        if (mounted) {
+          _showAlert("PoMA Exception", e.message);
+        }
       } catch (e, stackTrace) {
         debugPrint("Error: $e");
         debugPrintStack(stackTrace: stackTrace);
-        _showAlert("Error", e.toString());
+        if (mounted) {
+          _showAlert("Error", e.toString());
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            connectionCommandInProgress = false;
+          });
+        }
       }
-      setState(() {
-        connectionCommandInProgress = false;
-      });
     }
   }
 
@@ -108,19 +119,27 @@ class _ExperimentsTabState extends State<ExperimentsTab>
       } on PomaException catch (e, stackTrace) {
         debugPrint("PoMA Exception: $e");
         debugPrintStack(stackTrace: stackTrace);
-        _showAlert("PoMA Exception", e.message);
+        if (mounted) {
+          _showAlert("PoMA Exception", e.message);
+        }
       } catch (e, stackTrace) {
         debugPrint("Error: $e");
         debugPrintStack(stackTrace: stackTrace);
-        _showAlert("Error", e.toString());
+        if (mounted) {
+          _showAlert("Error", e.toString());
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            connectionCommandInProgress = false;
+          });
+        }
       }
-      setState(() {
-        connectionCommandInProgress = false;
-      });
     }
   }
 
   void _showAlert(String title, String value) {
+    if (!mounted) return;
     showDialog(
       context: context,
       builder: (context) {
@@ -130,7 +149,7 @@ class _ExperimentsTabState extends State<ExperimentsTab>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text("Close"),
+              child: const Text("Close"),
             ),
           ],
         );
@@ -147,7 +166,9 @@ class _ExperimentsTabState extends State<ExperimentsTab>
   }
 
   void _onExperimentUpdate() {
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _onClose() async {
@@ -156,6 +177,7 @@ class _ExperimentsTabState extends State<ExperimentsTab>
     if (trial != null) {
       await dataProvider.saveTrialEvents(trial);
     }
+    if (!mounted) return;
     setState(() {
       selectedExperiment = null;
     });
@@ -172,16 +194,21 @@ class _ExperimentsTabState extends State<ExperimentsTab>
               .selectedDevice;
       if ((selectedSubject == null) || (selectedDevice == null)) {
         experiment = null;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Select Device/Subject first.')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Select Device/Subject first.')),
+          );
+        }
       } else {
+        final trial = await dataProvider.createTrial(
+            experiment, selectedSubject, selectedDevice);
+        if (!mounted) return;
         experiment.setPomaClient(pomaClient);
         experiment.addListener(_onExperimentUpdate);
-        experiment.start(await dataProvider.createTrial(
-            experiment, selectedSubject, selectedDevice));
+        experiment.start(trial);
       }
     }
+    if (!mounted) return;
     setState(() {
       selectedExperiment = experiment;
     });

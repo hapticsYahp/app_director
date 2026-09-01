@@ -90,12 +90,15 @@ class _SubjectFormState extends State<SubjectForm> {
 
   void _createNewSubject() async {
     final dataProvider = Provider.of<DataProvider>(context, listen: false);
-    _setSubject(await dataProvider.createSubjectTrial(name: 'New Subject'));
+    final subject = await dataProvider.createSubjectTrial(name: 'New Subject');
+    if (!mounted) return;
+    _setSubject(subject);
   }
 
   Future<void> _getSubject() async {
     final dataProvider = Provider.of<DataProvider>(context, listen: false);
     final name = await _promptSubjectName(context);
+    if (!mounted) return;
     if (name == null || name.trim().isEmpty) return;
     final results = await dataProvider.searchSubjectsByName(name);
     if (!mounted) return;
@@ -108,6 +111,7 @@ class _SubjectFormState extends State<SubjectForm> {
     final SubjectTrial? selected = (results.length == 1)
         ? results.first
         : await _selectSubjectFromList(context, results);
+    if (!mounted) return;
     if (selected != null) {
       _setSubject(selected);
     }
@@ -132,9 +136,9 @@ class _SubjectFormState extends State<SubjectForm> {
           double.tryParse(_wristCircumferenceCmController.text);
 
     await dataProvider.saveSubject(subject);
+    if (!mounted) return;
     setState(() => _isSaving = false);
 
-    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Subject saved')),
     );

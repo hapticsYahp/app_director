@@ -43,6 +43,7 @@ class _DeviceFormState extends State<DeviceForm> {
     final deviceNotifier =
         Provider.of<DeviceTrialNotifier>(context, listen: false);
     DeviceTrial device = await dataProvider.createDeviceTrial('Device Name');
+    if (!mounted) return;
     setState(() {
       _device = device;
       _nameController.text = device.name;
@@ -53,6 +54,7 @@ class _DeviceFormState extends State<DeviceForm> {
   Future<void> _getDevice() async {
     final dataProvider = Provider.of<DataProvider>(context, listen: false);
     final name = await _promptDeviceName(context);
+    if (!mounted) return;
     if (name == null || name.trim().isEmpty) return;
     final results = await dataProvider.searchDevicesByName(name);
     if (!mounted) return;
@@ -67,6 +69,7 @@ class _DeviceFormState extends State<DeviceForm> {
     final DeviceTrial? selected = (results.length == 1)
         ? results.first
         : await _selectDeviceFromList(context, results);
+    if (!mounted) return;
     if (selected != null) {
       setState(() {
         _device = selected;
@@ -85,9 +88,9 @@ class _DeviceFormState extends State<DeviceForm> {
     device.name = _nameController.text;
 
     await dataProvider.saveDevice(device);
+    if (!mounted) return;
     setState(() => _isSaving = false);
 
-    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Device saved')),
     );
