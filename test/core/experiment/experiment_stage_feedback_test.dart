@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:yahp_director/components/experiment_stages/experiment_stage_feedback_widget.dart';
 import 'package:yahp_director/core/experiment/experiment_stage_feedback.dart';
 import 'package:yahp_director/core/experiment/result_generator_to_string.dart';
 import 'package:yahp_director/providers/poma/poma_client.dart';
@@ -137,6 +138,181 @@ void main() {
       stage.onEnter();
       stage.onExit();
       verifyNever(mockPomaClient.send(any));
+    });
+
+    testWidgets('ExperimentStageFeedbackWidget negative button completes with minScaleValue', (
+      WidgetTester tester,
+    ) async {
+      String? resultReceived;
+      final feedbackStage = ExperimentStageFeedback<String>(
+        id: 'fb_1',
+        defaultResult: 'DEF',
+        minScaleValue: 2,
+        maxScaleValue: 8,
+        resultGenerator: resultGenerator,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExperimentStageFeedbackWidget<String>(
+              key: const ValueKey('fb_1'),
+              stage: feedbackStage,
+              onFeedback: (result) {
+                resultReceived = result;
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Yes'), findsOneWidget);
+      expect(find.text('No'), findsOneWidget);
+
+      await tester.tap(find.text('No'));
+      await tester.pumpAndSettle();
+
+      expect(resultReceived, equals('2'));
+    });
+
+    testWidgets('ExperimentStageFeedbackWidget positive button opens scale and confirms selected value', (
+      WidgetTester tester,
+    ) async {
+      String? resultReceived;
+      final feedbackStage = ExperimentStageFeedback<String>(
+        id: 'fb_2',
+        defaultResult: 'DEF',
+        minScaleValue: 1,
+        maxScaleValue: 5,
+        initialSelectedValue: 3,
+        resultGenerator: resultGenerator,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExperimentStageFeedbackWidget<String>(
+              key: const ValueKey('fb_2'),
+              stage: feedbackStage,
+              onFeedback: (result) {
+                resultReceived = result;
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Yes'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Slider), findsOneWidget);
+      expect(find.text('Indicate the perceived intensity: 3'), findsOneWidget);
+
+      await tester.tap(find.text('Confirm'));
+      await tester.pumpAndSettle();
+
+      expect(resultReceived, equals('3'));
+    });
+
+    testWidgets('ExperimentStageFeedbackWidget handles out of bounds initialSelectedValue gracefully without AssertionError', (
+      WidgetTester tester,
+    ) async {
+      final feedbackStage = ExperimentStageFeedback<String>(
+        id: 'fb_out_of_bounds',
+        defaultResult: 'DEF',
+        minScaleValue: 0,
+        maxScaleValue: 10,
+        initialSelectedValue: 999, // Out of bounds
+        resultGenerator: resultGenerator,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExperimentStageFeedbackWidget<String>(
+              key: const ValueKey('fb_out_of_bounds'),
+              stage: feedbackStage,
+              onFeedback: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Yes'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Slider), findsOneWidget);
+      expect(find.text('Indicate the perceived intensity: 10'), findsOneWidget);
+    });
+
+    testWidgets('ExperimentStageFeedbackWidget handles minScaleValue == maxScaleValue without AssertionError', (
+      WidgetTester tester,
+    ) async {
+      String? resultReceived;
+      final feedbackStage = ExperimentStageFeedback<String>(
+        id: 'fb_zero_divisions',
+        defaultResult: 'DEF',
+        minScaleValue: 5,
+        maxScaleValue: 5,
+        initialSelectedValue: 5,
+        resultGenerator: resultGenerator,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExperimentStageFeedbackWidget<String>(
+              key: const ValueKey('fb_zero_divisions'),
+              stage: feedbackStage,
+              onFeedback: (result) {
+                resultReceived = result;
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Yes'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Slider), findsOneWidget);
+      expect(find.text('Indicate the perceived intensity: 5'), findsOneWidget);
+
+      await tester.tap(find.text('Confirm'));
+      await tester.pumpAndSettle();
+
+      expect(resultReceived, equals('5'));
+    });
+
+    testWidgets('ExperimentStageFeedbackWidget handles inverted min and max values gracefully without AssertionError', (
+      WidgetTester tester,
+    ) async {
+      final feedbackStage = ExperimentStageFeedback<String>(
+        id: 'fb_inverted',
+        defaultResult: 'DEF',
+        minScaleValue: 10,
+        maxScaleValue: 0,
+        initialSelectedValue: 5,
+        resultGenerator: resultGenerator,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExperimentStageFeedbackWidget<String>(
+              key: const ValueKey('fb_inverted'),
+              stage: feedbackStage,
+              onFeedback: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Yes'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Slider), findsOneWidget);
+      expect(find.text('Indicate the perceived intensity: 5'), findsOneWidget);
     });
   });
 }

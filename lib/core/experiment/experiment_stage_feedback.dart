@@ -65,7 +65,7 @@ class ExperimentStageFeedback<T_Result> extends ExperimentStage<T_Result> {
     BuildContext context,
     void Function(T_Result result) onResult,
   ) {
-    return ExperimentStageFeedbackWidget(
+    return ExperimentStageFeedbackWidget<T_Result>(
       key: ValueKey(id),
       stage: this,
       onFeedback: onResult,

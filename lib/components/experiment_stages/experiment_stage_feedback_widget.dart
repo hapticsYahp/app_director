@@ -19,7 +19,19 @@ class ExperimentStageFeedbackWidget<T_Result> extends StatefulWidget {
 class ExperimentStageFeedbackWidgetState<T_Result>
     extends State<ExperimentStageFeedbackWidget<T_Result>> {
   bool _showScale = false;
-  int _scaleSelectedValue = 0;
+  late int _scaleSelectedValue;
+
+  int get _effectiveMin =>
+      widget.stage.minScaleValue <= widget.stage.maxScaleValue
+          ? widget.stage.minScaleValue
+          : widget.stage.maxScaleValue;
+
+  int get _effectiveMax =>
+      widget.stage.minScaleValue <= widget.stage.maxScaleValue
+          ? widget.stage.maxScaleValue
+          : widget.stage.minScaleValue;
+
+  int get _divisions => _effectiveMax - _effectiveMin;
 
   void _onCompleteStage(int scaleFeedback) {
     widget.onFeedback(widget.stage.getResult(scaleFeedback));
@@ -28,7 +40,17 @@ class ExperimentStageFeedbackWidgetState<T_Result>
   @override
   void initState() {
     super.initState();
-    _scaleSelectedValue = widget.stage.initialSelectedValue;
+    _scaleSelectedValue =
+        widget.stage.initialSelectedValue.clamp(_effectiveMin, _effectiveMax);
+  }
+
+  @override
+  void didUpdateWidget(
+    covariant ExperimentStageFeedbackWidget<T_Result> oldWidget,
+  ) {
+    super.didUpdateWidget(oldWidget);
+    _scaleSelectedValue =
+        _scaleSelectedValue.clamp(_effectiveMin, _effectiveMax);
   }
 
   @override
@@ -44,18 +66,18 @@ class ExperimentStageFeedbackWidgetState<T_Result>
               icon: Icon(widget.stage.positiveIcon, size: 32),
               label: Text(
                 widget.stage.positiveLabel,
-                style: TextStyle(fontSize: 20),
+                style: const TextStyle(fontSize: 20),
               ),
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Expanded(
             child: ElevatedButton.icon(
-              onPressed: () => _onCompleteStage(widget.stage.minScaleValue),
+              onPressed: () => _onCompleteStage(_effectiveMin),
               icon: Icon(widget.stage.negativeIcon, size: 32),
               label: Text(
                 widget.stage.negativeLabel,
-                style: TextStyle(fontSize: 20),
+                style: const TextStyle(fontSize: 20),
               ),
             ),
           ),
@@ -65,23 +87,27 @@ class ExperimentStageFeedbackWidgetState<T_Result>
             child: Text(
               "${widget.stage.feedbackLabel} $_scaleSelectedValue",
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 18),
             ),
           ),
           Slider(
-            value: _scaleSelectedValue.toDouble(),
-            min: widget.stage.minScaleValue.toDouble(),
-            max: widget.stage.maxScaleValue.toDouble(),
-            divisions:
-                (widget.stage.maxScaleValue - widget.stage.minScaleValue),
+            value: _scaleSelectedValue
+                .clamp(_effectiveMin, _effectiveMax)
+                .toDouble(),
+            min: _effectiveMin.toDouble(),
+            max: _effectiveMax.toDouble(),
+            divisions: _divisions > 0 ? _divisions : null,
             label: _scaleSelectedValue.toString(),
-            onChanged: (value) {
-              setState(() {
-                _scaleSelectedValue = value.toInt();
-              });
-            },
+            onChanged: _divisions > 0
+                ? (value) {
+                    setState(() {
+                      _scaleSelectedValue =
+                          value.round().clamp(_effectiveMin, _effectiveMax);
+                    });
+                  }
+                : null,
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Expanded(
             flex: 2,
             child: ElevatedButton.icon(
@@ -89,7 +115,7 @@ class ExperimentStageFeedbackWidgetState<T_Result>
               icon: Icon(widget.stage.confirmIcon, size: 32),
               label: Text(
                 widget.stage.confirmLabel,
-                style: TextStyle(fontSize: 20),
+                style: const TextStyle(fontSize: 20),
               ),
             ),
           ),
