@@ -13,6 +13,21 @@ void main() {
   );
 
   group('BlePomaTransport validation', () {
+    test('defines Nordic UART Service default UUIDs', () {
+      expect(
+        BlePomaTransport.pomaServiceUuid,
+        '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
+      );
+      expect(
+        BlePomaTransport.pomaRxCharacteristicUuid,
+        '6e400002-b5a3-f393-e0a9-e50e24dcca9e',
+      );
+      expect(
+        BlePomaTransport.pomaTxCharacteristicUuid,
+        '6e400003-b5a3-f393-e0a9-e50e24dcca9e',
+      );
+    });
+
     test(
       'isValidMacOrId identifies valid and invalid MAC addresses or UUIDs',
       () {

@@ -7,10 +7,12 @@ import 'package:yahp_director/providers/poma/poma_exception.dart';
 import 'package:yahp_director/providers/poma/transport/poma_transport.dart';
 
 class BlePomaTransport implements PomaTransport {
-  // PoMA BLE fixed service/characteristic.
-  static const String pomaServiceUuid = "8633845e-104c-6597-ac42-66621995fe44";
-  static const String pomaCharacteristicUuid =
-      "b9be18d4-5fb4-c9ab-8841-39b87bbf54ab";
+  // Nordic UART Service (NUS) default UUIDs.
+  static const String pomaServiceUuid = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+  static const String pomaRxCharacteristicUuid =
+      "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+  static const String pomaTxCharacteristicUuid =
+      "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
 
   static int _mtu = 23;
   static const int _desiredMtu = 256;
@@ -62,7 +64,8 @@ class BlePomaTransport implements PomaTransport {
   final String _deviceId;
   final Duration _timeout;
   final String _serviceUuid;
-  final String _characteristicUuid;
+  final String _rxCharacteristicUuid;
+  final String _txCharacteristicUuid;
 
   StreamController<Uint8List> _incomingController =
       StreamController<Uint8List>.broadcast();
@@ -77,11 +80,13 @@ class BlePomaTransport implements PomaTransport {
     required String deviceId,
     Duration timeout = const Duration(seconds: 10),
     String serviceUuid = pomaServiceUuid,
-    String characteristicUuid = pomaCharacteristicUuid,
+    String rxCharacteristicUuid = pomaRxCharacteristicUuid,
+    String txCharacteristicUuid = pomaTxCharacteristicUuid,
   }) : _deviceId = deviceId,
        _timeout = timeout,
        _serviceUuid = serviceUuid,
-       _characteristicUuid = characteristicUuid;
+       _rxCharacteristicUuid = rxCharacteristicUuid,
+       _txCharacteristicUuid = txCharacteristicUuid;
 
   void _debug(String message) {
     if (!_debugController.isClosed) {
@@ -162,20 +167,30 @@ class BlePomaTransport implements PomaTransport {
         timeout: _timeout,
       );
 
-      // Locate the PoMA characteristic to inspect its supported properties.
-      BleCharacteristic? pomaChar;
+      // Locate the PoMA RX and TX characteristics to inspect their supported properties.
+      BleCharacteristic? rxChar;
+      BleCharacteristic? txChar;
       for (final s in services) {
-        for (final c in s.characteristics) {
-          _debug("svc=${s.uuid} char=${c.uuid} props=${c.properties}");
-          if (s.uuid.toLowerCase() == _serviceUuid.toLowerCase() &&
-              c.uuid.toLowerCase() == _characteristicUuid.toLowerCase()) {
-            pomaChar = c;
+        if (s.uuid.toLowerCase() == _serviceUuid.toLowerCase()) {
+          for (final c in s.characteristics) {
+            _debug("svc=${s.uuid} char=${c.uuid} props=${c.properties}");
+            if (c.uuid.toLowerCase() == _rxCharacteristicUuid.toLowerCase()) {
+              rxChar = c;
+            }
+            if (c.uuid.toLowerCase() == _txCharacteristicUuid.toLowerCase()) {
+              txChar = c;
+            }
           }
         }
       }
-      if (pomaChar == null) {
+      if (rxChar == null) {
         throw PomaException(
-          "PoMA characteristic $_characteristicUuid not found on device.",
+          "PoMA RX characteristic $_rxCharacteristicUuid not found on device.",
+        );
+      }
+      if (txChar == null) {
+        throw PomaException(
+          "PoMA TX characteristic $_txCharacteristicUuid not found on device.",
         );
       }
 
@@ -203,7 +218,7 @@ class BlePomaTransport implements PomaTransport {
       _valueSubscription =
           UniversalBle.characteristicValueStream(
             _deviceId,
-            _characteristicUuid,
+            _txCharacteristicUuid,
           ).listen(
             (Uint8List data) {
               _debug("RX ${data.length} bytes");
@@ -219,24 +234,24 @@ class BlePomaTransport implements PomaTransport {
             },
           );
 
-      final props = pomaChar.properties;
+      final props = txChar.properties;
       if (props.contains(CharacteristicProperty.notify)) {
-        _debug("Subscribing to notifications on $_characteristicUuid...");
+        _debug("Subscribing to notifications on $_txCharacteristicUuid...");
         await UniversalBle.subscribeNotifications(
           _deviceId,
           _serviceUuid,
-          _characteristicUuid,
+          _txCharacteristicUuid,
         );
       } else if (props.contains(CharacteristicProperty.indicate)) {
-        _debug("Subscribing to indications on $_characteristicUuid...");
+        _debug("Subscribing to indications on $_txCharacteristicUuid...");
         await UniversalBle.subscribeIndications(
           _deviceId,
           _serviceUuid,
-          _characteristicUuid,
+          _txCharacteristicUuid,
         );
       } else {
         throw PomaException(
-          "PoMA characteristic does not support notify or indicate.",
+          "PoMA TX characteristic does not support notify or indicate.",
         );
       }
 
@@ -269,7 +284,7 @@ class BlePomaTransport implements PomaTransport {
         await UniversalBle.write(
           _deviceId,
           _serviceUuid,
-          _characteristicUuid,
+          _rxCharacteristicUuid,
           chunk,
           withoutResponse: false,
         );
@@ -288,7 +303,7 @@ class BlePomaTransport implements PomaTransport {
         await UniversalBle.unsubscribe(
           _deviceId,
           _serviceUuid,
-          _characteristicUuid,
+          _txCharacteristicUuid,
         );
       } catch (_) {
         // Ignore unsubscribe errors on close.
