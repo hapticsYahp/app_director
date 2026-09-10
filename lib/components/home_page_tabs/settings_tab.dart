@@ -59,7 +59,8 @@ class _SettingsTabState extends State<SettingsTab>
   }
 
   bool get _isDbFormChanged {
-    return _isDbFormValid && (_dbUriController.text != configNotifier.dbUri);
+    return _isDbFormValid &&
+        (_dbUriController.text.trim() != configNotifier.dbUri);
   }
 
   String? _validatePomaHost(String? host) {
@@ -173,7 +174,7 @@ class _SettingsTabState extends State<SettingsTab>
 
   void _onDbSave() {
     if (_isDbFormValid && !isDbTesting) {
-      configNotifier.updateSettings(dbUri: _dbUriController.text);
+      configNotifier.updateSettings(dbUri: _dbUriController.text.trim());
       setState(() {
         dbTestResult = "";
       });
@@ -246,6 +247,7 @@ class _SettingsTabState extends State<SettingsTab>
     if (_isDbFormChanged) {
       _onDbSave();
     }
+    final String uri = _dbUriController.text.trim();
     setState(() {
       isDbTesting = true;
       dbTestResult = "Testing DB connection...";
@@ -253,11 +255,11 @@ class _SettingsTabState extends State<SettingsTab>
     String result;
     mongo_dart.Db? db;
     try {
-      db = await mongo_dart.Db.create(configNotifier.dbUri);
+      db = await mongo_dart.Db.create(uri);
       await db.open().timeout(
-        const Duration(seconds: 5),
+        const Duration(seconds: 30),
         onTimeout: () {
-          throw TimeoutException('Connection Timeout after 5s');
+          throw TimeoutException('Connection Timeout after 30s');
         },
       );
       final String testingCollectionName = "testing_haptic_collection";
@@ -265,20 +267,30 @@ class _SettingsTabState extends State<SettingsTab>
       final int idVal = 123;
       final String testingColumn = "testing_column";
       final String testingVal = "testing_val";
-      await db.createCollection(testingCollectionName);
       mongo_dart.DbCollection col = db.collection(testingCollectionName);
-      await col.insertOne({idColumn: idVal, testingColumn: testingVal});
-      Map<String, dynamic>? testFind = await col.findOne(
-        mongo_dart.where.eq(idColumn, idVal).fields([testingColumn]),
-      );
+      await col
+          .insertOne({idColumn: idVal, testingColumn: testingVal})
+          .timeout(const Duration(seconds: 20));
+      Map<String, dynamic>? testFind = await col
+          .findOne(mongo_dart.where.eq(idColumn, idVal).fields([testingColumn]))
+          .timeout(const Duration(seconds: 20));
       final bool couldRet =
           (testFind != null) && (testFind[testingColumn] == testingVal);
-      await db.dropCollection(testingCollectionName);
+      try {
+        await col
+            .deleteOne(mongo_dart.where.eq(idColumn, idVal))
+            .timeout(const Duration(seconds: 20));
+        await db
+            .dropCollection(testingCollectionName)
+            .timeout(const Duration(seconds: 20));
+      } catch (_) {}
       result = couldRet ? "Success." : "Failed.";
     } catch (e) {
       result = "Error ${e.toString()}.";
     } finally {
-      await db?.close();
+      try {
+        await db?.close();
+      } catch (_) {}
     }
     if (!mounted) return;
     setState(() {
