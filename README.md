@@ -145,6 +145,12 @@ For deployment on a physical **Android** device, ensure USB debugging is enabled
 flutter run --release
 ```
 
+To build a release APK binary:
+
+```bash
+flutter build apk --release --no-tree-shake-icons
+```
+
 ---
 
 *Yahp! Director is a collaborative development by:*
