@@ -12,7 +12,10 @@ class PomaClient {
   static final String _setTopicValueCommandChar = "=";
   static final String _messagePrefix = "ACK: ";
   static final String _messageTerminationChar = "\x00";
-  static final String _messageResponseDelimiter = "\n";
+
+  static final RegExp _delimiterRegex = RegExp(r'[\x00\r\n]+');
+
+  Duration responseTimeout = const Duration(seconds: 10);
 
   final StringBuffer _responseBuffer = StringBuffer();
   Completer<String>? _bufferedResponseCompleter;
@@ -74,17 +77,34 @@ class PomaClient {
   }
 
   void _onSocketDataReceived(Uint8List data) {
-    String message = String.fromCharCodes(data);
+    String message = utf8.decode(data, allowMalformed: true);
     _debug("Message received: '$message'.");
-    message = message.replaceAll(_messageTerminationChar, "");
     _responseBuffer.write(message);
-    if (message.contains(_messageResponseDelimiter)) {
-      String response = _responseBuffer
-          .toString()
-          .split(_messageResponseDelimiter)
-          .first
-          .replaceFirst(_messagePrefix, "");
+
+    while (_bufferedResponseCompleter != null) {
+      final bufferText = _responseBuffer.toString();
+      final match = _delimiterRegex.firstMatch(bufferText);
+      if (match == null) {
+        break;
+      }
+      final line = bufferText.substring(0, match.start);
+      final remaining = bufferText.substring(match.end);
       _responseBuffer.clear();
+      _responseBuffer.write(remaining);
+
+      final messagePrefixTrimmed = _messagePrefix.trimRight();
+      if (line.isEmpty &&
+          !bufferText.startsWith(_messagePrefix) &&
+          !bufferText.startsWith(messagePrefixTrimmed)) {
+        continue;
+      }
+
+      String response = line;
+      if (response.startsWith(_messagePrefix)) {
+        response = response.substring(_messagePrefix.length);
+      } else if (response.startsWith(messagePrefixTrimmed)) {
+        response = response.substring(messagePrefixTrimmed.length).trimLeft();
+      }
       _completeBufferedResponse(response);
     }
   }
@@ -155,7 +175,15 @@ class PomaClient {
 
     try {
       await send(message);
-      return await completer.future;
+      return await completer.future.timeout(
+        responseTimeout,
+        onTimeout: () {
+          if (_bufferedResponseCompleter == completer) {
+            _bufferedResponseCompleter = null;
+          }
+          throw PomaException("Timeout waiting for PoMA response.");
+        },
+      );
     } catch (e) {
       if (_bufferedResponseCompleter == completer) {
         _bufferedResponseCompleter = null;

@@ -67,6 +67,8 @@ class BlePomaTransport implements PomaTransport {
   final String _rxCharacteristicUuid;
   final String _txCharacteristicUuid;
 
+  final BytesBuilder _rxAssemblyBuffer = BytesBuilder(copy: false);
+
   StreamController<Uint8List> _incomingController =
       StreamController<Uint8List>.broadcast();
   StreamController<String> _debugController =
@@ -94,6 +96,11 @@ class BlePomaTransport implements PomaTransport {
     }
   }
 
+  static bool _compareUuid(String uuid1, String uuid2) {
+    return uuid1.replaceAll('-', '').toLowerCase() ==
+        uuid2.replaceAll('-', '').toLowerCase();
+  }
+
   void _checkValidMacOrId(String macOrId) {
     if (!isValidMacOrId(macOrId)) {
       throw PomaException("Invalid BLE device ID '$macOrId'.");
@@ -108,6 +115,7 @@ class BlePomaTransport implements PomaTransport {
     if (deviceId == _deviceId && !isConnected) {
       _debug("BLE device disconnected.");
       _connected = false;
+      _rxAssemblyBuffer.clear();
       _valueSubscription?.cancel();
       _valueSubscription = null;
       if (error != null && !_incomingController.isClosed) {
@@ -171,13 +179,13 @@ class BlePomaTransport implements PomaTransport {
       BleCharacteristic? rxChar;
       BleCharacteristic? txChar;
       for (final s in services) {
-        if (s.uuid.toLowerCase() == _serviceUuid.toLowerCase()) {
+        if (_compareUuid(s.uuid, _serviceUuid)) {
           for (final c in s.characteristics) {
             _debug("svc=${s.uuid} char=${c.uuid} props=${c.properties}");
-            if (c.uuid.toLowerCase() == _rxCharacteristicUuid.toLowerCase()) {
+            if (_compareUuid(c.uuid, _rxCharacteristicUuid)) {
               rxChar = c;
             }
-            if (c.uuid.toLowerCase() == _txCharacteristicUuid.toLowerCase()) {
+            if (_compareUuid(c.uuid, _txCharacteristicUuid)) {
               txChar = c;
             }
           }
@@ -220,12 +228,7 @@ class BlePomaTransport implements PomaTransport {
             _deviceId,
             _txCharacteristicUuid,
           ).listen(
-            (Uint8List data) {
-              _debug("RX ${data.length} bytes");
-              if (!_incomingController.isClosed) {
-                _incomingController.add(data);
-              }
-            },
+            handleIncomingFragment,
             onError: (Object error) {
               _debug("BLE value stream error: $error");
               if (!_incomingController.isClosed) {
@@ -295,6 +298,37 @@ class BlePomaTransport implements PomaTransport {
     }
   }
 
+  void handleIncomingFragment(Uint8List data) {
+    _debug("RX ${data.length} bytes");
+    if (data.isEmpty) return;
+
+    // PoMA BLE framing protocol:
+    // Byte 0: Header
+    //   bit 0: more fragments (1 = more fragments follow, 0 = last fragment)
+    //   bits 1-7: sequence number (seq << 1)
+    // Bytes 1..N: Payload
+    final int header = data[0];
+    final bool more = (header & 0x01) != 0;
+    final int seq = (header >> 1) & 0x7F;
+
+    if (data.length > 1) {
+      _rxAssemblyBuffer.add(data.sublist(1));
+    }
+
+    _debug(
+      "BLE fragment: seq=$seq, more=$more, buffered=${_rxAssemblyBuffer.length} bytes",
+    );
+
+    if (!more) {
+      final Uint8List assembled = _rxAssemblyBuffer.takeBytes();
+      // Ensure the assembled message has a line delimiter for stream consumers.
+      final Uint8List framedMessage = Uint8List.fromList([...assembled, 0x0A]);
+      if (!_incomingController.isClosed) {
+        _incomingController.add(framedMessage);
+      }
+    }
+  }
+
   @override
   Future<void> close() async {
     if (_connected) {
@@ -315,6 +349,7 @@ class BlePomaTransport implements PomaTransport {
       }
     }
     _connected = false;
+    _rxAssemblyBuffer.clear();
     _valueSubscription?.cancel();
     _valueSubscription = null;
     _unregisterConnectionListener(_onBleConnectionChange);
@@ -323,6 +358,7 @@ class BlePomaTransport implements PomaTransport {
   @override
   void dispose() {
     _connected = false;
+    _rxAssemblyBuffer.clear();
     _valueSubscription?.cancel();
     _valueSubscription = null;
     _unregisterConnectionListener(_onBleConnectionChange);

@@ -128,6 +128,56 @@ void main() {
       expect(result, 'response_data');
     });
 
+    test('getTopics parses topic list from ACK response with null terminator only', () async {
+      await pomaClient.connect();
+      final future = pomaClient.getTopics();
+
+      fakeTransport.emitIncoming('ACK: topic1 | intensity | topic3 | \x00');
+
+      final topics = await future;
+      expect(topics, ['topic1', 'intensity', 'topic3']);
+    });
+
+    test('getTopics parses topic list from ACK response with newline only', () async {
+      await pomaClient.connect();
+      final future = pomaClient.getTopics();
+
+      fakeTransport.emitIncoming('ACK: topic1 | intensity | topic3\n');
+
+      final topics = await future;
+      expect(topics, ['topic1', 'intensity', 'topic3']);
+    });
+
+    test('getTopics parses topic list from ACK response with CRLF', () async {
+      await pomaClient.connect();
+      final future = pomaClient.getTopics();
+
+      fakeTransport.emitIncoming('ACK: topic1 | intensity | topic3\r\n');
+
+      final topics = await future;
+      expect(topics, ['topic1', 'intensity', 'topic3']);
+    });
+
+    test('getTopics parses chunked response across multiple incoming packets', () async {
+      await pomaClient.connect();
+      final future = pomaClient.getTopics();
+
+      fakeTransport.emitIncoming('ACK: topic1 | inten');
+      fakeTransport.emitIncoming('sity | topic3 | \x00');
+
+      final topics = await future;
+      expect(topics, ['topic1', 'intensity', 'topic3']);
+    });
+
+    test('sendAndWait throws PomaException on timeout', () async {
+      await pomaClient.connect();
+      pomaClient.responseTimeout = const Duration(milliseconds: 50);
+      expect(
+        () => pomaClient.sendAndWait('hello'),
+        throwsA(isA<PomaException>()),
+      );
+    });
+
     test('getTopics parses topic list from ACK response', () async {
       await pomaClient.connect();
       final future = pomaClient.getTopics();

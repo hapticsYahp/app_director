@@ -102,6 +102,51 @@ void main() {
         transport2.dispose();
       },
     );
+
+    test('handleIncomingFragment processes single unfragmented notification', () async {
+      final transport = BlePomaTransport(deviceId: 'AA:BB:CC:DD:EE:FF');
+      final incoming = <String>[];
+      transport.incoming.listen((data) {
+        incoming.add(String.fromCharCodes(data));
+      });
+
+      // seq=0, more=0 -> header = 0x00
+      final text = 'ACK: topic1 | intensity | topic3 | ';
+      final packet = Uint8List.fromList([0x00, ...text.codeUnits]);
+
+      transport.handleIncomingFragment(packet);
+
+      await Future.delayed(Duration.zero);
+      expect(incoming.length, 1);
+      expect(incoming.first, 'ACK: topic1 | intensity | topic3 | \n');
+      transport.dispose();
+    });
+
+    test('handleIncomingFragment reassembles multi-fragment notifications', () async {
+      final transport = BlePomaTransport(deviceId: 'AA:BB:CC:DD:EE:FF');
+      final incoming = <String>[];
+      transport.incoming.listen((data) {
+        incoming.add(String.fromCharCodes(data));
+      });
+
+      // seq=0, more=1 -> header = (0 << 1) | 1 = 0x01
+      final chunk1 = 'ACK: topic1 | inten';
+      final packet1 = Uint8List.fromList([0x01, ...chunk1.codeUnits]);
+
+      // seq=1, more=0 -> header = (1 << 1) | 0 = 0x02
+      final chunk2 = 'sity | topic3 | ';
+      final packet2 = Uint8List.fromList([0x02, ...chunk2.codeUnits]);
+
+      transport.handleIncomingFragment(packet1);
+      expect(incoming.isEmpty, isTrue);
+
+      transport.handleIncomingFragment(packet2);
+      await Future.delayed(Duration.zero);
+
+      expect(incoming.length, 1);
+      expect(incoming.first, 'ACK: topic1 | intensity | topic3 | \n');
+      transport.dispose();
+    });
   });
 
   group('ConfigNotifier connectionType settings', () {

@@ -198,6 +198,7 @@ class _SettingsTabState extends State<SettingsTab>
       pomaTestResult = "Testing PoMA connection...";
     });
     String result;
+    PomaClient? pomaClient;
     try {
       final PomaTransport transport;
       if (configNotifier.connectionType == ConnectionType.ble) {
@@ -212,18 +213,26 @@ class _SettingsTabState extends State<SettingsTab>
           timeout: Duration(seconds: configNotifier.deviceConnectionTimeout),
         );
       }
-      PomaClient pomaClient = PomaClient(transport);
+      pomaClient = PomaClient(transport);
+      pomaClient.responseTimeout = Duration(
+        seconds: configNotifier.deviceConnectionTimeout,
+      );
       await pomaClient.connect();
       List<String> topics = await pomaClient.getTopics();
       result = topics.contains(pomaTopicTest)
           ? "Success."
           : "Fail: PoMA device does not have '$pomaTopicTest' topic.";
-      await pomaClient.disconnect();
     } on PomaException catch (e) {
       result = "PomaException: ${e.message}.";
     } catch (e) {
       result = "Error ${e.toString()}.";
+    } finally {
+      if (pomaClient != null) {
+        await pomaClient.disconnect();
+        await pomaClient.dispose();
+      }
     }
+    if (!mounted) return;
     setState(() {
       isPomaTesting = false;
       pomaTestResult = result;
