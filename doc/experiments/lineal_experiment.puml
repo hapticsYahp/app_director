@@ -4,7 +4,7 @@ center header
 19/04/2025
 endheader
 
-'Title Comments (ídem Header Comments):'
+'Title Comments (same as Header Comments):'
 title
 Lineal Experiment
 end title
@@ -141,7 +141,7 @@ Feedback -right-> End : [always]
 'Transitions End.'
 '----------------'
 
-'Footer Comments (ídem Header Comments):'
+'Footer Comments (same as Header Comments):'
 footer
 Copyright: 2025
 end footer

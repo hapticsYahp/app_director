@@ -44,15 +44,6 @@ The experiment could continue depending on the Transitions configured.
 
 An **Experiment** consists of the following properties:
 
-* **Descripción**: un texto descriptivo. Visible al usuario.
-* **Etapas**: el conjunto de **Etapas** por las que puede pasar cada ensayo.
-  Dentro del Experimento, cada Etapa es identificada por una Referencia única.
-* **Transiciones**: el conjunto de **Reglas** que definen el flujo de ejecución del ensayo.
-* **Etapa inicial**: la Etapa (perteneciente al conjunto de Etapas) que se debe visualizar al inicio del Experimento.
-* **Etapa final**: la Etapa (perteneciente al conjunto de Etapas) que se debe visualizar cuando el Experimento finaliza.
-* **Etapa de aborto**: la Etapa (perteneciente al conjunto de Etapas) que se debe visualizar cuando el Experimento es
-  abortado.
-
 * **ID**: a unique identifier for the Experiment. It must not be repeated among all Experiments in the system. It is not
   visible to the user.
 * **Title**: a short description. Visible to the user.
@@ -73,15 +64,15 @@ An **Experiment** consists of the following properties:
   "title": "Experiment",
   "description": "Experiment description. Lorem ipsum dolor sit amet, ...",
   "stages": {
-    "ref_etapa_1": {
+    "ref_stage_1": {
       /* ... Definition Stage 1 ... */
     },
-    "ref_etapa_2": {
-      /* ... Definition Etapa 2 ... */
+    "ref_stage_2": {
+      /* ... Definition Stage 2 ... */
     },
     /* ... Other Stages ... */
-    "ref_etapa_n": {
-      /* ... Definition Etapa N ... */
+    "ref_stage_n": {
+      /* ... Definition Stage N ... */
     }
   },
   "transitions": {
@@ -89,9 +80,9 @@ An **Experiment** consists of the following properties:
       /* ... Transition Rules ... */
     ]
   },
-  "startingStageId": "ref_etapa_1",
-  "finalStageId": "ref_etapa_2",
-  "abortStageId": "ref_etapa_n"
+  "startingStageId": "ref_stage_1",
+  "finalStageId": "ref_stage_2",
+  "abortStageId": "ref_stage_n"
 }
 ```
 
@@ -112,13 +103,6 @@ There are different types of Stages, each defining:
 ### Basic Properties
 
 Every **Stage** consists of the following basic properties:
-
-* **ID**: un identificador único de la Etapa. No se debe repetir entre todas las Etapas de todos los Experimentos.
-* **Tipo**: el tipo específico de Etapa.
-* **Título**: una descripción corta. Visible al usuario. Según el *tipo* tiene diferentes valores por defecto.
-* **Descripción**: un texto descriptivo, visible al usuario. Según el *tipo* tiene diferentes valores por defecto.
-* **Comandos PoMA**: un conjunto de pares Evento-Comando que se usarán durante el transcurso de la Etapa. Cuando ocurra
-  cada Evento, se enviará el Comando correspondiente al dispositivo PoMA conectado con el Experimento (pulsera háptica).
 
 * **ID**: a unique identifier for the Stage. It must not be repeated across all Stages in all Experiments.
 * **Type**: the specific type of Stage.
@@ -389,7 +373,7 @@ occur: the first one second after the start of the Stage; and then, four seconds
 
 Currently, these are the only possible events. In the future, each Stage type could define its own events.
 
-### PoMA Commandos
+### PoMA Commands
 
 A set of PoMA commands can be defined for each Stage.
 Each command is associated with an Event; therefore, when that Event occurs, the Experiment containing the Stage will
@@ -409,10 +393,6 @@ For example, if the following Event-Command pairs are defined:
   // ...
 }
 ```
-
-Al entrar en la Etapa se enviará el comando PoMA `= enabled_motors 1,1,0,0,0,0`; luego, transcurrido un segundo, se
-enviará el comando `= intensity 50,50`; transcurridos cuatro segundos más se enviará `= intensity 0,0`; finalmente, al
-salir de la Etapa, se enviará, `= enabled_motors 0,0,0,0,0,0`.
 
 Upon entering the Stage, the command PoMA `= enabled_motors 1,1,0,0,0,0` will be sent; then, after one second, the
 command `= intensity 50,50` will be sent; after four more seconds, `= intensity 0,0` will be sent; finally, upon exiting
@@ -556,7 +536,7 @@ center header
 19/04/2025
 endheader
 
-'Title Comments (ídem Header Comments):'
+'Title Comments (same as Header Comments):'
 title
 Lineal Experiment
 end title
@@ -574,7 +554,7 @@ Nullam hendrerit dui at sagittis aliquam. Fusce faucibus nec lorem quis sceleris
 ....
 'Experiment Details (multiline; format: "<key>: <value>"):'
 ID: ABC123
-abortStageId: end
+abortStageId: End
 end legend
 '--------------------------'
 'Experiment Definition End.'
@@ -690,7 +670,7 @@ Feedback -right-> End : [always]
 'Transitions End.'
 '----------------'
 
-'Footer Comments (ídem Header Comments):'
+'Footer Comments (same as Header Comments):'
 footer
 Copyright: 2025
 end footer
